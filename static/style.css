@@ -76,3 +76,4 @@ h2 { font-size: 1.05rem; margin: 1.4em 0 .4em; color: var(--deep); }
 .list li { padding: 8px 0; border-bottom: 1px solid var(--line); }
 .list li a { font-weight: 600; text-decoration: none; }
 footer { max-width: 720px; margin: 24px auto; padding: 0 16px 24px; text-align: center; }
+.soon { font-weight: 600; color: var(--muted); }

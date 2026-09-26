@@ -36,6 +36,16 @@ SUPABASE_ANON_KEY = (
 )
 BASE_URL = os.environ.get("PAGES_BASE_URL", "https://dulionpaul-ai.github.io/wavents-web").rstrip("/")
 PLAY_STORE_URL = "https://play.google.com/store/apps/details?id=com.wavents.wavents"
+# Passer à True le jour où l'appli est publiée sur le Play Store (test
+# ouvert ou production) : avant, la fiche renvoie une erreur 404.
+PLAY_STORE_PUBLISHED = False
+
+
+def play_store_link(text: str, css_class: str = "") -> str:
+    if PLAY_STORE_PUBLISHED:
+        cls = f' class="{css_class}"' if css_class else ""
+        return f'<a{cls} href="{PLAY_STORE_URL}">{text}</a>'
+    return '<span class="soon">Wavents arrive bientôt sur Google Play</span>'
 PARIS = ZoneInfo("Europe/Paris")
 HOME = (46.1075, 4.7536)  # centre de Belleville-en-Beaujolais, comme l'appli
 HOME_RADIUS_KM = 30
@@ -191,7 +201,7 @@ def layout(title: str, body: str, *, description: str, url: str, image: str | No
 {body}
   </main>
   <footer>
-    <p><a href="{PLAY_STORE_URL}">Wavents sur Google Play</a> · <a href="{root}confidentialite.html">Confidentialité</a></p>
+    <p>{play_store_link("Wavents sur Google Play")} · <a href="{root}confidentialite.html">Confidentialité</a></p>
     <p class="muted">Informations publiées par les organisateurs et les agendas publics ; vérifiez auprès de l'organisateur avant de vous déplacer.</p>
   </footer>
 </body>
@@ -225,7 +235,7 @@ def event_page(event: dict) -> str:
       </ul>
       <div class="actions">{''.join(links)}</div>
       {f'<div class="description">{e(description).replace(chr(10), "<br>")}</div>' if description else ''}
-      <p class="muted">Pas encore l'appli ? <a href="{PLAY_STORE_URL}">Télécharge Wavents</a> pour voir tous les événements autour de toi et recevoir un rappel.</p>
+      <p class="muted">Tous les événements autour de toi, avec des rappels : {play_store_link("télécharge l'appli Wavents")}</p>
     </article>"""
     return layout(
         f"{event['title']} – Wavents",
@@ -265,7 +275,7 @@ def home_page(events: list[dict], now: datetime) -> str:
         sections.append(f'<section><h2>{e(label[:1].upper() + label[1:])}</h2><ul class="list">{"".join(items)}</ul></section>')
     body = f"""    <h1>Que faire autour de Belleville-en-Beaujolais ?</h1>
     <p class="muted">Les {len(nearby)} événements des {HOME_DAYS} prochains jours à moins de {HOME_RADIUS_KM} km. Mis à jour chaque jour.</p>
-    <p><a class="button primary" href="{PLAY_STORE_URL}">Télécharger l'appli Wavents</a></p>
+    <p>{play_store_link("Télécharger l'appli Wavents", "button primary")}</p>
 {''.join(sections)}"""
     return layout(
         "Wavents – Sorties et événements autour de Belleville-en-Beaujolais",
