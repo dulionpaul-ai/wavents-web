@@ -1,0 +1,78 @@
+:root {
+  --deep: #0B4F6C;
+  --wave: #01BAEF;
+  --accent: #0B81E1;
+  --bg: #F6FAFC;
+  --card: #FFFFFF;
+  --text: #16202A;
+  --muted: #5B6875;
+  --line: #DCE6EC;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --deep: #0E3445;
+    --bg: #121417;
+    --card: #1E2226;
+    --text: #EEF2F5;
+    --muted: #A5B0BA;
+    --line: #2E343A;
+  }
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.55;
+}
+a { color: var(--accent); }
+.top {
+  background: linear-gradient(120deg, var(--deep), var(--wave));
+  color: #fff;
+  padding: 14px 16px;
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.brand { color: #fff; font-weight: 800; font-size: 1.3rem; text-decoration: none; }
+.tagline { opacity: .85; font-size: .9rem; }
+main { max-width: 720px; margin: 0 auto; padding: 16px; }
+h1 { font-size: 1.5rem; line-height: 1.25; margin: .4em 0; }
+h2 { font-size: 1.05rem; margin: 1.4em 0 .4em; color: var(--deep); }
+@media (prefers-color-scheme: dark) { h2 { color: var(--wave); } }
+.muted { color: var(--muted); font-size: .92rem; }
+.event .cover {
+  width: 100%;
+  max-height: 360px;
+  object-fit: cover;
+  border-radius: 14px;
+  background: var(--line);
+}
+.category { margin: .8em 0 0; font-weight: 600; color: var(--muted); }
+.facts { list-style: none; padding: 0; margin: .6em 0 1em; }
+.facts li { padding: 4px 0; }
+.actions { display: flex; flex-wrap: wrap; gap: 8px; margin: 1em 0; }
+.button {
+  display: inline-block;
+  padding: 10px 14px;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  background: var(--card);
+  text-decoration: none;
+  font-weight: 600;
+}
+.button.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+.description {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 14px 16px;
+  margin: 1em 0;
+  overflow-wrap: anywhere;
+}
+.list { list-style: none; padding: 0; margin: 0; }
+.list li { padding: 8px 0; border-bottom: 1px solid var(--line); }
+.list li a { font-weight: 600; text-decoration: none; }
+footer { max-width: 720px; margin: 24px auto; padding: 0 16px 24px; text-align: center; }
