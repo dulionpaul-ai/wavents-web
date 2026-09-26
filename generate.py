@@ -53,7 +53,7 @@ HOME_DAYS = 21
 
 FIELDS = (
     "id,title,description,category_id,location_name,address,latitude,longitude,"
-    "start_date,end_date,start_time_known,end_time_known,price_type,price_amount,"
+    "start_date,end_date,start_time_known,end_time_known,price_type,price_amount,price_confirmed,"
     "image_url,website_url,for_kids"
 )
 CATEGORIES = {
@@ -119,12 +119,15 @@ def when_label(event: dict) -> str:
 
 
 def price_label(event: dict) -> str:
-    if event.get("price_type") == "free":
-        return "Gratuit"
+    """« Gratuit » seulement si c'est confirmé : sans information de la
+    source, la plupart des scrapers supposent « gratuit » (price_confirmed
+    faux), ce qu'on n'affiche pas comme une certitude."""
     amount = event.get("price_amount")
-    if amount:
+    if event.get("price_type") == "paid" and amount:
         return f"{amount:g} €".replace(".", ",")
-    return "Payant"
+    if not event.get("price_confirmed"):
+        return "Prix non communiqué"
+    return "Gratuit" if event.get("price_type") == "free" else "Payant"
 
 
 def image_for(event: dict) -> str:
@@ -161,7 +164,7 @@ def json_ld(event: dict) -> str:
         },
         "image": [image_for(event)],
         "description": (event.get("description") or "")[:500],
-        "isAccessibleForFree": event.get("price_type") == "free",
+        "isAccessibleForFree": event.get("price_type") == "free" and bool(event.get("price_confirmed")),
         "url": f"{BASE_URL}/{event_path(event)}",
     }
     if end:
