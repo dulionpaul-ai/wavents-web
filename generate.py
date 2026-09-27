@@ -68,7 +68,7 @@ CATEGORIES = {
     "associatif_autre": ("🤝", "Événement"),
 }
 CATEGORY_IMAGE = SUPABASE_URL + "/storage/v1/object/public/event-photos/categories/{}.jpg"
-CATEGORY_IMAGE_FILE = {"associatif_autre": "associatif"}
+CATEGORY_IMAGE_FILE = {"associatif_autre": "associatif", "spectacle": "spectacle_v2", "atelier": "atelier_v2", "visite": "visite_v2"}
 DAYS = ["lundi", "mardi", "mercredi", "jeudi", "vendredi", "samedi", "dimanche"]
 MONTHS = ["janvier", "février", "mars", "avril", "mai", "juin", "juillet", "août",
           "septembre", "octobre", "novembre", "décembre"]
