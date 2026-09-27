@@ -59,17 +59,18 @@ FIELDS = (
     "start_date,end_date,start_time_known,end_time_known,price_type,price_amount,price_confirmed,"
     "image_url,website_url,for_kids,source"
 )
-# id -> (emoji, libellé, couleur pop)
+# id -> (emoji, libellé, couleur) : mêmes couleurs que l'appli
+# (lib/models/category.dart), pour qu'on se sente au même endroit.
 CATEGORIES = {
-    "concert": ("🎶", "Concert", "#FF3D6E"),
-    "fete": ("🎉", "Fête", "#FF8A1E"),
-    "marche": ("🧺", "Marché", "#22C55E"),
-    "spectacle": ("🎭", "Spectacle", "#9B51E0"),
-    "sport": ("🏆", "Sport", "#1E88E5"),
-    "culture": ("🎨", "Culture", "#E6399B"),
-    "atelier": ("🖌️", "Atelier", "#F2B705"),
-    "visite": ("🧭", "Visite", "#00B8A9"),
-    "associatif_autre": ("🤝", "Associatif", "#5C6BC0"),
+    "concert": ("🎵", "Concert", "#E91E63"),
+    "fete": ("🎉", "Fête", "#FF5252"),
+    "marche": ("🧺", "Marché", "#FF9800"),
+    "spectacle": ("🎭", "Spectacle", "#8E24AA"),
+    "sport": ("🏆", "Sport", "#43A047"),
+    "culture": ("🎨", "Culture", "#7C4DFF"),
+    "atelier": ("🖌️", "Atelier", "#8D6E63"),
+    "visite": ("🧭", "Visite", "#1E88E5"),
+    "associatif_autre": ("🤝", "Associatif", "#00BFA5"),
 }
 CATEGORY_PHOTO = {
     "concert": "concert", "fete": "fete", "marche": "marche", "spectacle": "spectacle",
@@ -372,7 +373,7 @@ def layout(title: str, body: str, *, description: str, url: str, image: str | No
   <link rel="apple-touch-icon" href="{root}img/apple-touch-icon.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Inter:wght@400;500;600;700&display=swap">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800;900&family=Roboto:wght@400;500;700&display=swap">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
   <link rel="stylesheet" href="{root}style.css">
   {extra_head}
@@ -384,7 +385,7 @@ def layout(title: str, body: str, *, description: str, url: str, image: str | No
       <a href="{root}#week-end">Ce week-end</a>
       <a href="{root}#carte">Carte</a>
       <a href="{root}#agenda">Agenda</a>
-      <a href="{root}#appli" class="nav-cta">L'appli ✨</a>
+      <a href="{root}#appli" class="nav-cta">L'appli</a>
     </nav>
   </header>
 {body}
@@ -442,7 +443,7 @@ def card(event: dict, series: dict[str, list[dict]], root: str = "", *, size: st
     emoji, label, color = category(event)
     start = wall_time(event["start_date"])
     recurring = series_label(series.get(series_key(event) or "", []))
-    when = hour_label(start) if event.get("start_time_known") else ""
+    when = hour_label(start) if event.get("start_time_known") and (start.hour or start.minute) else ""
     meta = " · ".join(p for p in (when, commune_of(event)) if p)
     badges = []
     if is_free(event):
@@ -455,6 +456,35 @@ def card(event: dict, series: dict[str, list[dict]], root: str = "", *, size: st
     return f"""<a class="card {size}" href="{root}{event_path(event)}" data-cat="{e(event.get('category_id') or '')}" data-free="{1 if is_free(event) else 0}" data-kids="{1 if event.get('for_kids') else 0}" data-q="{e(search)}" style="--cat:{color}">
   <div class="card-media{'' if event.get('image_url') else ' no-img'}">{media(event, root)}{date_chip(event)}<span class="cat-pill">{emoji} {e(label)}</span></div>
   <div class="card-body"><h3>{e(event['title'])}</h3><p class="card-meta">{e(meta)}</p><div class="badges">{''.join(badges)}</div></div>
+</a>"""
+
+
+def row_card(event: dict, series: dict[str, list[dict]], root: str = "") -> str:
+    """Carte en ligne, calquée sur la fiche de l'appli
+    (lib/widgets/event_preview_card.dart) : photo arrondie à gauche,
+    pastille de catégorie, titre, date dans la couleur de la catégorie."""
+    emoji, label, color = category(event)
+    start = wall_time(event["start_date"])
+    recurring = series_label(series.get(series_key(event) or "", []))
+    if is_long(event) and start.date() < datetime.now(PARIS).date():
+        end = end_of(event)
+        when = f"jusqu'au {end.day} {MONTHS_SHORT[end.month - 1]}"
+    else:
+        when = f"{DAYS_SHORT[start.weekday()]} {start.day} {MONTHS_SHORT[start.month - 1]}"
+        if event.get("start_time_known") and (start.hour or start.minute):
+            when += f" · {hour_label(start)}"
+    if recurring:
+        when = recurring
+    meta = " · ".join(p for p in (when, commune_of(event)) if p)
+    badges = []
+    if is_free(event):
+        badges.append('<span class="badge free">Gratuit</span>')
+    if event.get("for_kids"):
+        badges.append('<span class="badge kids">Enfants</span>')
+    search = fold(f"{event['title']} {commune_of(event)} {event.get('location_name') or ''} {label}")
+    return f"""<a class="row-card" href="{root}{event_path(event)}" data-cat="{e(event.get('category_id') or '')}" data-free="{1 if is_free(event) else 0}" data-kids="{1 if event.get('for_kids') else 0}" data-q="{e(search)}" style="--cat:{color}">
+  <span class="row-media{'' if event.get('image_url') else ' no-img'}">{media(event, root)}</span>
+  <span class="row-body"><span class="cat-chip">{emoji} {e(label)}</span><b>{e(event['title'])}</b><span class="row-date">{e(meta)}</span>{f'<span class="badges">{"".join(badges)}</span>' if badges else ''}</span>
 </a>"""
 
 
@@ -568,7 +598,7 @@ def home_page(events: list[dict], all_upcoming: list[dict], now: datetime) -> st
         day_sections.append(
             f'<section class="day{hidden}"><h3 class="day-title"><span>{e(label)}</span>'
             f'<small>{len(items)} sortie{"s" if len(items) > 1 else ""}</small></h3>'
-            f'<div class="grid">{"".join(card(ev, series) for ev in items)}</div></section>'
+            f'<div class="rows">{"".join(row_card(ev, series) for ev in items)}</div></section>'
         )
 
     map_points = [
@@ -583,50 +613,40 @@ def home_page(events: list[dict], all_upcoming: list[dict], now: datetime) -> st
     categories_js = {cid: {"e": emoji, "l": label, "c": color} for cid, (emoji, label, color) in CATEGORIES.items()}
     payload = json.dumps({"points": map_points, "cats": categories_js, "home": HOME}, ensure_ascii=False)
     data_script = f'<script id="wv-data" type="application/json">{payload.replace("</", "<" + chr(92) + "/")}</script>'
-    ticker_items = "".join(
-        f'<span style="--cat:{category(ev)[2]}">{category(ev)[0]} {e(ev["title"][:50])} · <b>{e(commune_of(ev))}</b></span>'
-        for ev in (weekend + shown)[:16]
-    )
 
     body = f"""  <section class="hero">
-    <div class="hero-bg"><div class="blob b1"></div><div class="blob b2"></div><div class="blob b3"></div><div class="grain"></div></div>
+    <div class="hero-bg"><div class="sun"></div></div>
     <div class="hero-inner">
       <div class="hero-copy reveal">
         <p class="eyebrow"><span class="pulse"></span> {len(all_upcoming)} événements à venir en ce moment</p>
-        <h1>Ça bouge<br>près de <span class="scribble">chez toi</span>.</h1>
+        <h1>Découvre les événements <span class="sunny">près de chez toi</span></h1>
         <p class="lead">Concerts, marchés, fêtes de village, spectacles, lotos, brocantes… Wavents fouille chaque nuit des dizaines d'agendas du Beaujolais et du nord de Lyon pour que tu ne rates plus rien.</p>
         <div class="hero-actions">
-          <a class="btn btn-pop" href="#week-end">Qu'est-ce qu'on fait ce week-end ? →</a>
+          <a class="btn btn-sun" href="#week-end">Voir ce week-end</a>
           {play_cta()}
         </div>
       </div>
       <div class="hero-visual reveal">
         {phone_mockup(weekend or shown)}
         <img class="hero-logo float" src="img/logo-256.png" alt="Wavents" width="150" height="150">
-        <span class="sticker s1">🎶 Concert ce soir</span>
-        <span class="sticker s2">🧺 Marché du samedi</span>
-        <span class="sticker s3">🎉 Fête du village</span>
       </div>
     </div>
     <svg class="waves" viewBox="0 0 1440 160" preserveAspectRatio="none" aria-hidden="true">
       <path class="w1" d="M0,96 C240,150 480,40 720,80 C960,120 1200,40 1440,90 L1440,160 L0,160 Z"/>
-      <path class="w2" d="M0,110 C200,70 440,150 720,110 C1000,70 1240,140 1440,100 L1440,160 L0,160 Z"/>
-      <path class="w3" d="M0,130 C260,100 520,160 760,130 C1000,100 1220,150 1440,125 L1440,160 L0,160 Z"/>
+      <path class="w3" d="M0,120 C260,90 520,150 760,120 C1000,90 1220,140 1440,115 L1440,160 L0,160 Z"/>
     </svg>
   </section>
 
-  <div class="ticker" aria-hidden="true"><div class="ticker-track">{ticker_items}{ticker_items}</div></div>
-
   <section class="stats">
-    <div class="stat reveal" style="--c:#FF3D6E"><b data-count="{len(all_upcoming)}">{len(all_upcoming)}</b><span>événements à venir</span></div>
-    <div class="stat reveal" style="--c:#FF8A1E"><b data-count="{len(communes)}">{len(communes)}</b><span>communes couvertes</span></div>
-    <div class="stat reveal" style="--c:#22C55E"><b data-count="{len(sources)}">{len(sources)}</b><span>agendas suivis chaque nuit</span></div>
-    <div class="stat reveal" style="--c:#9B51E0"><b>0 €</b><span>pour toi, toujours</span></div>
+    <div class="stat reveal" style="--c:#065FBB"><b data-count="{len(all_upcoming)}">{len(all_upcoming)}</b><span>événements à venir</span></div>
+    <div class="stat reveal" style="--c:#0B81E1"><b data-count="{len(communes)}">{len(communes)}</b><span>communes couvertes</span></div>
+    <div class="stat reveal" style="--c:#01A9D8"><b data-count="{len(sources)}">{len(sources)}</b><span>agendas suivis chaque nuit</span></div>
+    <div class="stat reveal" style="--c:#FF8A1E"><b>0 €</b><span>gratuit, sans pub</span></div>
   </section>
 
   <section class="section" id="week-end">
     <div class="section-head reveal">
-      <div><p class="kicker">{e(cap(weekend_dates))}</p><h2>{weekend_title}, <span class="hl">on sort&nbsp;!</span></h2></div>
+      <div><p class="kicker">{e(cap(weekend_dates))}</p><h2>{weekend_title}</h2></div>
       <div class="scroller-nav"><button data-scroll="-1" aria-label="Précédent">←</button><button data-scroll="1" aria-label="Suivant">→</button></div>
     </div>
     <div class="scroller reveal">{''.join(card(ev, series, size="big") for ev in weekend) or '<p class="empty">Rien de prévu pour l’instant : reviens bientôt !</p>'}</div>
@@ -634,19 +654,19 @@ def home_page(events: list[dict], all_upcoming: list[dict], now: datetime) -> st
 
   {f'''<section class="section">
     <div class="section-head reveal">
-      <div><p class="kicker">Expos, animations, festivals</p><h2>En ce moment, <span class="hl hl-3">et pour un moment</span></h2></div>
+      <div><p class="kicker">Expos, animations, festivals</p><h2>En ce moment</h2></div>
       <div class="scroller-nav"><button data-scroll="-1" aria-label="Précédent">←</button><button data-scroll="1" aria-label="Suivant">→</button></div>
     </div>
     <div class="scroller reveal">{''.join(card(ev, series) for ev in ongoing[:18])}</div>
   </section>''' if ongoing else ''}
 
   <section class="section">
-    <div class="section-head reveal"><div><p class="kicker">Envie de quoi ?</p><h2>Choisis ton <span class="hl hl-2">mood</span></h2></div></div>
+    <div class="section-head reveal"><div><p class="kicker">Envie de quoi ?</p><h2>Par catégorie</h2></div></div>
     <div class="cat-grid reveal">{cat_tiles}</div>
   </section>
 
   <section class="section map-section" id="carte">
-    <div class="section-head reveal"><div><p class="kicker">{len(shown)} sorties dans les {HOME_DAYS} prochains jours</p><h2>La carte <span class="hl hl-3">des bons plans</span></h2></div></div>
+    <div class="section-head reveal"><div><p class="kicker">{len(shown)} sorties dans les {HOME_DAYS} prochains jours</p><h2>Sur la carte</h2></div></div>
     <div class="map-wrap reveal"><div id="map" role="region" aria-label="Carte des événements"></div>
     <div class="map-legend">{''.join(f'<span style="--cat:{c}">{em} {l}</span>' for cid, (em, l, c) in CATEGORIES.items() if counts.get(cid))}</div></div>
   </section>
@@ -656,7 +676,7 @@ def home_page(events: list[dict], all_upcoming: list[dict], now: datetime) -> st
     <div class="filters" id="filters">
       <label class="search"><span>🔍</span><input type="search" id="q" placeholder="Un village, un concert, un loto…" autocomplete="off"></label>
       <div class="chips">
-        <button class="chip is-on" data-cat="">✨ Tout</button>
+        <button class="chip is-on" data-cat="">Tout</button>
         {chips}
         <button class="chip toggle" data-toggle="free">💚 Gratuit</button>
         <button class="chip toggle" data-toggle="kids">🧸 Enfants</button>
@@ -669,11 +689,11 @@ def home_page(events: list[dict], all_upcoming: list[dict], now: datetime) -> st
   </section>
 
   <section class="section how">
-    <div class="section-head reveal center"><div><p class="kicker">Comment ça marche</p><h2>Ton agenda local, <span class="hl">sans effort</span></h2></div></div>
+    <div class="section-head reveal center"><div><p class="kicker">Comment ça marche</p><h2>Ton agenda local, sans effort</h2></div></div>
     <div class="how-grid">
       <div class="how-card reveal" style="--c:#01BAEF"><span class="how-num">🔎</span><h3>On fouille pour toi</h3><p>Chaque nuit, Wavents lit les agendas des mairies, offices de tourisme, salles de spectacle, associations et billetteries de la région.</p></div>
       <div class="how-card reveal" style="--c:#FF8A1E"><span class="how-num">🪄</span><h3>On trie et on vérifie</h3><p>Doublons fusionnés, catégories, prix, « pour les enfants » : tout est rangé pour que tu trouves en deux secondes.</p></div>
-      <div class="how-card reveal" style="--c:#FF3D6E"><span class="how-num">🔔</span><h3>Tu ne rates plus rien</h3><p>Favoris, rappels avant l'événement et notifications quand ça bouge près de chez toi, dans les catégories que tu aimes.</p></div>
+      <div class="how-card reveal" style="--c:#FFD66B"><span class="how-num">🔔</span><h3>Tu ne rates plus rien</h3><p>Favoris, rappels avant l'événement et notifications quand ça bouge près de chez toi, dans les catégories que tu aimes.</p></div>
     </div>
   </section>
 
@@ -734,7 +754,7 @@ def event_page(event: dict, neighbours: list[dict], series: dict[str, list[dict]
     maps = f"https://www.google.com/maps/dir/?api=1&destination={lat},{lon}"
     image = image_for(event, root)
 
-    actions = [f'<a class="btn btn-pop" href="event.ics" download="wavents-{event["id"][:8]}.ics">📅 Ajouter à mon agenda</a>',
+    actions = [f'<a class="btn btn-sun" href="event.ics" download="wavents-{event["id"][:8]}.ics">📅 Ajouter à mon agenda</a>',
                f'<a class="btn btn-ghost" href="{maps}" target="_blank" rel="noopener">🧭 Y aller</a>',
                '<button class="btn btn-ghost" data-share>🔗 Partager</button>']
     if (event.get("website_url") or "").startswith("http"):
@@ -758,10 +778,9 @@ def event_page(event: dict, neighbours: list[dict], series: dict[str, list[dict]
     near_html = ""
     if neighbours:
         near_html = (f'<section class="section"><div class="section-head"><div><p class="kicker">Le même jour, pas loin</p>'
-                     f'<h2>Et pourquoi pas <span class="hl">aussi…</span></h2></div></div>'
-                     f'<div class="grid">{"".join(card(ev, series, root) for ev in neighbours)}</div></section>')
+                     f'<h2>Aussi ce jour-là</h2></div></div>'
+                     f'<div class="rows">{"".join(row_card(ev, series, root) for ev in neighbours)}</div></section>')
     body = f"""  <section class="ev-hero" style="--cat:{color}">
-    {f'<div class="ev-hero-bg" style="background-image:url({json.dumps(image)})"></div>' if event.get('image_url') else ''}
     <div class="ev-hero-inner">
       <a class="back" href="{root}#agenda">← Tout l'agenda</a>
       <div class="ev-head">

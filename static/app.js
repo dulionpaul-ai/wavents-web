@@ -56,7 +56,7 @@
   const agenda = $(".agenda");
   if (agenda) {
     const state = { cat: "", free: false, kids: false, q: "" };
-    const cards = $$(".agenda .card");
+    const cards = $$(".agenda [data-cat]");
     const days = $$(".agenda .day");
     const count = $("#count");
     const empty = $("#empty");
@@ -76,7 +76,7 @@
         if (ok) shown++;
       });
       days.forEach((d) => {
-        const any = $$(".card", d).some((c) => !c.hidden);
+        const any = $$("[data-cat]", d).some((c) => !c.hidden);
         d.hidden = !any;
         d.classList.toggle("is-open", Boolean(filtering) || opened);
       });
