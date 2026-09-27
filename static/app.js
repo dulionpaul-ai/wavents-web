@@ -52,39 +52,62 @@
     scroller.scrollBy({ left: parseInt(btn.dataset.scroll, 10) * scroller.clientWidth * 0.85, behavior: "smooth" });
   }));
 
-  /* Agenda : filtres */
+  /* Agenda : un onglet par jour, filtres, « voir les autres » */
   const agenda = $(".agenda");
   if (agenda) {
-    const state = { cat: "", free: false, kids: false, q: "" };
-    const cards = $$(".agenda [data-cat]");
+    const PREVIEW = 12;
+    const state = { cat: "", free: false, kids: false, q: "", day: "0" };
     const days = $$(".agenda .day");
+    const tabs = $$(".day-tab");
     const count = $("#count");
     const empty = $("#empty");
-    const more = $("#more");
-    const moreBox = more && more.parentElement;
-    let opened = false;
+    const expanded = new Set();
+
+    const matches = (c) => (!state.cat || c.dataset.cat === state.cat)
+      && (!state.free || c.dataset.free === "1")
+      && (!state.kids || c.dataset.kids === "1")
+      && (!state.q || c.dataset.q.includes(state.q));
 
     const apply = () => {
       const filtering = state.cat || state.free || state.kids || state.q;
-      let shown = 0;
-      cards.forEach((c) => {
-        const ok = (!state.cat || c.dataset.cat === state.cat)
-          && (!state.free || c.dataset.free === "1")
-          && (!state.kids || c.dataset.kids === "1")
-          && (!state.q || c.dataset.q.includes(state.q));
-        c.hidden = !ok;
-        if (ok) shown++;
-      });
+      let total = 0, firstWithResults = null;
       days.forEach((d) => {
-        const any = $$("[data-cat]", d).some((c) => !c.hidden);
-        d.hidden = !any;
-        d.classList.toggle("is-open", Boolean(filtering) || opened);
+        const key = d.dataset.day;
+        let n = 0;
+        $$("[data-cat]", d).forEach((c) => {
+          const ok = matches(c);
+          if (ok) n++;
+          c.hidden = !ok || (!expanded.has(key) && n > PREVIEW);
+        });
+        total += n;
+        if (n && firstWithResults === null) firstWithResults = key;
+        const tab = tabs.find((t) => t.dataset.day === key);
+        if (tab) { tab.hidden = n === 0; $("small", tab).textContent = n; }
+        const more = $(".day-more", d);
+        if (more) {
+          more.hidden = expanded.has(key) || n <= PREVIEW;
+          $("button", more).textContent = `Voir les ${n - PREVIEW} autres sorties`;
+        }
+        d.dataset.count = n;
       });
-      if (moreBox) moreBox.hidden = Boolean(filtering) || opened || !days.some((d) => d.classList.contains("is-later"));
-      if (empty) empty.hidden = shown > 0;
-      if (count) count.textContent = filtering ? `${shown} sortie${shown > 1 ? "s" : ""} trouvée${shown > 1 ? "s" : ""}` : "";
+      // Jour affiché : celui choisi, ou le premier qui a des résultats.
+      const current = days.find((d) => d.dataset.day === state.day);
+      if (!current || current.dataset.count === "0") state.day = firstWithResults ?? "0";
+      days.forEach((d) => d.classList.toggle("is-on", d.dataset.day === state.day));
+      tabs.forEach((t) => t.classList.toggle("is-on", t.dataset.day === state.day));
+      if (empty) empty.hidden = total > 0;
+      if (count) count.textContent = filtering ? `${total} sortie${total > 1 ? "s" : ""} trouvée${total > 1 ? "s" : ""}` : "";
     };
 
+    tabs.forEach((tab) => tab.addEventListener("click", () => {
+      state.day = tab.dataset.day;
+      apply();
+      tab.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "center" });
+    }));
+    $$("[data-more]").forEach((btn) => btn.addEventListener("click", () => {
+      expanded.add(btn.closest(".day").dataset.day);
+      apply();
+    }));
     $$(".chip[data-cat]").forEach((chip) => chip.addEventListener("click", () => {
       state.cat = chip.dataset.cat;
       $$(".chip[data-cat]").forEach((c) => c.classList.toggle("is-on", c === chip));
@@ -98,7 +121,6 @@
     }));
     const q = $("#q");
     if (q) q.addEventListener("input", () => { state.q = fold(q.value.trim()); apply(); });
-    if (more) more.addEventListener("click", () => { opened = true; apply(); });
 
     /* Tuiles de catégorie : filtrent l'agenda */
     $$("[data-filter-cat]").forEach((tile) => tile.addEventListener("click", (ev) => {
@@ -138,8 +160,8 @@
       const layer = L.layerGroup().addTo(map);
       const pinIcon = (cat) => L.divIcon({
         className: "",
-        html: `<div class="wv-pin" style="--cat:${cat.c}"><span>${cat.e}</span></div>`,
-        iconSize: [34, 34], iconAnchor: [17, 34], popupAnchor: [0, -30],
+        html: `<div class="wv-pin" style="--cat:${cat.c}">${cat.e}</div>`,
+        iconSize: [36, 46], iconAnchor: [18, 46], popupAnchor: [0, -40],
       });
       const draw = () => {
         layer.clearLayers();
@@ -157,7 +179,7 @@
             const p = pts[0];
             const cat = data.cats[p.c] || data.cats.associatif_autre;
             L.marker([p.la, p.lo], { icon: pinIcon(cat) })
-              .bindPopup(`<div class="wv-pop"><b>${esc(p.t)}</b><small>${cat.e} ${esc(p.d)} · ${esc(p.p)}</small><a href="${p.u}">Voir la sortie →</a></div>`)
+              .bindPopup(`<div class="wv-pop"><b>${esc(p.t)}</b><small>${esc(p.d)} · ${esc(p.p)}</small><a href="${p.u}">Voir la sortie →</a></div>`)
               .addTo(layer);
             return;
           }
@@ -170,7 +192,7 @@
             const bounds = L.latLngBounds(pts.map((p) => [p.la, p.lo]));
             if (map.getZoom() >= 15 || bounds.getNorthEast().equals(bounds.getSouthWest())) {
               map.setView([la, lo], Math.max(map.getZoom(), 16));
-              const list = pts.slice(0, 12).map((p) => `<li><a href="${p.u}">${(data.cats[p.c] || {}).e || ""} ${esc(p.t)}</a></li>`).join("");
+              const list = pts.slice(0, 12).map((p) => `<li><a href="${p.u}">${esc(p.t)}</a></li>`).join("");
               L.popup().setLatLng([la, lo]).setContent(`<div class="wv-pop"><b>${pts.length} sorties ici</b><ul style="padding-left:16px;margin:6px 0 0">${list}</ul></div>`).openOn(map);
             } else {
               map.fitBounds(bounds.pad(0.3));
@@ -195,7 +217,7 @@
     const map = L.map(mini, { scrollWheelZoom: false, dragging: !L.Browser.mobile, zoomControl: false }).setView([lat, lon], 14);
     tiles().addTo(map);
     L.marker([lat, lon], {
-      icon: L.divIcon({ className: "", html: `<div class="wv-pin" style="--cat:${mini.dataset.color}"><span>${mini.dataset.emoji || "📍"}</span></div>`, iconSize: [34, 34], iconAnchor: [17, 34] }),
+      icon: L.divIcon({ className: "", html: `<div class="wv-pin big" style="--cat:${mini.dataset.color}"><span class="ms">${mini.dataset.icon || "place"}</span></div>`, iconSize: [46, 58], iconAnchor: [23, 58] }),
     }).addTo(map);
   });
 

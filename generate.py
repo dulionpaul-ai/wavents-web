@@ -52,25 +52,29 @@ PARIS = ZoneInfo("Europe/Paris")
 HOME = (46.1075, 4.7536)  # centre de Belleville-en-Beaujolais, comme l'appli
 HOME_RADIUS_KM = 30
 HOME_DAYS = 21
-AGENDA_OPEN_DAYS = 7  # jours affichés d'emblée dans l'agenda, le reste sur « Voir plus »
+AGENDA_DAY_PREVIEW = 12  # cartes affichées par jour avant « Voir les autres sorties » (static/app.js)
 
 FIELDS = (
     "id,title,description,category_id,location_name,address,latitude,longitude,"
     "start_date,end_date,start_time_known,end_time_known,price_type,price_amount,price_confirmed,"
     "image_url,website_url,for_kids,source"
 )
-# id -> (emoji, libellé, couleur) : mêmes couleurs que l'appli
-# (lib/models/category.dart), pour qu'on se sente au même endroit.
+# id -> (icône, libellé, couleur) : mêmes icônes Material et mêmes couleurs
+# que l'appli (lib/models/category.dart), pour qu'on se sente au même endroit.
+def _icon(name: str) -> str:
+    return f'<span class="ms" aria-hidden="true">{name}</span>'
+
+
 CATEGORIES = {
-    "concert": ("🎵", "Concert", "#E91E63"),
-    "fete": ("🎉", "Fête", "#FF5252"),
-    "marche": ("🧺", "Marché", "#FF9800"),
-    "spectacle": ("🎭", "Spectacle", "#8E24AA"),
-    "sport": ("🏆", "Sport", "#43A047"),
-    "culture": ("🎨", "Culture", "#7C4DFF"),
-    "atelier": ("🖌️", "Atelier", "#8D6E63"),
-    "visite": ("🧭", "Visite", "#1E88E5"),
-    "associatif_autre": ("🤝", "Associatif", "#00BFA5"),
+    "concert": (_icon("music_note"), "Concert", "#E91E63"),
+    "fete": (_icon("celebration"), "Fête", "#FF5252"),
+    "marche": (_icon("storefront"), "Marché", "#FF9800"),
+    "spectacle": (_icon("theater_comedy"), "Spectacle", "#8E24AA"),
+    "sport": (_icon("sports_soccer"), "Sport", "#43A047"),
+    "culture": (_icon("museum"), "Culture", "#7C4DFF"),
+    "atelier": (_icon("brush"), "Atelier", "#8D6E63"),
+    "visite": (_icon("explore"), "Visite", "#1E88E5"),
+    "associatif_autre": (_icon("groups"), "Associatif", "#00BFA5"),
 }
 CATEGORY_PHOTO = {
     "concert": "concert", "fete": "fete", "marche": "marche", "spectacle": "spectacle",
@@ -374,6 +378,7 @@ def layout(title: str, body: str, *, description: str, url: str, image: str | No
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800;900&family=Roboto:wght@400;500;700&display=swap">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,500,1,0&display=block">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
   <link rel="stylesheet" href="{root}style.css">
   {extra_head}
@@ -425,18 +430,14 @@ def date_chip(event: dict) -> str:
 
 
 def fallback(event: dict, root: str) -> str:
-    """Photo cassée : l'affiche colorée de la catégorie prend le relais."""
-    return "this.parentNode.classList.add('no-img');this.remove()"
+    """Photo cassée : la photo de la catégorie prend le relais."""
+    return f"this.onerror=null;this.src='{category_photo(event.get('category_id'), root)}'"
 
 
 def media(event: dict, root: str, css: str = "") -> str:
-    """Photo de l'événement, ou affiche générée (couleur et emoji de la
-    catégorie) : plus vivant que la même photo répétée partout."""
-    emoji = category(event)[0]
-    poster = f'<span class="poster" aria-hidden="true"><span>{emoji}</span></span>'
-    if event.get("image_url"):
-        return f'{poster}<img class="{css}" src="{e(event["image_url"])}" alt="" loading="lazy" onerror="{fallback(event, root)}">'
-    return poster
+    """Photo de l'événement, ou celle de sa catégorie (comme EventImage dans
+    l'appli)."""
+    return f'<img class="{css}" src="{e(image_for(event, root))}" alt="" loading="lazy" onerror="{fallback(event, root)}">'
 
 
 def card(event: dict, series: dict[str, list[dict]], root: str = "", *, size: str = "") -> str:
@@ -454,7 +455,7 @@ def card(event: dict, series: dict[str, list[dict]], root: str = "", *, size: st
         badges.append(f'<span class="badge series">{e(recurring)}</span>')
     search = fold(f"{event['title']} {commune_of(event)} {event.get('location_name') or ''} {label}")
     return f"""<a class="card {size}" href="{root}{event_path(event)}" data-cat="{e(event.get('category_id') or '')}" data-free="{1 if is_free(event) else 0}" data-kids="{1 if event.get('for_kids') else 0}" data-q="{e(search)}" style="--cat:{color}">
-  <div class="card-media{'' if event.get('image_url') else ' no-img'}">{media(event, root)}{date_chip(event)}<span class="cat-pill">{emoji} {e(label)}</span></div>
+  <div class="card-media">{media(event, root)}{date_chip(event)}<span class="cat-pill">{emoji} {e(label)}</span></div>
   <div class="card-body"><h3>{e(event['title'])}</h3><p class="card-meta">{e(meta)}</p><div class="badges">{''.join(badges)}</div></div>
 </a>"""
 
@@ -483,7 +484,7 @@ def row_card(event: dict, series: dict[str, list[dict]], root: str = "") -> str:
         badges.append('<span class="badge kids">Enfants</span>')
     search = fold(f"{event['title']} {commune_of(event)} {event.get('location_name') or ''} {label}")
     return f"""<a class="row-card" href="{root}{event_path(event)}" data-cat="{e(event.get('category_id') or '')}" data-free="{1 if is_free(event) else 0}" data-kids="{1 if event.get('for_kids') else 0}" data-q="{e(search)}" style="--cat:{color}">
-  <span class="row-media{'' if event.get('image_url') else ' no-img'}">{media(event, root)}</span>
+  <span class="row-media">{media(event, root)}</span>
   <span class="row-body"><span class="cat-chip">{emoji} {e(label)}</span><b>{e(event['title'])}</b><span class="row-date">{e(meta)}</span>{f'<span class="badges">{"".join(badges)}</span>' if badges else ''}</span>
 </a>"""
 
@@ -534,7 +535,7 @@ def phone_mockup(events: list[dict]) -> str:
         emoji, label, color = category(ev)
         start = wall_time(ev["start_date"])
         rows.append(f"""<div class="ph-card" style="--cat:{color}">
-  <span class="ph-media{'' if ev.get('image_url') else ' no-img'}" style="--cat:{color}">{media(ev, '')}</span>
+  <span class="ph-media" style="--cat:{color}">{media(ev, '')}</span>
   <div><span class="ph-date">{DAYS_SHORT[start.weekday()]} {start.day} {MONTHS_SHORT[start.month - 1]}</span><b>{e(ev['title'][:44])}</b><small>{emoji} {e(commune_of(ev))}</small></div>
 </div>""")
     return f"""<div class="phone" aria-hidden="true">
@@ -589,16 +590,18 @@ def home_page(events: list[dict], all_upcoming: list[dict], now: datetime) -> st
             continue
         start = max(wall_time(ev["start_date"]).date(), today)
         by_day.setdefault(start, []).append(ev)
-    day_sections = []
+    day_sections, day_tabs = [], []
     for index, day in enumerate(sorted(by_day)):
         items = sorted(by_day[day], key=lambda ev: (ev.get("category_id") == "marche",
                                                     not ev.get("start_time_known"), ev["start_date"]))
         label = "Aujourd'hui" if day == today else "Demain" if day == today + timedelta(days=1) else cap(day_label(day))
-        hidden = " is-later" if index >= AGENDA_OPEN_DAYS else ""
+        short = "Aujourd'hui" if day == today else "Demain" if day == today + timedelta(days=1) else f"{DAYS_SHORT[day.weekday()]} {day.day}"
+        on = " is-on" if index == 0 else ""
+        day_tabs.append(f'<button class="day-tab{on}" data-day="{index}"><b>{e(short)}</b><small>{len(items)}</small></button>')
         day_sections.append(
-            f'<section class="day{hidden}"><h3 class="day-title"><span>{e(label)}</span>'
-            f'<small>{len(items)} sortie{"s" if len(items) > 1 else ""}</small></h3>'
-            f'<div class="rows">{"".join(row_card(ev, series) for ev in items)}</div></section>'
+            f'<section class="day{on}" data-day="{index}"><h3 class="day-title">{e(label)}</h3>'
+            f'<div class="grid">{"".join(card(ev, series) for ev in items)}</div>'
+            f'<div class="day-more"><button class="btn btn-ghost" data-more>Voir les autres sorties</button></div></section>'
         )
 
     map_points = [
@@ -686,9 +689,9 @@ def home_page(events: list[dict], all_upcoming: list[dict], now: datetime) -> st
       </div>
       <p class="result-count" id="count" aria-live="polite"></p>
     </div>
+    <div class="day-tabs" role="tablist">{''.join(day_tabs)}</div>
     <div class="agenda">{''.join(day_sections)}</div>
     <p class="empty" id="empty" hidden>Aucune sortie ne correspond. Essaie un autre filtre&nbsp;!</p>
-    <div class="more"><button class="btn btn-ghost" id="more">Voir les jours suivants ↓</button></div>
   </section>
 
   <section class="section how">
@@ -787,7 +790,7 @@ def event_page(event: dict, neighbours: list[dict], series: dict[str, list[dict]
     <div class="ev-hero-inner">
       <a class="back" href="{root}#agenda">← Tout l'agenda</a>
       <div class="ev-head">
-        <div class="ev-cover-wrap">{date_chip(event)}<div class="ev-cover{'' if event.get('image_url') else ' no-img'}">{media(event, root)}</div></div>
+        <div class="ev-cover-wrap">{date_chip(event)}<div class="ev-cover">{media(event, root)}</div></div>
         <div class="ev-title">
           <p class="cat-pill big">{emoji} {e(label)}</p>
           <h1>{e(event['title'])}</h1>
@@ -810,7 +813,7 @@ def event_page(event: dict, neighbours: list[dict], series: dict[str, list[dict]
         <div><span>📍</span><p><b>Où</b>{e(place)}</p></div>
         <div><span>💶</span><p><b>Prix</b>{e(price_label(event))}</p></div>
       </div>
-      <div class="panel mini-map-panel"><div id="mini-map" data-lat="{lat}" data-lon="{lon}" data-color="{color}" data-emoji="{emoji}"></div></div>
+      <div class="panel mini-map-panel"><div id="mini-map" data-lat="{lat}" data-lon="{lon}" data-color="{color}" data-icon="{re.sub(r"<[^>]+>", "", emoji)}"></div></div>
       <div class="panel app-promo"><img src="{root}img/logo-256.png" alt="" width="56" height="56"><p><b>Ne rate plus rien près de chez toi</b>Favoris, rappels et notifs avec l'appli Wavents.</p>{play_cta('small')}</div>
     </aside>
   </section>
