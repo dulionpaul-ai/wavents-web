@@ -62,6 +62,9 @@ CATEGORIES = {
     "concert": ("🎶", "Concert"),
     "marche": ("🧺", "Marché"),
     "culture": ("🎨", "Sortie culture"),
+    "spectacle": ("🎭", "Spectacle"),
+    "atelier": ("🖌️", "Atelier"),
+    "visite": ("🧭", "Visite"),
     "associatif_autre": ("🤝", "Événement"),
 }
 CATEGORY_IMAGE = SUPABASE_URL + "/storage/v1/object/public/event-photos/categories/{}.jpg"
