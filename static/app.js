@@ -132,7 +132,7 @@
 
   /* Cartes Leaflet (chargé en différé) */
   const whenLeaflet = (fn) => {
-    if (window.L) return fn();
+    if (window.L && window.L.markerClusterGroup) return fn();
     window.addEventListener("load", () => window.L && fn());
   };
   const tiles = () => window.L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
@@ -156,58 +156,34 @@
       map.on("blur", () => map.scrollWheelZoom.disable());
       L.marker(data.home, { icon: L.divIcon({ className: "", html: '<div class="wv-me"></div>', iconSize: [18, 18] }), interactive: false }).addTo(map);
 
-      // Regroupement maison par grille : léger, sans extension.
-      const layer = L.layerGroup().addTo(map);
+      // Regroupement : extension MarkerCluster (aucun chevauchement, éventail
+      // pour les points au même endroit). Pastilles comme dans l'appli
+      // (EventPinCluster) : couleur de la catégorie la plus présente.
       const pinIcon = (cat) => L.divIcon({
         className: "",
         html: `<div class="wv-pin" style="--cat:${cat.c}">${cat.e}</div>`,
         iconSize: [36, 46], iconAnchor: [18, 46], popupAnchor: [0, -40],
       });
-      const draw = () => {
-        layer.clearLayers();
-        const zoom = map.getZoom();
-        const cell = zoom >= 14 ? 0 : 64;
-        const buckets = new Map();
-        data.points.forEach((p) => {
-          const pt = map.project([p.la, p.lo], zoom);
-          const key = cell ? `${Math.floor(pt.x / cell)}:${Math.floor(pt.y / cell)}` : `${p.la}:${p.lo}:${p.u}`;
-          if (!buckets.has(key)) buckets.set(key, []);
-          buckets.get(key).push(p);
-        });
-        buckets.forEach((pts) => {
-          if (pts.length === 1) {
-            const p = pts[0];
-            const cat = data.cats[p.c] || data.cats.associatif_autre;
-            L.marker([p.la, p.lo], { icon: pinIcon(cat) })
-              .bindPopup(`<div class="wv-pop"><b>${esc(p.t)}</b><small>${esc(p.d)} · ${esc(p.p)}</small><a href="${p.u}">Voir la sortie →</a></div>`)
-              .addTo(layer);
-            return;
-          }
-          const la = pts.reduce((s, p) => s + p.la, 0) / pts.length;
-          const lo = pts.reduce((s, p) => s + p.lo, 0) / pts.length;
-          // Comme l'appli (EventPinCluster) : couleur de la catégorie la plus
-          // présente dans le groupe, contour blanc, nombre en blanc.
+      const clusters = L.markerClusterGroup({
+        maxClusterRadius: 56,
+        showCoverageOnHover: false,
+        spiderfyOnMaxZoom: true,
+        iconCreateFunction: (cluster) => {
           const tally = {};
-          pts.forEach((p) => { tally[p.c] = (tally[p.c] || 0) + 1; });
+          cluster.getAllChildMarkers().forEach((m) => { tally[m.options.cat] = (tally[m.options.cat] || 0) + 1; });
           const top = Object.keys(tally).sort((a, b) => tally[b] - tally[a])[0];
           const color = (data.cats[top] || data.cats.associatif_autre).c;
-          const size = Math.min(52, 36 + Math.sqrt(pts.length) * 2.5);
-          L.marker([la, lo], {
-            icon: L.divIcon({ className: "", html: `<div class="wv-cluster" style="--cat:${color};width:${size}px;height:${size}px"><b>${pts.length}</b></div>`, iconSize: [size, size] }),
-          }).on("click", () => {
-            const bounds = L.latLngBounds(pts.map((p) => [p.la, p.lo]));
-            if (map.getZoom() >= 15 || bounds.getNorthEast().equals(bounds.getSouthWest())) {
-              map.setView([la, lo], Math.max(map.getZoom(), 16));
-              const list = pts.slice(0, 12).map((p) => `<li><a href="${p.u}">${esc(p.t)}</a></li>`).join("");
-              L.popup().setLatLng([la, lo]).setContent(`<div class="wv-pop"><b>${pts.length} sorties ici</b><ul style="padding-left:16px;margin:6px 0 0">${list}</ul></div>`).openOn(map);
-            } else {
-              map.fitBounds(bounds.pad(0.3));
-            }
-          }).addTo(layer);
-        });
-      };
-      map.on("zoomend", draw);
-      draw();
+          const n = cluster.getChildCount();
+          const size = Math.min(52, 36 + Math.sqrt(n) * 2.5);
+          return L.divIcon({ className: "", html: `<div class="wv-cluster" style="--cat:${color};width:${size}px;height:${size}px"><b>${n}</b></div>`, iconSize: [size, size] });
+        },
+      });
+      data.points.forEach((p) => {
+        const cat = data.cats[p.c] || data.cats.associatif_autre;
+        clusters.addLayer(L.marker([p.la, p.lo], { icon: pinIcon(cat), cat: p.c })
+          .bindPopup(`<div class="wv-pop"><b>${esc(p.t)}</b><small>${esc(p.d)} · ${esc(p.p)}</small><a href="${p.u}">Voir la sortie →</a></div>`));
+      });
+      map.addLayer(clusters);
     });
     if ("IntersectionObserver" in window) {
       const io = new IntersectionObserver(([entry]) => { if (entry.isIntersecting) { io.disconnect(); start(); } }, { rootMargin: "300px" });

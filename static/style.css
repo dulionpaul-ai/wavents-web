@@ -469,3 +469,4 @@ main h2 { font-size: 1.35rem; margin: 1.6em 0 .5em; color: var(--deep); }
 .band-map .band-sun { left: auto; right: -25%; bottom: -70%; }
 .band-map .map-wrap { border-color: rgba(255,255,255,.6); box-shadow: 0 24px 60px rgba(6,40,90,.35); }
 .band-map .section h2 { color: #fff; }
+.band .map-legend { color: var(--ink); }
