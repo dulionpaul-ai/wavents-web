@@ -671,11 +671,14 @@ def home_page(events: list[dict], all_upcoming: list[dict], now: datetime) -> st
     <div class="cat-grid reveal">{cat_tiles}</div>
   </section>
 
+  <div class="band band-map">
+  <div class="band-sun" aria-hidden="true"></div>
   <section class="section map-section" id="carte">
     <div class="section-head reveal"><div><p class="kicker">{len(shown)} sorties dans les {HOME_DAYS} prochains jours</p><h2>Sur la carte</h2></div></div>
     <div class="map-wrap reveal"><div id="map" role="region" aria-label="Carte des événements"></div>
     <div class="map-legend">{''.join(f'<span style="--cat:{c}">{em} {l}</span>' for cid, (em, l, c) in CATEGORIES.items() if counts.get(cid))}</div></div>
   </section>
+  </div>
 
   <section class="section" id="agenda">
     <div class="section-head reveal"><div><p class="kicker">Mis à jour chaque jour</p><h2>L'agenda des {HOME_DAYS} prochains jours</h2></div></div>
