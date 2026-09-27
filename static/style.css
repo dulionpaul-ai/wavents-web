@@ -16,7 +16,8 @@
   --ink-soft: #4B6475;
   --card: #FFFFFF;
   --line: #DCEAF4;
-  --page: linear-gradient(180deg, #EAF8FD 0%, #F4FBFE 35%, #FFF9E8 80%, #FFF4D2 100%);
+  --page: linear-gradient(180deg, #EAF8FD 0%, #F2FAFE 50%, #E3F4FC 100%);
+  --b-grad: radial-gradient(circle at 10% 0%, #065FBB 0%, transparent 55%), linear-gradient(135deg, #0B81E1 0%, #01BAEF 100%);
   --radius: 24px;
   --display: "Nunito", "Roboto", system-ui, sans-serif;
   --text: "Roboto", -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
@@ -150,7 +151,7 @@ h1, h2, h3 { font-family: var(--display); line-height: 1.08; letter-spacing: -.0
 .w1 { fill: rgba(255,255,255,.22); }
 .w3 { fill: #EAF8FD; animation-duration: 14s !important; }
 @media (prefers-color-scheme: dark) { .w3 { fill: #0E1A24; } }
-@keyframes sway { to { transform: translateX(-50px); } }
+@keyframes sway { from { transform: translateX(-40px); } to { transform: translateX(40px); } }
 
 /* Chiffres */
 .stats { max-width: 1180px; margin: 20px auto 0; padding: 0 clamp(16px, 4vw, 40px); display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
@@ -385,3 +386,35 @@ main h2 { font-size: 1.35rem; margin: 1.6em 0 .5em; color: var(--deep); }
 .top { background: linear-gradient(135deg, var(--blue), var(--wave)); color: #fff; padding: 14px 16px; }
 .top .brand { color: #fff; font-family: var(--display); font-weight: 900; font-size: 1.3rem; text-decoration: none; }
 .button { display: inline-block; padding: 11px 18px; border-radius: 999px; background: var(--deep); color: #fff; text-decoration: none; font-weight: 700; }
+
+/* --- Bande « coucher de soleil » (plus de B, demande de Paul) --------- */
+.band { position: relative; isolation: isolate; overflow: hidden; margin-top: clamp(40px, 6vw, 70px); padding: 30px 0 clamp(60px, 8vw, 90px);
+  background: var(--b-grad); color: #fff; }
+.band-sun { position: absolute; z-index: -1; width: min(1100px, 140vw); aspect-ratio: 1; left: -20%; bottom: -60%; border-radius: 50%;
+  background: radial-gradient(circle, #FFE9A0 0%, var(--sun) 14%, rgba(255,214,107,.6) 28%, rgba(255,233,168,.25) 44%, transparent 64%);
+  animation: sunrise 11s ease-in-out infinite alternate; }
+.band::before, .band::after { content: ""; position: absolute; left: 0; right: 0; height: clamp(34px, 5vw, 70px); z-index: 1; pointer-events: none;
+  background-repeat: no-repeat; background-size: 100% 100%; }
+.band::before { top: -1px; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 70' preserveAspectRatio='none'%3E%3Cpath d='M0,40 C240,0 480,70 720,36 C960,4 1200,62 1440,30 L1440,0 L0,0 Z' fill='%23EAF8FD'/%3E%3C/svg%3E"); }
+.band::after { bottom: -1px; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 70' preserveAspectRatio='none'%3E%3Cpath d='M0,30 C240,70 480,0 720,34 C960,66 1200,8 1440,40 L1440,70 L0,70 Z' fill='%23EAF8FD'/%3E%3C/svg%3E"); }
+@media (prefers-color-scheme: dark) { .band::before, .band::after { filter: brightness(.12); } }
+.band .section { padding-top: clamp(40px, 5vw, 64px); }
+.band .section h2 { color: #fff; text-shadow: 0 4px 24px rgba(6,60,130,.25); }
+.band .kicker { color: var(--sun); }
+.band .scroller-nav button { background: rgba(255,255,255,.2); color: #fff; border-color: rgba(255,255,255,.5); backdrop-filter: blur(6px); }
+.band .card { color: var(--ink); border-color: rgba(255,255,255,.7); box-shadow: 0 16px 34px rgba(6,40,90,.28); }
+.band .card:hover { box-shadow: 0 24px 44px rgba(6,40,90,.36); }
+.band .empty { color: #fff; }
+
+/* Touches B dans le reste de la page */
+.day-title { color: #fff !important; background: var(--b-grad); padding: 6px 16px 8px; border-radius: 16px; display: inline-flex;
+  box-shadow: 0 8px 20px rgba(6,95,187,.25); }
+.day-title small { color: rgba(255,255,255,.85) !important; }
+.chip.is-on[data-cat=""] { background: var(--b-grad); border-color: transparent; }
+.how-num { background: var(--b-grad) !important; }
+.how-card:nth-child(2) .how-num { background: radial-gradient(circle at 70% 90%, #FFD66B, #FFB84D 60%, #FF8A1E) !important; }
+.stat { background: linear-gradient(160deg, #fff 60%, #FFF6D8); }
+@media (prefers-color-scheme: dark) { .stat { background: var(--card); } }
+.map-wrap { box-shadow: 0 20px 50px rgba(6,95,187,.2), 0 0 0 6px rgba(1,186,239,.12); }
+.section h2 { background: linear-gradient(90deg, #065FBB, #0B81E1 60%, #01A9D8); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.band .section h2, .app-band-inner h2 { background: none; -webkit-background-clip: border-box; background-clip: border-box; color: #fff; }

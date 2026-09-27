@@ -631,9 +631,9 @@ def home_page(events: list[dict], all_upcoming: list[dict], now: datetime) -> st
         <img class="hero-logo float" src="img/logo-256.png" alt="Wavents" width="150" height="150">
       </div>
     </div>
-    <svg class="waves" viewBox="0 0 1440 160" preserveAspectRatio="none" aria-hidden="true">
-      <path class="w1" d="M0,96 C240,150 480,40 720,80 C960,120 1200,40 1440,90 L1440,160 L0,160 Z"/>
-      <path class="w3" d="M0,120 C260,90 520,150 760,120 C1000,90 1220,140 1440,115 L1440,160 L0,160 Z"/>
+    <svg class="waves" viewBox="0 0 1440 160" preserveAspectRatio="none" overflow="visible" aria-hidden="true">
+      <path class="w1" d="M-100,96 C160,150 420,40 700,80 C980,120 1240,40 1540,90 L1540,160 L-100,160 Z"/>
+      <path class="w3" d="M-100,120 C180,90 460,150 740,120 C1020,90 1260,140 1540,115 L1540,160 L-100,160 Z"/>
     </svg>
   </section>
 
@@ -644,6 +644,8 @@ def home_page(events: list[dict], all_upcoming: list[dict], now: datetime) -> st
     <div class="stat reveal" style="--c:#FF8A1E"><b>0 €</b><span>gratuit, sans pub</span></div>
   </section>
 
+  <div class="band">
+  <div class="band-sun" aria-hidden="true"></div>
   <section class="section" id="week-end">
     <div class="section-head reveal">
       <div><p class="kicker">{e(cap(weekend_dates))}</p><h2>{weekend_title}</h2></div>
@@ -659,6 +661,7 @@ def home_page(events: list[dict], all_upcoming: list[dict], now: datetime) -> st
     </div>
     <div class="scroller reveal">{''.join(card(ev, series) for ev in ongoing[:18])}</div>
   </section>''' if ongoing else ''}
+  </div>
 
   <section class="section">
     <div class="section-head reveal"><div><p class="kicker">Envie de quoi ?</p><h2>Par catégorie</h2></div></div>
