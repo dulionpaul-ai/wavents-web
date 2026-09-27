@@ -265,8 +265,12 @@ h1, h2, h3 { font-family: var(--display); line-height: 1.08; letter-spacing: -.0
 .wv-pin .ms { font-size: 19px; }
 .wv-pin.big { width: 46px; height: 46px; }
 .wv-pin.big .ms { font-size: 25px; }
-.wv-cluster { border-radius: 50%; color: #fff; display: grid; place-items: center; font-weight: 900; font-family: var(--display);
-  background: radial-gradient(circle at 30% 30%, var(--wave), var(--deep)); border: 3px solid #fff; box-shadow: 0 0 0 5px rgba(1,186,239,.25), 0 6px 14px rgba(6,95,187,.35); }
+.wv-cluster { position: relative; border-radius: 50%; color: #fff; display: grid; place-items: center; background: var(--cat);
+  border: 3px solid #fff; box-shadow: 0 3px 8px rgba(0,0,0,.35); transition: transform .2s; }
+.wv-cluster::before { content: ""; position: absolute; inset: -3px; border-radius: 50%; z-index: -1; background: color-mix(in srgb, var(--cat) 55%, #fff);
+  border: 3px solid #fff; transform: translate(5px, -5px); box-shadow: 0 2px 6px rgba(0,0,0,.2); }
+.wv-cluster b { font-family: var(--text); font-weight: 800; font-size: 14px; }
+.wv-cluster:hover { transform: scale(1.1); }
 .leaflet-popup-content-wrapper { border-radius: 18px; box-shadow: 0 12px 30px rgba(6,95,187,.25); }
 .leaflet-popup-content { margin: 12px 14px; font-family: var(--text); }
 .wv-pop b { display: block; font-family: var(--display); font-size: 1.02rem; margin-bottom: 4px; color: #0A2A3D; }

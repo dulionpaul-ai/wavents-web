@@ -185,9 +185,15 @@
           }
           const la = pts.reduce((s, p) => s + p.la, 0) / pts.length;
           const lo = pts.reduce((s, p) => s + p.lo, 0) / pts.length;
-          const size = Math.min(64, 38 + Math.sqrt(pts.length) * 4);
+          // Comme l'appli (EventPinCluster) : couleur de la catégorie la plus
+          // présente dans le groupe, contour blanc, nombre en blanc.
+          const tally = {};
+          pts.forEach((p) => { tally[p.c] = (tally[p.c] || 0) + 1; });
+          const top = Object.keys(tally).sort((a, b) => tally[b] - tally[a])[0];
+          const color = (data.cats[top] || data.cats.associatif_autre).c;
+          const size = Math.min(52, 36 + Math.sqrt(pts.length) * 2.5);
           L.marker([la, lo], {
-            icon: L.divIcon({ className: "", html: `<div class="wv-cluster" style="width:${size}px;height:${size}px">${pts.length}</div>`, iconSize: [size, size] }),
+            icon: L.divIcon({ className: "", html: `<div class="wv-cluster" style="--cat:${color};width:${size}px;height:${size}px"><b>${pts.length}</b></div>`, iconSize: [size, size] }),
           }).on("click", () => {
             const bounds = L.latLngBounds(pts.map((p) => [p.la, p.lo]));
             if (map.getZoom() >= 15 || bounds.getNorthEast().equals(bounds.getSouthWest())) {
