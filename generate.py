@@ -175,12 +175,19 @@ def category_photo(category_id: str | None, root: str) -> str:
     return f"{root}categories/{CATEGORY_PHOTO.get(category_id or '', 'associatif')}.jpg"
 
 
+def real_image(event: dict) -> str | None:
+    """Photo de l'événement, sauf les images vides de chargement différé
+    (« data:image/svg+xml… ») qu'un scraper aurait prises pour une photo."""
+    url = event.get("image_url") or ""
+    return url if url.startswith("http") else None
+
+
 def image_for(event: dict, root: str = "") -> str:
-    return event.get("image_url") or category_photo(event.get("category_id"), root)
+    return real_image(event) or category_photo(event.get("category_id"), root)
 
 
 def absolute_image(event: dict) -> str:
-    return event.get("image_url") or f"{BASE_URL}/{category_photo(event.get('category_id'), '')}"
+    return real_image(event) or f"{BASE_URL}/{category_photo(event.get('category_id'), '')}"
 
 
 def event_path(event: dict) -> str:
