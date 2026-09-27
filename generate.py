@@ -588,6 +588,12 @@ def home_page(events: list[dict], all_upcoming: list[dict], now: datetime) -> st
         f'<span class="cat-tile-label"><b><span class="cat-emoji">{emoji}</span>{label}</b><small>{counts.get(cid, 0)} à venir</small></span></a>'
         for cid, (emoji, label, color) in CATEGORIES.items() if counts.get(cid)
     )
+    kids_count = sum(1 for ev in shown if ev.get("for_kids"))
+    if kids_count:
+        cat_tiles = (f'<a class="cat-tile kids" href="#agenda" data-filter-kids style="--cat:#E91E63">'
+                     f'<span class="ms kids-art" aria-hidden="true">family_restroom</span>'
+                     f'<span class="cat-tile-label"><b><span class="cat-emoji">{_icon("child_care")}</span>Pour les enfants</b>'
+                     f'<small>{kids_count} à venir</small></span></a>') + cat_tiles
     chips = "".join(
         f'<button class="chip" data-cat="{cid}" style="--cat:{color}">{emoji} {label}</button>'
         for cid, (emoji, label, color) in CATEGORIES.items() if counts.get(cid)
@@ -685,7 +691,7 @@ def home_page(events: list[dict], all_upcoming: list[dict], now: datetime) -> st
   <section class="section map-section" id="carte">
     <div class="section-head reveal"><div><p class="kicker">{len(shown)} sorties dans les {HOME_DAYS} prochains jours</p><h2>Sur la carte</h2></div></div>
     <div class="map-wrap reveal"><div id="map" role="region" aria-label="Carte des événements"></div>
-    <div class="map-legend">{''.join(f'<span style="--cat:{c}">{em} {l}</span>' for cid, (em, l, c) in CATEGORIES.items() if counts.get(cid))}</div></div>
+    <div class="map-legend" role="group" aria-label="Filtrer la carte"><button class="map-chip is-on" data-map-cat="">Tout</button>{''.join(f'<button class="map-chip" data-map-cat="{cid}" style="--cat:{c}">{em} {l}</button>' for cid, (em, l, c) in CATEGORIES.items() if counts.get(cid))}</div></div>
   </section>
   </div>
 

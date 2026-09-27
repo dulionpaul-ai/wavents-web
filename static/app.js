@@ -122,6 +122,11 @@
     const q = $("#q");
     if (q) q.addEventListener("input", () => { state.q = fold(q.value.trim()); apply(); });
 
+    /* Tuile « Pour les enfants » : active le filtre Enfants */
+    $$("[data-filter-kids]").forEach((tile) => tile.addEventListener("click", (ev) => {
+      const chip = $('.chip[data-toggle="kids"]');
+      if (chip) { ev.preventDefault(); if (!state.kids) chip.click(); $("#agenda").scrollIntoView({ behavior: "smooth" }); }
+    }));
     /* Tuiles de catégorie : filtrent l'agenda */
     $$("[data-filter-cat]").forEach((tile) => tile.addEventListener("click", (ev) => {
       const chip = $(`.chip[data-cat="${tile.dataset.filterCat}"]`);
@@ -178,12 +183,22 @@
           return L.divIcon({ className: "", html: `<div class="wv-cluster" style="--cat:${color};width:${size}px;height:${size}px"><b>${n}</b></div>`, iconSize: [size, size] });
         },
       });
-      data.points.forEach((p) => {
+      const markers = data.points.map((p) => {
         const cat = data.cats[p.c] || data.cats.associatif_autre;
-        clusters.addLayer(L.marker([p.la, p.lo], { icon: pinIcon(cat), cat: p.c })
-          .bindPopup(`<div class="wv-pop"><b>${esc(p.t)}</b><small>${esc(p.d)} · ${esc(p.p)}</small><a href="${p.u}">Voir la sortie →</a></div>`));
+        return L.marker([p.la, p.lo], { icon: pinIcon(cat), cat: p.c })
+          .bindPopup(`<div class="wv-pop"><b>${esc(p.t)}</b><small>${esc(p.d)} · ${esc(p.p)}</small><a href="${p.u}">Voir la sortie →</a></div>`);
       });
+      const show = (cat) => {
+        clusters.clearLayers();
+        clusters.addLayers(cat ? markers.filter((m) => m.options.cat === cat) : markers);
+      };
+      show("");
       map.addLayer(clusters);
+      // Filtres sous la carte : une catégorie à la fois (« Tout » pour revenir).
+      $$(".map-chip").forEach((chip) => chip.addEventListener("click", () => {
+        $$(".map-chip").forEach((c) => c.classList.toggle("is-on", c === chip));
+        show(chip.dataset.mapCat);
+      }));
     });
     if ("IntersectionObserver" in window) {
       const io = new IntersectionObserver(([entry]) => { if (entry.isIntersecting) { io.disconnect(); start(); } }, { rootMargin: "300px" });
