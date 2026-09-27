@@ -20,7 +20,9 @@ de Belleville-en-Beaujolais, et la politique de confidentialité de l'appli.
 
 Adresse d'une page : `<adresse du site>/e/<id de l'événement>/`. L'adresse
 du site se règle avec la variable `PAGES_BASE_URL` (par défaut
-`https://dulionpaul-ai.github.io/wavents-web`) ; avec un nom de domaine, la
-changer ici et dans l'appli (`lib/utils/share_links.dart`).
+`https://wavents.fr`, domaine branché le 28/09/2026 : zone DNS OVH vers
+GitHub Pages, domaine personnalisé dans Settings > Pages). L'ancienne
+adresse github.io redirige vers wavents.fr ; à changer aussi dans l'appli
+(`lib/utils/share_links.dart`) si le domaine change.
 
 Réglage à faire une fois : Settings > Pages > Source : « GitHub Actions ».

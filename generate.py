@@ -42,7 +42,7 @@ SUPABASE_ANON_KEY = (
     "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im16Ynhud3ZydnJobHVjanpiemxzIiwicm9sZSI6"
     "ImFub24iLCJpYXQiOjE3ODQ2NDMwMzQsImV4cCI6MjEwMDIxOTAzNH0.wqoOLgNM92KmwZfbh4c56dVN13DDlCxJhuOOoqlH1is"
 )
-BASE_URL = os.environ.get("PAGES_BASE_URL", "https://dulionpaul-ai.github.io/wavents-web").rstrip("/")
+BASE_URL = os.environ.get("PAGES_BASE_URL", "https://wavents.fr").rstrip("/")
 PLAY_STORE_URL = "https://play.google.com/store/apps/details?id=com.wavents.wavents"
 # Passer à True le jour où l'appli est publiée sur le Play Store (test
 # ouvert ou production) : avant, la fiche renvoie une erreur 404.
