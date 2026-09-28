@@ -9,8 +9,8 @@
   --blue: #0B81E1;
   --wave: #01BAEF;
   --foam: #E8F7FB;
-  --sand: #FFE9A8;
-  --sun: #FFD66B;
+  --sand: #FFE788;
+  --sun: #FFD93D;
   --pin: #FF8A1E;
   --ink: #0A2A3D;
   --ink-soft: #4B6475;
@@ -71,8 +71,8 @@ h1, h2, h3 { font-family: var(--display); line-height: 1.08; letter-spacing: -.0
   box-shadow: 0 6px 18px rgba(6,95,187,.10); transition: transform .2s, box-shadow .2s;
 }
 .btn:hover { transform: translateY(-2px); box-shadow: 0 12px 26px rgba(6,95,187,.18); }
-.btn-sun { background: linear-gradient(135deg, #FFE08A, var(--sun)); color: #3A2A00; border-color: transparent; box-shadow: 0 10px 26px rgba(255,190,50,.45); }
-.btn-sun:hover { box-shadow: 0 16px 34px rgba(255,190,50,.55); }
+.btn-sun { background: linear-gradient(135deg, #FFE680, var(--sun)); color: #3A2A00; border-color: transparent; box-shadow: 0 8px 20px rgba(4,56,110,.25); }
+.btn-sun:hover { box-shadow: 0 12px 26px rgba(4,56,110,.32); }
 .btn-ghost { background: var(--card); }
 .btn-light { background: #fff; color: var(--deep); border-color: #fff; }
 
@@ -95,17 +95,17 @@ h1, h2, h3 { font-family: var(--display); line-height: 1.08; letter-spacing: -.0
 }
 .hero-bg { position: absolute; inset: 0; z-index: -1; overflow: hidden; }
 .sun { position: absolute; width: min(1000px, 130vw); aspect-ratio: 1; right: -12%; bottom: -42%; border-radius: 50%;
-  background: radial-gradient(circle, #FFE9A0 0%, var(--sun) 14%, rgba(255,214,107,.7) 28%, rgba(255,233,168,.3) 44%, transparent 64%);
+  background: radial-gradient(circle, var(--sun) 0%, var(--sun) 22%, #FFE36B 31%, #FFF3C4 39%, #fff 43%, rgba(255,255,255,.4) 50%, transparent 64%);
   animation: sunrise 9s ease-in-out infinite alternate; }
-@keyframes sunrise { from { transform: translateY(4%) scale(.96); opacity: .85; } to { transform: translateY(-4%) scale(1.05); opacity: 1; } }
+@keyframes sunrise { from { transform: translateY(4%) scale(.96); } to { transform: translateY(-4%) scale(1.05); } }
 .hero-inner { max-width: 1180px; margin: 0 auto; display: grid; grid-template-columns: 1.1fr .9fr; gap: clamp(24px, 5vw, 64px); align-items: center; }
 @media (max-width: 900px) { .hero-inner { grid-template-columns: 1fr; } }
 .eyebrow { display: inline-flex; align-items: center; gap: 10px; margin: 0 0 20px; padding: 7px 15px; border-radius: 999px;
   background: rgba(255,255,255,.16); border: 1.5px solid rgba(255,255,255,.35); font-weight: 500; font-size: .92rem; backdrop-filter: blur(6px); }
-.pulse { width: 9px; height: 9px; border-radius: 50%; background: var(--sun); box-shadow: 0 0 0 0 rgba(255,214,107,.8); animation: pulse 2s infinite; }
-@keyframes pulse { 70% { box-shadow: 0 0 0 12px rgba(255,214,107,0); } 100% { box-shadow: 0 0 0 0 rgba(255,214,107,0); } }
+.pulse { width: 9px; height: 9px; border-radius: 50%; background: var(--sun); box-shadow: 0 0 0 0 rgba(255,217,61,.8); animation: pulse 2s infinite; }
+@keyframes pulse { 70% { box-shadow: 0 0 0 12px rgba(255,217,61,0); } 100% { box-shadow: 0 0 0 0 rgba(255,217,61,0); } }
 .hero h1 { font-size: clamp(2.6rem, 6.4vw, 4.8rem); font-weight: 900; text-shadow: 0 4px 30px rgba(6,60,130,.25); }
-.sunny { display: block; background: linear-gradient(90deg, #FFF3C4, var(--sun) 60%, #FFB84D); -webkit-background-clip: text; background-clip: text; color: transparent; text-shadow: none; }
+.sunny { display: block; background: linear-gradient(90deg, #FFF0A6, var(--sun) 60%, #FFCF26); -webkit-background-clip: text; background-clip: text; color: transparent; text-shadow: none; }
 .lead { font-size: clamp(1.05rem, 1.6vw, 1.22rem); max-width: 33em; opacity: .95; margin: 22px 0 30px; }
 .hero-actions { display: flex; flex-wrap: wrap; gap: 14px; align-items: center; }
 
@@ -116,7 +116,7 @@ h1, h2, h3 { font-family: var(--display); line-height: 1.08; letter-spacing: -.0
 
 /* Téléphone : l'écran d'accueil de l'appli, avec de vrais événements */
 .phone { width: min(300px, 76vw); aspect-ratio: 9 / 18.5; border-radius: 44px; background: #0B1B2B; padding: 11px; position: relative;
-  box-shadow: 0 50px 90px -25px rgba(6,40,90,.65), 0 0 0 1.5px rgba(255,255,255,.18) inset; transform: rotate(4deg); animation: tilt 8s ease-in-out infinite alternate; }
+  box-shadow: 0 24px 40px -18px rgba(6,40,90,.4), 0 0 0 1.5px rgba(255,255,255,.18) inset; transform: rotate(4deg); animation: tilt 8s ease-in-out infinite alternate; }
 @keyframes tilt { to { transform: rotate(1.5deg) translateY(-8px); } }
 .phone-notch { position: absolute; top: 17px; left: 50%; translate: -50% 0; width: 88px; height: 22px; border-radius: 20px; background: #0B1B2B; z-index: 2; }
 .phone-screen { height: 100%; border-radius: 34px; overflow: hidden; background: #F4F9FC; color: #0A2A3D; padding: 44px 11px 11px; display: flex; flex-direction: column; gap: 9px; }
@@ -329,7 +329,7 @@ h1, h2, h3 { font-family: var(--display); line-height: 1.08; letter-spacing: -.0
 .app-band { padding-bottom: 10px; }
 .app-band-inner { position: relative; overflow: hidden; isolation: isolate; display: flex; gap: clamp(20px, 4vw, 48px); align-items: center; color: #fff;
   border-radius: 34px; padding: clamp(28px, 5vw, 56px); box-shadow: 0 30px 60px -20px rgba(6,95,187,.5);
-  background: radial-gradient(circle at 95% 110%, var(--sun) 0%, rgba(255,214,107,.6) 20%, transparent 50%), radial-gradient(circle at 0% 0%, var(--deep), transparent 60%), linear-gradient(135deg, var(--blue), var(--wave)); }
+  background: radial-gradient(circle at 95% 110%, var(--sun) 0%, var(--sun) 14%, #FFE36B 21%, #FFF3C4 27%, #fff 30%, rgba(255,255,255,.35) 36%, transparent 48%), radial-gradient(circle at 0% 0%, var(--deep), transparent 60%), linear-gradient(135deg, var(--blue), var(--wave)); }
 .app-band-inner img { flex: none; width: clamp(90px, 12vw, 140px); height: auto; filter: drop-shadow(0 14px 20px rgba(0,0,0,.3)); }
 .app-band-inner h2 { color: #fff !important; margin-bottom: 12px; }
 .app-band-inner p { font-size: 1.06rem; max-width: 40em; opacity: .95; margin: 0 0 22px; }
@@ -351,7 +351,7 @@ h1, h2, h3 { font-family: var(--display); line-height: 1.08; letter-spacing: -.0
 .ev-hero { position: relative; overflow: hidden; isolation: isolate; color: #fff; margin-top: -64px; padding: calc(64px + 28px) clamp(16px, 4vw, 40px) 90px;
   background: radial-gradient(circle at 10% 0%, var(--deep) 0%, transparent 55%), linear-gradient(135deg, var(--blue), var(--wave)); }
 .ev-hero::before { content: ""; position: absolute; z-index: -1; width: 700px; aspect-ratio: 1; right: -200px; bottom: -420px; border-radius: 50%;
-  background: radial-gradient(circle, var(--sun) 0%, rgba(255,214,107,.6) 22%, transparent 60%); }
+  background: radial-gradient(circle, var(--sun) 0%, var(--sun) 18%, #FFE36B 27%, #FFF3C4 35%, #fff 39%, rgba(255,255,255,.35) 46%, transparent 60%); }
 .ev-hero::after { content: ""; position: absolute; left: 0; right: 0; bottom: -1px; height: 60px; z-index: 0;
   background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 60' preserveAspectRatio='none'%3E%3Cpath d='M0,34 C240,60 480,10 720,30 C960,50 1200,12 1440,32 L1440,60 L0,60Z' fill='%23EAF8FD'/%3E%3C/svg%3E") no-repeat bottom / 100% 100%; }
 @media (prefers-color-scheme: dark) { .ev-hero::after { filter: brightness(.12); } }
@@ -413,7 +413,7 @@ main h2 { font-size: 1.35rem; margin: 1.6em 0 .5em; color: var(--deep); }
 .band { position: relative; isolation: isolate; overflow: hidden; margin-top: clamp(40px, 6vw, 70px); padding: 30px 0 clamp(60px, 8vw, 90px);
   background: var(--b-grad); color: #fff; }
 .band-sun { position: absolute; z-index: -1; width: min(1100px, 140vw); aspect-ratio: 1; left: -20%; bottom: -60%; border-radius: 50%;
-  background: radial-gradient(circle, #FFE9A0 0%, var(--sun) 14%, rgba(255,214,107,.6) 28%, rgba(255,233,168,.25) 44%, transparent 64%);
+  background: radial-gradient(circle, var(--sun) 0%, var(--sun) 22%, #FFE36B 31%, #FFF3C4 39%, #fff 43%, rgba(255,255,255,.4) 50%, transparent 64%);
   animation: sunrise 11s ease-in-out infinite alternate; }
 .band::before, .band::after { content: ""; position: absolute; left: 0; right: 0; height: clamp(34px, 5vw, 70px); z-index: 1; pointer-events: none;
   background-repeat: no-repeat; background-size: 100% 100%; }
