@@ -19,7 +19,7 @@
   --page: linear-gradient(180deg, #EAF8FD 0%, #F2FAFE 50%, #E3F4FC 100%);
   /* Dégradé bleu → jaune (sans soleil), en passant par le clair pour ne pas verdir */
   --sunset: linear-gradient(160deg, #065FBB 0%, #0B81E1 32%, #01BAEF 62%, #6FD3F3 100%);
-  --wash: linear-gradient(165deg, #BDEBF9 55%, #FFF1A8 67%, #FFE36B 78%, #FFD93D 91%);
+  --wash: radial-gradient(circle at 100% 100%, #FFD93D 0%, #FFD93D 18%, #FFE36B 30%, #FFF1A8 40%, #D2F0FA 50%);
   --b-grad: radial-gradient(circle at 10% 0%, #065FBB 0%, transparent 55%), linear-gradient(135deg, #0B81E1 0%, #01BAEF 100%);
   --radius: 24px;
   --display: "Nunito", "Roboto", system-ui, sans-serif;
@@ -490,9 +490,9 @@ main h2 { font-size: 1.35rem; margin: 1.6em 0 .5em; color: var(--deep); }
 .cat-tile.kids::after { background: linear-gradient(to top, rgba(160,20,70,.55), transparent 60%); }
 .kids-art { position: absolute; z-index: 1; top: 12px; right: 14px; font-size: 44px !important; opacity: .9; color: #fff; filter: drop-shadow(0 6px 10px rgba(0,0,0,.2)); }
 
-/* Jaune en bas à droite, séparé du bleu par une vague douce (pas de soleil).
+/* Jaune confiné au quart bas-droit (demande de Paul), séparé du bleu par une vague douce (pas de soleil).
    Le bord du masque ne laisse passer que du bleu très clair : pas de vert. */
 .sun, .band-sun, .ev-hero::before { position: absolute; inset: 0; width: auto; height: auto; aspect-ratio: auto; border-radius: 0; z-index: -1;
   left: 0; right: 0; top: 0; bottom: 0; background: var(--wash); animation: none; transform: none;
-  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' preserveAspectRatio='none'%3E%3Cfilter id='b'%3E%3CfeGaussianBlur stdDeviation='1.2'/%3E%3C/filter%3E%3Cpath filter='url(%23b)' d='M-5,105 L-5,92 C8,86.5 18,93.5 32,87.5 C46,81 56,88 70,79 C80,72.5 88,75 105,64 L105,105 Z'/%3E%3C/svg%3E") no-repeat 0 0 / 100% 100%; mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' preserveAspectRatio='none'%3E%3Cfilter id='b'%3E%3CfeGaussianBlur stdDeviation='1.2'/%3E%3C/filter%3E%3Cpath filter='url(%23b)' d='M-5,105 L-5,92 C8,86.5 18,93.5 32,87.5 C46,81 56,88 70,79 C80,72.5 88,75 105,64 L105,105 Z'/%3E%3C/svg%3E") no-repeat 0 0 / 100% 100%; }
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' preserveAspectRatio='none'%3E%3Cfilter id='b'%3E%3CfeGaussianBlur stdDeviation='1.2'/%3E%3C/filter%3E%3Cpath filter='url(%23b)' d='M53,105 C54,97 58,93 63,89 C69,84 70,78 77,73 C84,68 88,66 93,60 C96,57 99,55 105,54 L105,105 Z'/%3E%3C/svg%3E") no-repeat 0 0 / 100% 100%; mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' preserveAspectRatio='none'%3E%3Cfilter id='b'%3E%3CfeGaussianBlur stdDeviation='1.2'/%3E%3C/filter%3E%3Cpath filter='url(%23b)' d='M53,105 C54,97 58,93 63,89 C69,84 70,78 77,73 C84,68 88,66 93,60 C96,57 99,55 105,54 L105,105 Z'/%3E%3C/svg%3E") no-repeat 0 0 / 100% 100%; }
 .band-map .band-sun { left: 0; right: 0; bottom: 0; }
