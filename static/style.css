@@ -18,7 +18,8 @@
   --line: #DCEAF4;
   --page: linear-gradient(180deg, #EAF8FD 0%, #F2FAFE 50%, #E3F4FC 100%);
   /* Dégradé bleu → jaune (sans soleil), en passant par le clair pour ne pas verdir */
-  --sunset: linear-gradient(160deg, #065FBB 0%, #0B81E1 30%, #01BAEF 54%, #9EE0F6 64%, #EEF8F6 70%, #FFF1A8 76%, #FFE36B 84%, #FFD93D 95%);
+  --sunset: linear-gradient(160deg, #065FBB 0%, #0B81E1 32%, #01BAEF 62%, #6FD3F3 100%);
+  --wash: linear-gradient(165deg, #BDEBF9 52%, #FFF1A8 64%, #FFE36B 76%, #FFD93D 90%);
   --b-grad: radial-gradient(circle at 10% 0%, #065FBB 0%, transparent 55%), linear-gradient(135deg, #0B81E1 0%, #01BAEF 100%);
   --radius: 24px;
   --display: "Nunito", "Roboto", system-ui, sans-serif;
@@ -489,5 +490,9 @@ main h2 { font-size: 1.35rem; margin: 1.6em 0 .5em; color: var(--deep); }
 .cat-tile.kids::after { background: linear-gradient(to top, rgba(160,20,70,.55), transparent 60%); }
 .kids-art { position: absolute; z-index: 1; top: 12px; right: 14px; font-size: 44px !important; opacity: .9; color: #fff; filter: drop-shadow(0 6px 10px rgba(0,0,0,.2)); }
 
-/* Plus de disque de soleil : le jaune vient uniquement du dégradé */
-.sun, .band-sun, .ev-hero::before { display: none; }
+/* Jaune en bas à droite, séparé du bleu par une vague douce (pas de soleil).
+   Le bord du masque ne laisse passer que du bleu très clair : pas de vert. */
+.sun, .band-sun, .ev-hero::before { position: absolute; inset: 0; width: auto; height: auto; aspect-ratio: auto; border-radius: 0; z-index: -1;
+  left: 0; right: 0; top: 0; bottom: 0; background: var(--wash); animation: none; transform: none;
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' preserveAspectRatio='none'%3E%3Cfilter id='b'%3E%3CfeGaussianBlur stdDeviation='1.2'/%3E%3C/filter%3E%3Cpath filter='url(%23b)' d='M-5,105 L-5,90 C8,84 18,92 32,85 C46,78 56,86 70,76 C80,69 88,72 105,60 L105,105 Z'/%3E%3C/svg%3E") no-repeat 0 0 / 100% 100%; mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' preserveAspectRatio='none'%3E%3Cfilter id='b'%3E%3CfeGaussianBlur stdDeviation='1.2'/%3E%3C/filter%3E%3Cpath filter='url(%23b)' d='M-5,105 L-5,90 C8,84 18,92 32,85 C46,78 56,86 70,76 C80,69 88,72 105,60 L105,105 Z'/%3E%3C/svg%3E") no-repeat 0 0 / 100% 100%; }
+.band-map .band-sun { left: 0; right: 0; bottom: 0; }
