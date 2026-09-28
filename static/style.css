@@ -18,7 +18,7 @@
   --line: #DCEAF4;
   --page: linear-gradient(180deg, #EAF8FD 0%, #F2FAFE 50%, #E3F4FC 100%);
   /* Dégradé bleu → jaune (sans soleil), en passant par le clair pour ne pas verdir */
-  --sunset: linear-gradient(160deg, #065FBB 0%, #0B81E1 30%, #01BAEF 52%, #9EE0F6 67%, #E9F7FC 75%, #FFF3C4 81%, #FFE36B 90%, #FFD93D 100%);
+  --sunset: linear-gradient(160deg, #065FBB 0%, #0B81E1 30%, #01BAEF 56%, #8FDCF5 64%, #FFF1A8 70%, #FFE36B 76%, #FFD93D 88%);
   --b-grad: radial-gradient(circle at 10% 0%, #065FBB 0%, transparent 55%), linear-gradient(135deg, #0B81E1 0%, #01BAEF 100%);
   --radius: 24px;
   --display: "Nunito", "Roboto", system-ui, sans-serif;
@@ -483,9 +483,9 @@ main h2 { font-size: 1.35rem; margin: 1.6em 0 .5em; color: var(--deep); }
 .map-chip[data-map-cat=""].is-on { background: var(--b-grad); border-color: transparent; }
 
 /* Tuile « Pour les enfants » (filtre, pas une catégorie) */
-.cat-tile.kids { background: radial-gradient(circle at 80% 90%, #FFD93D 0%, rgba(255,217,61,.6) 25%, transparent 55%), linear-gradient(135deg, #E91E63, #FF6FA5); display: grid; place-items: center; }
+.cat-tile.kids { background: linear-gradient(135deg, #E91E63, #FF6FA5); }
 .cat-tile.kids::after { background: linear-gradient(to top, rgba(160,20,70,.55), transparent 60%); }
-.kids-art { position: absolute; top: 14%; left: 50%; translate: -50% 0; font-size: 58px !important; color: #fff; filter: drop-shadow(0 6px 10px rgba(0,0,0,.2)); }
+.kids-art { position: absolute; z-index: 1; top: 12px; right: 14px; font-size: 44px !important; opacity: .9; color: #fff; filter: drop-shadow(0 6px 10px rgba(0,0,0,.2)); }
 
 /* Plus de disque de soleil : le jaune vient uniquement du dégradé */
 .sun, .band-sun, .ev-hero::before { display: none; }
