@@ -354,9 +354,15 @@ def ics(event: dict) -> str:
 def play_cta(extra_class: str = "") -> str:
     if PLAY_STORE_PUBLISHED:
         return (f'<a class="store-badge {extra_class}" href="{PLAY_STORE_URL}">'
-                f'<span class="store-icon">▶</span><span><small>Disponible sur</small>Google Play</span></a>')
+                f'<span class="store-icon">▶</span><span><small>Disponible sur</small>Google Play</span></a>' + app_store_soon(extra_class))
     return (f'<span class="store-badge soon {extra_class}"><span class="store-icon">▶</span>'
-            f'<span><small>Bientôt sur</small>Google Play</span></span>')
+            f'<span><small>Bientôt sur</small>Google Play</span></span>' + app_store_soon(extra_class))
+
+
+def app_store_soon(extra_class: str = "") -> str:
+    """Badge « Bientôt sur l'App Store » (pas encore de version iPhone)."""
+    return (f'<span class="store-badge soon {extra_class}"><span class="store-icon apple">{_icon("phone_iphone")}</span>'
+            f"<span><small>Bientôt sur</small>l'App Store</span></span>")
 
 
 def layout(title: str, body: str, *, description: str, url: str, image: str | None = None,
@@ -624,7 +630,7 @@ def home_page(events: list[dict], all_upcoming: list[dict], now: datetime) -> st
             "t": ev["title"], "c": ev.get("category_id") or "associatif_autre",
             "la": round(ev["latitude"], 5), "lo": round(ev["longitude"], 5),
             "d": cap(day_label(wall_time(ev["start_date"]))), "p": commune_of(ev),
-            "u": event_path(ev),
+            "u": event_path(ev), "k": 1 if ev.get("for_kids") else 0,
         }
         for ev in shown
     ]
@@ -691,7 +697,7 @@ def home_page(events: list[dict], all_upcoming: list[dict], now: datetime) -> st
   <section class="section map-section" id="carte">
     <div class="section-head reveal"><div><p class="kicker">{len(shown)} sorties dans les {HOME_DAYS} prochains jours</p><h2>Sur la carte</h2></div></div>
     <div class="map-wrap reveal"><div id="map" role="region" aria-label="Carte des événements"></div>
-    <div class="map-legend" role="group" aria-label="Filtrer la carte"><button class="map-chip is-on" data-map-cat="">Tout</button>{''.join(f'<button class="map-chip" data-map-cat="{cid}" style="--cat:{c}">{em} {l}</button>' for cid, (em, l, c) in CATEGORIES.items() if counts.get(cid))}</div></div>
+    <div class="map-legend" role="group" aria-label="Filtrer la carte"><button class="map-chip is-on" data-map-cat="">Tout</button><button class="map-chip" data-map-kids style="--cat:#E91E63">{_icon("child_care")} Enfants</button>{''.join(f'<button class="map-chip" data-map-cat="{cid}" style="--cat:{c}">{em} {l}</button>' for cid, (em, l, c) in CATEGORIES.items() if counts.get(cid))}</div></div>
   </section>
   </div>
 
@@ -701,9 +707,9 @@ def home_page(events: list[dict], all_upcoming: list[dict], now: datetime) -> st
       <label class="search"><span>🔍</span><input type="search" id="q" placeholder="Un village, un concert, un loto…" autocomplete="off"></label>
       <div class="chips">
         <button class="chip is-on" data-cat="">Tout</button>
+        <button class="chip toggle" data-toggle="kids">{_icon("child_care")} Enfants</button>
+        <button class="chip toggle" data-toggle="free">{_icon("money_off")} Gratuit</button>
         {chips}
-        <button class="chip toggle" data-toggle="free">💚 Gratuit</button>
-        <button class="chip toggle" data-toggle="kids">🧸 Enfants</button>
       </div>
       <p class="result-count" id="count" aria-live="polite"></p>
     </div>

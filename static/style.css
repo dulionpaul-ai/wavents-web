@@ -18,7 +18,7 @@
   --line: #DCEAF4;
   --page: linear-gradient(180deg, #EAF8FD 0%, #F2FAFE 50%, #E3F4FC 100%);
   /* Dégradé bleu → jaune (sans soleil), en passant par le clair pour ne pas verdir */
-  --sunset: linear-gradient(160deg, #065FBB 0%, #0B81E1 30%, #01BAEF 56%, #8FDCF5 64%, #FFF1A8 70%, #FFE36B 76%, #FFD93D 88%);
+  --sunset: linear-gradient(160deg, #065FBB 0%, #0B81E1 30%, #01BAEF 54%, #9EE0F6 64%, #EEF8F6 70%, #FFF1A8 76%, #FFE36B 84%, #FFD93D 95%);
   --b-grad: radial-gradient(circle at 10% 0%, #065FBB 0%, transparent 55%), linear-gradient(135deg, #0B81E1 0%, #01BAEF 100%);
   --radius: 24px;
   --display: "Nunito", "Roboto", system-ui, sans-serif;
@@ -84,6 +84,8 @@ h1, h2, h3 { font-family: var(--display); line-height: 1.08; letter-spacing: -.0
 .store-badge small { display: block; font-size: .68rem; font-weight: 500; opacity: .85; }
 .store-icon { width: 28px; height: 28px; display: grid; place-items: center; border-radius: 8px; font-size: .78rem; color: #fff;
   background: conic-gradient(from 210deg, #01BAEF, #43A047, #FFD66B, #FF5252, #01BAEF); }
+.store-icon.apple { background: linear-gradient(135deg, #1C1C1E, #48484A); }
+.store-icon.apple .ms { font-size: 18px; }
 .store-badge.small { background: var(--deep); border-color: var(--deep); padding: 7px 14px 7px 10px; font-size: .9rem; }
 
 /* --- Hero « coucher de soleil » --------------------------------------- */

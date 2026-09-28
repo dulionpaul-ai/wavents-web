@@ -185,19 +185,19 @@
       });
       const markers = data.points.map((p) => {
         const cat = data.cats[p.c] || data.cats.associatif_autre;
-        return L.marker([p.la, p.lo], { icon: pinIcon(cat), cat: p.c })
+        return L.marker([p.la, p.lo], { icon: pinIcon(cat), cat: p.c, kids: p.k === 1 })
           .bindPopup(`<div class="wv-pop"><b>${esc(p.t)}</b><small>${esc(p.d)} · ${esc(p.p)}</small><a href="${p.u}">Voir la sortie →</a></div>`);
       });
-      const show = (cat) => {
+      const show = (cat, kids) => {
         clusters.clearLayers();
-        clusters.addLayers(cat ? markers.filter((m) => m.options.cat === cat) : markers);
+        clusters.addLayers(markers.filter((m) => (!cat || m.options.cat === cat) && (!kids || m.options.kids)));
       };
       show("");
       map.addLayer(clusters);
       // Filtres sous la carte : une catégorie à la fois (« Tout » pour revenir).
       $$(".map-chip").forEach((chip) => chip.addEventListener("click", () => {
         $$(".map-chip").forEach((c) => c.classList.toggle("is-on", c === chip));
-        show(chip.dataset.mapCat);
+        show(chip.dataset.mapCat || "", "mapKids" in chip.dataset);
       }));
     });
     if ("IntersectionObserver" in window) {
