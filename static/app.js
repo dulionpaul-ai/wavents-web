@@ -218,15 +218,31 @@
     }).addTo(map);
   });
 
-  /* Partage */
+  /* Partage : feuille de partage du téléphone, sinon copie du lien (avec un
+     retour visible dans tous les cas, jamais d'échec silencieux). */
+  const copyLink = async (url) => {
+    try { await navigator.clipboard.writeText(url); return true; } catch (e) { /* repli ci-dessous */ }
+    const ta = document.createElement("textarea");
+    ta.value = url; ta.setAttribute("readonly", ""); ta.style.cssText = "position:fixed;opacity:0";
+    document.body.appendChild(ta); ta.select();
+    let ok = false;
+    try { ok = document.execCommand("copy"); } catch (e) { ok = false; }
+    ta.remove();
+    return ok;
+  };
+  const mobile = window.matchMedia("(pointer: coarse)").matches;
   $$("[data-share]").forEach((btn) => btn.addEventListener("click", async () => {
-    const data = { title: document.title, url: location.href };
-    try {
-      if (navigator.share) { await navigator.share(data); return; }
-      await navigator.clipboard.writeText(location.href);
-      const label = btn.textContent;
+    const url = location.href;
+    if (mobile && navigator.share) {
+      try { await navigator.share({ title: document.title, url }); return; }
+      catch (e) { if (e && e.name === "AbortError") return; }
+    }
+    const label = btn.innerHTML;
+    if (await copyLink(url)) {
       btn.textContent = "✅ Lien copié !";
-      setTimeout(() => { btn.textContent = label; }, 2000);
-    } catch (e) { /* partage annulé */ }
+      setTimeout(() => { btn.innerHTML = label; }, 2200);
+    } else {
+      window.prompt("Copie ce lien pour le partager :", url);
+    }
   }));
 })();
