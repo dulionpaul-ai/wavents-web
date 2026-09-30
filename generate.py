@@ -740,9 +740,9 @@ def home_page(events: list[dict], all_upcoming: list[dict], now: datetime) -> st
   </section>
   {data_script}"""
     return layout(
-        "Wavents – Que faire autour de Belleville-en-Beaujolais ?",
+        "Wavents – Que faire autour de toi ?",
         body,
-        description=f"Concerts, marchés, fêtes, spectacles et sorties des {HOME_DAYS} prochains jours autour de Belleville-en-Beaujolais, dans le Beaujolais et le nord de Lyon.",
+        description=f"Concerts, marchés, fêtes, spectacles et sorties des {HOME_DAYS} prochains jours autour de toi, dans le Beaujolais et le nord de Lyon.",
         url=f"{BASE_URL}/",
         image=f"{BASE_URL}/img/og.png",
         page_class="home",
