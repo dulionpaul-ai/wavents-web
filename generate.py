@@ -400,7 +400,7 @@ def layout(title: str, body: str, *, description: str, url: str, image: str | No
 </head>
 <body class="{page_class}">
   <header class="nav" id="top">
-    <a href="{root}" class="nav-brand"><img src="{root}img/pin.png" alt="" width="34" height="34"><span>Wavents</span></a>
+    <a href="{root}" class="nav-brand"><img src="{root}img/pin.png" alt="" width="46" height="46"><span>Wavents</span></a>
     <nav class="nav-links">
       <a href="{root}#week-end">Ce week-end</a>
       <a href="{root}#carte">Carte</a>
