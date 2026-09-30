@@ -723,8 +723,8 @@ def home_page(events: list[dict], all_upcoming: list[dict], now: datetime) -> st
   <section class="section how">
     <div class="section-head reveal center"><div><p class="kicker">Comment ça marche</p><h2>Ton agenda local, sans effort</h2></div></div>
     <div class="how-grid">
-      <div class="how-card reveal" style="--c:#01BAEF"><span class="how-num">🔎</span><h3>On fouille pour toi</h3><p>Chaque nuit, Wavents lit les agendas des mairies, offices de tourisme, salles de spectacle, associations et billetteries de la région.</p></div>
-      <div class="how-card reveal" style="--c:#FF8A1E"><span class="how-num">🪄</span><h3>On trie et on vérifie</h3><p>Doublons fusionnés, catégories, prix, « pour les enfants » : tout est rangé pour que tu trouves en deux secondes.</p></div>
+      <div class="how-card reveal" style="--c:#01BAEF"><span class="how-num">🔎</span><h3>On fouille pour toi</h3><p>Wavents trouve les événements des mairies, offices de tourisme, salles de spectacle, associations, billetteries… de la région. L'outil s'étend chaque jour avec de nouvelles zones et de nouvelles sources.</p></div>
+      <div class="how-card reveal" style="--c:#FF8A1E"><span class="how-num">🪄</span><h3>On trie et on vérifie</h3><p>Doublons fusionnés, catégories, prix, « pour les enfants » : tout est rangé pour que tu trouves en deux secondes ce qui t'intéresse.</p></div>
       <div class="how-card reveal" style="--c:#FFD66B"><span class="how-num">🔔</span><h3>Tu ne rates plus rien</h3><p>Favoris, rappels avant l'événement et notifications quand ça bouge près de chez toi, dans les catégories que tu aimes.</p></div>
     </div>
   </section>
