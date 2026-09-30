@@ -646,7 +646,7 @@ def home_page(events: list[dict], all_upcoming: list[dict], now: datetime) -> st
       <div class="hero-copy reveal">
         <p class="eyebrow"><span class="pulse"></span> {len(all_upcoming)} événements à venir en ce moment</p>
         <h1>Découvre les événements <span class="sunny">près de chez toi</span></h1>
-        <p class="lead">Concerts, marchés, fêtes de village, spectacles, lotos, brocantes… Wavents fouille chaque nuit des dizaines d'agendas du Beaujolais et du nord de Lyon pour que tu ne rates plus rien.</p>
+        <p class="lead">Concerts, marchés, fêtes de village, spectacles, lotos, brocantes… Wavents fouille chaque jour des dizaines d'agendas du Beaujolais et du nord de Lyon pour que tu ne rates plus rien.</p>
         <div class="hero-actions">
           <a class="btn btn-sun" href="#week-end">Voir ce week-end</a>
           {play_cta()}
@@ -666,7 +666,7 @@ def home_page(events: list[dict], all_upcoming: list[dict], now: datetime) -> st
   <section class="stats">
     <div class="stat reveal" style="--c:#065FBB"><b data-count="{len(all_upcoming)}">{len(all_upcoming)}</b><span>événements à venir</span></div>
     <div class="stat reveal" style="--c:#0B81E1"><b data-count="{len(communes)}">{len(communes)}</b><span>communes couvertes</span></div>
-    <div class="stat reveal" style="--c:#01A9D8"><b data-count="{len(sources)}">{len(sources)}</b><span>agendas suivis chaque nuit</span></div>
+    <div class="stat reveal" style="--c:#01A9D8"><b data-count="{len(sources)}">{len(sources)}</b><span>agendas suivis chaque jour</span></div>
     <div class="stat reveal" style="--c:#FF8A1E"><b>0 €</b><span>gratuit, sans pub</span></div>
   </section>
 
