@@ -153,7 +153,15 @@
   /* Agenda : un onglet par jour, filtres, « voir les autres » */
   const agenda = $(".agenda");
   if (agenda) {
-    const PREVIEW = 12;
+    // 3 rangées de cartes par jour avant « Voir les autres » (Paul, 30/09) :
+    // au-delà, on croyait que l'agenda ne finissait jamais et on ne voyait
+    // pas la suite du site. Le nombre de colonnes dépend de la largeur.
+    const ROWS = 3;
+    const perRow = () => {
+      const grid = $(".agenda .day.is-on .grid") || $(".agenda .grid");
+      const cols = grid ? getComputedStyle(grid).gridTemplateColumns : "none";
+      return cols && cols !== "none" ? Math.max(1, cols.trim().split(/\s+/).length) : 2;
+    };
     const state = { cat: "", free: false, kids: false, q: "", day: "0" };
     const days = $$(".agenda .day");
     const tabs = $$(".day-tab");
@@ -168,6 +176,7 @@
 
     const apply = () => {
       const filtering = state.cat || state.free || state.kids || state.q;
+      const PREVIEW = ROWS * perRow();
       let total = 0, firstWithResults = null;
       days.forEach((d) => {
         const key = d.dataset.day;
@@ -197,6 +206,8 @@
       if (count) count.textContent = filtering ? `${total} sortie${total > 1 ? "s" : ""} trouvée${total > 1 ? "s" : ""}` : "";
     };
 
+    let resizeTimer;
+    window.addEventListener("resize", () => { clearTimeout(resizeTimer); resizeTimer = setTimeout(apply, 200); });
     tabs.forEach((tab) => tab.addEventListener("click", () => {
       state.day = tab.dataset.day;
       apply();
