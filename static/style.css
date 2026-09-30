@@ -72,6 +72,8 @@ h1, h2, h3 { font-family: var(--display); line-height: 1.08; letter-spacing: -.0
 .wm-slot { display: inline-block; overflow: clip visible; vertical-align: baseline;
   transition: width var(--wm-t, .7s) cubic-bezier(.65,0,.35,1), opacity var(--wm-t, .7s) ease-in-out; }
 .wm-in { display: inline-block; }
+/* « Une » et « d' » plus petits : moins de vide autour de « Vague » et « événements ». */
+.wm-une .wm-in, .wm-de .wm-in { font-size: .7em; }
 .wm-ruler { position: absolute; left: 0; top: 0; visibility: hidden; white-space: pre; }
 /* V majuscule et v minuscule superposés, calés à droite : « ague » ne bouge pas. */
 .wm-cap { display: inline-grid; justify-items: end; }
