@@ -13,6 +13,92 @@
   window.addEventListener("scroll", onScroll, { passive: true });
   onScroll();
 
+  /* Jeu de mots du logo (30/09, idée de Paul) : de temps en temps,
+     « Wavents » se déplie en « Wave · events », « Vague · événements »,
+     « Une vague d'événements », puis se referme. Rare exprès : une première
+     fois après 5 à 10 s, puis une pause de 15 à 20 s entre deux passages. */
+  const brand = $(".nav-brand");
+  const mark = brand && $("span", brand);
+  const calm = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  if (mark && !calm && window.CSS && CSS.supports("overflow", "clip") && Element.prototype.animate) {
+    const EVENTS = '<span class="wm-slot wm-eve">eve</span>nts';
+    brand.setAttribute("aria-label", "Wavents");
+    mark.classList.add("wm");
+    mark.innerHTML = '<span class="wm-base">Wavents</span><span class="wm-layer" aria-hidden="true">' +
+      '<span class="wm-slot wm-une"><span class="wm-in">Une&nbsp;</span></span>' +
+      '<span class="wm-slot wm-w1"><span class="wm-in">Wave</span></span>' +
+      '<span class="wm-slot wm-sp"><span class="wm-in">&nbsp;</span></span>' +
+      '<span class="wm-slot wm-de"><span class="wm-in">d’</span></span>' +
+      '<span class="wm-slot wm-w2"><span class="wm-in">' + EVENTS + '</span></span></span>';
+    const layer = $(".wm-layer", mark);
+    const [une, w1, sp, de, w2] = ["une", "w1", "sp", "de", "w2"].map((k) => $(".wm-" + k, mark));
+    const wait = (ms) => new Promise((r) => setTimeout(r, ms));
+    const eve = () => $(".wm-eve", w2);
+    const open = (s, on) => {
+      s.style.width = s.offsetWidth + "px";
+      void s.offsetWidth;
+      s.style.width = (on ? s.firstChild.offsetWidth || s.scrollWidth : 0) + "px";
+      s.style.opacity = on ? 1 : 0;
+    };
+    const eveOpen = (on) => {
+      const e = eve();
+      e.style.width = e.offsetWidth + "px";
+      void e.offsetWidth;
+      e.style.width = on ? e.scrollWidth + "px" : "0px";
+      e.style.opacity = on ? 1 : 0;
+    };
+    // Le mot sort par le haut et le nouveau entre par le bas, la largeur suit.
+    const flip = async (s, html, after) => {
+      const inner = s.firstChild;
+      s.style.width = s.offsetWidth + "px";
+      await inner.animate([{ opacity: 1, transform: "none" }, { opacity: 0, transform: "translateY(-.45em)" }],
+        { duration: 200, easing: "ease-in", fill: "forwards" }).finished;
+      inner.innerHTML = html;
+      if (after) after();
+      s.style.width = inner.offsetWidth + "px";
+      await inner.animate([{ opacity: 0, transform: "translateY(.45em)" }, { opacity: 1, transform: "none" }],
+        { duration: 260, easing: "ease-out", fill: "forwards" }).finished;
+    };
+    // Sur petit écran, le texte rétrécit pour ne pas toucher le bouton.
+    const ruler = document.createElement("span");
+    ruler.className = "wm-ruler";
+    mark.appendChild(ruler);
+    const fit = (text) => {
+      const links = $(".nav-links");
+      if (!links) return;
+      ruler.textContent = text;
+      const room = links.getBoundingClientRect().left - mark.getBoundingClientRect().left - 12;
+      const scale = Math.min(1, room / ruler.offsetWidth);
+      layer.style.transform = scale < 1 ? `scale(${scale.toFixed(3)})` : "";
+    };
+    const play = async () => {
+      mark.classList.add("wm-play");
+      fit("Wave events"); open(sp, true); eveOpen(true);               // Wave · events
+      await wait(1000);
+      fit("Vague événements");
+      await Promise.all([flip(w1, "Vague"), flip(w2, "événements")]); // Vague · événements
+      await wait(550);
+      fit("Une vague d’événements"); open(une, true); open(de, true);  // Une vague d’événements
+      await flip(w1, "vague");
+      await wait(1300);
+      fit("Vague événements"); open(une, false); open(de, false);
+      await wait(350);
+      fit("Wave events");                                              // Wave · events
+      await Promise.all([flip(w1, "Wave"), flip(w2, EVENTS, () => { eve().style.width = "auto"; })]);
+      await wait(550);
+      fit("Wavents"); open(sp, false); eveOpen(false);                // Wavents
+      await wait(600);
+      mark.classList.remove("wm-play");
+    };
+    const later = (min, max) => setTimeout(run, min + Math.random() * (max - min));
+    const run = async () => {
+      if (!document.hidden) await play();
+      later(15000, 20000);
+    };
+    eveOpen(false); open(sp, false); open(une, false); open(de, false);
+    later(5000, 10000);
+  }
+
   /* Apparitions au défilement */
   const reveals = $$(".reveal");
   if ("IntersectionObserver" in window) {

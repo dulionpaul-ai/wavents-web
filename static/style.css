@@ -64,6 +64,14 @@ h1, h2, h3 { font-family: var(--display); line-height: 1.08; letter-spacing: -.0
 .nav-cta { background: rgba(255,255,255,.2); border: 1.5px solid rgba(255,255,255,.55); padding: 7px 16px; border-radius: 999px; font-weight: 700; opacity: 1 !important; }
 .nav.scrolled .nav-cta { background: var(--deep); color: #fff; border-color: var(--deep); }
 @media (max-width: 720px) { .nav-links a:not(.nav-cta) { display: none; } }
+/* Jeu de mots du logo (app.js) : « Wavents » invisible garde la place, le
+   calque animé se superpose sans rien pousser. */
+.wm { position: relative; white-space: nowrap; }
+.wm-base { visibility: hidden; }
+.wm-layer { position: absolute; left: 0; top: 0; white-space: nowrap; transform-origin: 0 50%; transition: transform .45s cubic-bezier(.3,.7,.2,1); }
+.wm-slot { display: inline-block; overflow: clip visible; vertical-align: baseline; transition: width .45s cubic-bezier(.3,.7,.2,1), opacity .35s; }
+.wm-in { display: inline-block; }
+.wm-ruler { position: absolute; left: 0; top: 0; visibility: hidden; white-space: pre; }
 
 /* --- Boutons ----------------------------------------------------------- */
 .btn {
