@@ -27,12 +27,11 @@
     const T = 700, HOLD = 900, PEAK = 1400; // transition, pause, pause sur la phrase
     const shut = ' style="width:0;opacity:0"';
     const EVENTS = '<span class="wm-slot wm-eve">eve</span>nts';
-    const CAP = '<span class="wm-cap"><span>V</span><span>v</span></span>ague';
     brand.setAttribute("aria-label", "Wavents");
     mark.classList.add("wm");
     mark.style.setProperty("--wm-t", T + "ms");
     mark.innerHTML = '<span class="wm-base">Wavents</span><span class="wm-layer" aria-hidden="true">' +
-      '<span class="wm-slot wm-une"' + shut + '><span class="wm-in">Une&thinsp;</span></span>' +
+      '<span class="wm-slot wm-une"' + shut + '><span class="wm-in">Une&nbsp;</span></span>' +
       '<span class="wm-slot wm-w1"><span class="wm-in">Wave</span></span>' +
       '<span class="wm-slot wm-sp"' + shut + '><span class="wm-in">&nbsp;</span></span>' +
       '<span class="wm-slot wm-de"' + shut + '><span class="wm-in">d’</span></span>' +
@@ -43,7 +42,6 @@
     const [une, w1, sp, de, w2] = ["une", "w1", "sp", "de", "w2"].map((k) => $(".wm-" + k, mark));
     const wait = (ms) => new Promise((r) => setTimeout(r, ms));
     const eve = () => $(".wm-eve", w2);
-    const cap = () => $(".wm-cap", w1);
     const resize = (s, to) => {
       s.style.width = s.offsetWidth + "px";
       void s.offsetWidth;
@@ -88,13 +86,13 @@
       await wait(T + HOLD);
       // 2 → 3 : Vague · événements, déjà placés comme dans la phrase
       fit("Une vague d’événements"); open(une, true, false); open(de, true, false);
-      await Promise.all([flip(w1, CAP), flip(w2, "événements")]);
+      await Promise.all([flip(w1, "Vague"), flip(w2, "événements")]);
       await wait(HOLD);
-      // 3 → 4 : Une vague d'événements (seuls « Une », « d' » et le V changent)
-      une.style.opacity = de.style.opacity = 1; cap().classList.add("low");
+      // 3 → 4 : Une vague d'événements (seuls « Une » et « d' » apparaissent)
+      une.style.opacity = de.style.opacity = 1;
       await wait(T + PEAK);
       // 4 → 3
-      une.style.opacity = de.style.opacity = 0; cap().classList.remove("low");
+      une.style.opacity = de.style.opacity = 0;
       await wait(T + HOLD);
       // 3 → 2
       fit("Wave events"); open(une, false); open(de, false);
