@@ -757,7 +757,7 @@ def home_page(events: list[dict], all_upcoming: list[dict], now: datetime) -> st
     return layout(
         "Wavents – Que faire autour de toi ?",
         body,
-        description=f"Concerts, marchés, fêtes, spectacles et sorties des {HOME_DAYS} prochains jours autour de toi, dans le Beaujolais et le nord de Lyon.",
+        description="Concerts, marchés, fêtes de village, spectacles… Des dizaines de sorties chaque jour dans le Beaujolais et le nord de Lyon (pour l'instant !), près de chez toi.",
         url=f"{BASE_URL}/",
         image=f"{BASE_URL}/img/og.png?v=3",
         page_class="home",
