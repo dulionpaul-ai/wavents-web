@@ -646,7 +646,7 @@ def home_page(events: list[dict], all_upcoming: list[dict], now: datetime) -> st
       <div class="hero-copy reveal">
         <p class="eyebrow"><span class="pulse"></span> {len(all_upcoming)} événements à venir en ce moment</p>
         <h1>Découvre les événements <span class="sunny">près de chez toi</span></h1>
-        <p class="lead">Concerts, marchés, lotos, brocantes… dans le Beaujolais et le nord de Lyon (pour l'instant&nbsp;!).</p>
+        <p class="lead">Wavents trouve chaque jour des concerts, marchés, animations, brocantes… dans le Beaujolais et le nord de Lyon (pour l'instant&nbsp;!).</p>
         <p class="punch">Ne rate plus la fête de quartier en bas de chez toi juste parce que tu ne savais pas.</p>
         <div class="hero-actions">
           <a class="btn btn-sun" href="#week-end">Voir ce week-end</a>
