@@ -56,6 +56,8 @@ h1, h2, h3 { font-family: var(--display); line-height: 1.08; letter-spacing: -.0
   backdrop-filter: blur(16px) saturate(1.5); -webkit-backdrop-filter: blur(16px) saturate(1.5); box-shadow: 0 6px 24px rgba(6,95,187,.10); }
 .nav-brand { display: flex; align-items: center; gap: 10px; text-decoration: none; font-family: var(--display); font-weight: 900; font-size: 1.45rem; }
 .nav-brand img { width: 34px; height: 34px; }
+/* Épingle seule (liseré blanc) : un fin contour bleu quand la barre devient claire au défilement. */
+.nav.scrolled .nav-brand img { filter: drop-shadow(0 0 .7px #065FBB) drop-shadow(0 0 .7px #065FBB); }
 .nav-links { display: flex; align-items: center; gap: clamp(8px, 2vw, 24px); font-weight: 500; font-size: .95rem; }
 .nav-links a { text-decoration: none; opacity: .92; }
 .nav-links a:not(.nav-cta):hover { opacity: 1; text-decoration: underline; text-underline-offset: 6px; text-decoration-thickness: 2px; text-decoration-color: var(--sun); }
