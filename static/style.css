@@ -68,10 +68,16 @@ h1, h2, h3 { font-family: var(--display); line-height: 1.08; letter-spacing: -.0
    calque animé se superpose sans rien pousser. */
 .wm { position: relative; white-space: nowrap; }
 .wm-base { visibility: hidden; }
-.wm-layer { position: absolute; left: 0; top: 0; white-space: nowrap; transform-origin: 0 50%; transition: transform .45s cubic-bezier(.3,.7,.2,1); }
-.wm-slot { display: inline-block; overflow: clip visible; vertical-align: baseline; transition: width .45s cubic-bezier(.3,.7,.2,1), opacity .35s; }
+.wm-layer { position: absolute; left: 0; top: 0; white-space: nowrap; transform-origin: 0 50%; transition: transform var(--wm-t, .7s) cubic-bezier(.65,0,.35,1); }
+.wm-slot { display: inline-block; overflow: clip visible; vertical-align: baseline;
+  transition: width var(--wm-t, .7s) cubic-bezier(.65,0,.35,1), opacity var(--wm-t, .7s) ease-in-out; }
 .wm-in { display: inline-block; }
 .wm-ruler { position: absolute; left: 0; top: 0; visibility: hidden; white-space: pre; }
+/* V majuscule et v minuscule superposés, calés à droite : « ague » ne bouge pas. */
+.wm-cap { display: inline-grid; justify-items: end; }
+.wm-cap > span { grid-area: 1 / 1; transition: opacity var(--wm-t, .7s) ease-in-out; }
+.wm-cap > span + span, .wm-cap.low > span:first-child { opacity: 0; }
+.wm-cap.low > span + span { opacity: 1; }
 
 /* --- Boutons ----------------------------------------------------------- */
 .btn {

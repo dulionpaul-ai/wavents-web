@@ -15,54 +15,64 @@
 
   /* Jeu de mots du logo (30/09, idée de Paul) : de temps en temps,
      « Wavents » se déplie en « Wave · events », « Vague · événements »,
-     « Une vague d'événements », puis se referme. Rare exprès : une première
-     fois après 5 à 10 s, puis une pause de 15 à 20 s entre deux passages. */
+     « Une vague d'événements », puis revient au départ par les mêmes étapes,
+     à la même vitesse. Rare exprès : une première fois après 5 à 10 s, puis
+     une pause de 15 à 20 s entre deux passages. « Vague » et « événements »
+     arrivent directement à leur place finale : ils ne bougent plus quand
+     « Une » et « d' » apparaissent. */
   const brand = $(".nav-brand");
   const mark = brand && $("span", brand);
   const calm = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   if (mark && !calm && window.CSS && CSS.supports("overflow", "clip") && Element.prototype.animate) {
+    const T = 700, HOLD = 900, PEAK = 1400; // transition, pause, pause sur la phrase
+    const shut = ' style="width:0;opacity:0"';
     const EVENTS = '<span class="wm-slot wm-eve">eve</span>nts';
+    const CAP = '<span class="wm-cap"><span>V</span><span>v</span></span>ague';
     brand.setAttribute("aria-label", "Wavents");
     mark.classList.add("wm");
+    mark.style.setProperty("--wm-t", T + "ms");
     mark.innerHTML = '<span class="wm-base">Wavents</span><span class="wm-layer" aria-hidden="true">' +
-      '<span class="wm-slot wm-une"><span class="wm-in">Une&nbsp;</span></span>' +
+      '<span class="wm-slot wm-une"' + shut + '><span class="wm-in">Une&thinsp;</span></span>' +
       '<span class="wm-slot wm-w1"><span class="wm-in">Wave</span></span>' +
-      '<span class="wm-slot wm-sp"><span class="wm-in">&nbsp;</span></span>' +
-      '<span class="wm-slot wm-de"><span class="wm-in">d’</span></span>' +
-      '<span class="wm-slot wm-w2"><span class="wm-in">' + EVENTS + '</span></span></span>';
+      '<span class="wm-slot wm-sp"' + shut + '><span class="wm-in">&nbsp;</span></span>' +
+      '<span class="wm-slot wm-de"' + shut + '><span class="wm-in">d’</span></span>' +
+      '<span class="wm-slot wm-w2"><span class="wm-in"><span class="wm-slot wm-eve"' + shut + '>eve</span>nts</span></span>' +
+      '</span><span class="wm-ruler"></span>';
     const layer = $(".wm-layer", mark);
+    const ruler = $(".wm-ruler", mark);
     const [une, w1, sp, de, w2] = ["une", "w1", "sp", "de", "w2"].map((k) => $(".wm-" + k, mark));
     const wait = (ms) => new Promise((r) => setTimeout(r, ms));
     const eve = () => $(".wm-eve", w2);
-    const open = (s, on) => {
+    const cap = () => $(".wm-cap", w1);
+    const resize = (s, to) => {
       s.style.width = s.offsetWidth + "px";
       void s.offsetWidth;
-      s.style.width = (on ? s.firstChild.offsetWidth || s.scrollWidth : 0) + "px";
-      s.style.opacity = on ? 1 : 0;
+      s.style.width = to + "px";
+    };
+    // Ouvre ou ferme un morceau ; `shown` à faux garde sa place, invisible.
+    const open = (s, on, shown = on) => {
+      resize(s, on ? s.firstChild.offsetWidth : 0);
+      s.style.opacity = shown ? 1 : 0;
     };
     const eveOpen = (on) => {
       const e = eve();
-      e.style.width = e.offsetWidth + "px";
-      void e.offsetWidth;
-      e.style.width = on ? e.scrollWidth + "px" : "0px";
+      resize(e, on ? e.scrollWidth : 0);
       e.style.opacity = on ? 1 : 0;
     };
-    // Le mot sort par le haut et le nouveau entre par le bas, la largeur suit.
+    // Le mot sort par le haut, le nouveau entre par le bas, la largeur suit
+    // en continu sur toute la durée.
     const flip = async (s, html, after) => {
       const inner = s.firstChild;
-      s.style.width = s.offsetWidth + "px";
-      await inner.animate([{ opacity: 1, transform: "none" }, { opacity: 0, transform: "translateY(-.45em)" }],
-        { duration: 200, easing: "ease-in", fill: "forwards" }).finished;
+      ruler.innerHTML = html;
+      resize(s, ruler.offsetWidth);
+      await inner.animate([{ opacity: 1, transform: "none" }, { opacity: 0, transform: "translateY(-.3em)" }],
+        { duration: T * 0.45, easing: "cubic-bezier(.5,0,.75,0)", fill: "forwards" }).finished;
       inner.innerHTML = html;
       if (after) after();
-      s.style.width = inner.offsetWidth + "px";
-      await inner.animate([{ opacity: 0, transform: "translateY(.45em)" }, { opacity: 1, transform: "none" }],
-        { duration: 260, easing: "ease-out", fill: "forwards" }).finished;
+      await inner.animate([{ opacity: 0, transform: "translateY(.3em)" }, { opacity: 1, transform: "none" }],
+        { duration: T * 0.55, easing: "cubic-bezier(.25,1,.5,1)", fill: "forwards" }).finished;
     };
     // Sur petit écran, le texte rétrécit pour ne pas toucher le bouton.
-    const ruler = document.createElement("span");
-    ruler.className = "wm-ruler";
-    mark.appendChild(ruler);
     const fit = (text) => {
       const links = $(".nav-links");
       if (!links) return;
@@ -73,21 +83,26 @@
     };
     const play = async () => {
       mark.classList.add("wm-play");
-      fit("Wave events"); open(sp, true); eveOpen(true);               // Wave · events
-      await wait(1000);
-      fit("Vague événements");
-      await Promise.all([flip(w1, "Vague"), flip(w2, "événements")]); // Vague · événements
-      await wait(550);
-      fit("Une vague d’événements"); open(une, true); open(de, true);  // Une vague d’événements
-      await flip(w1, "vague");
-      await wait(1300);
-      fit("Vague événements"); open(une, false); open(de, false);
-      await wait(350);
-      fit("Wave events");                                              // Wave · events
+      // 1 → 2 : Wave · events
+      fit("Wave events"); open(sp, true); eveOpen(true);
+      await wait(T + HOLD);
+      // 2 → 3 : Vague · événements, déjà placés comme dans la phrase
+      fit("Une vague d’événements"); open(une, true, false); open(de, true, false);
+      await Promise.all([flip(w1, CAP), flip(w2, "événements")]);
+      await wait(HOLD);
+      // 3 → 4 : Une vague d'événements (seuls « Une », « d' » et le V changent)
+      une.style.opacity = de.style.opacity = 1; cap().classList.add("low");
+      await wait(T + PEAK);
+      // 4 → 3
+      une.style.opacity = de.style.opacity = 0; cap().classList.remove("low");
+      await wait(T + HOLD);
+      // 3 → 2
+      fit("Wave events"); open(une, false); open(de, false);
       await Promise.all([flip(w1, "Wave"), flip(w2, EVENTS, () => { eve().style.width = "auto"; })]);
-      await wait(550);
-      fit("Wavents"); open(sp, false); eveOpen(false);                // Wavents
-      await wait(600);
+      await wait(HOLD);
+      // 2 → 1 : Wavents
+      fit("Wavents"); open(sp, false); eveOpen(false);
+      await wait(T);
       mark.classList.remove("wm-play");
     };
     const later = (min, max) => setTimeout(run, min + Math.random() * (max - min));
@@ -95,7 +110,6 @@
       if (!document.hidden) await play();
       later(15000, 20000);
     };
-    eveOpen(false); open(sp, false); open(une, false); open(de, false);
     later(5000, 10000);
   }
 
