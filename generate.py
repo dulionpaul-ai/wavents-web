@@ -759,7 +759,7 @@ def home_page(events: list[dict], all_upcoming: list[dict], now: datetime) -> st
         body,
         description=f"Concerts, marchés, fêtes, spectacles et sorties des {HOME_DAYS} prochains jours autour de toi, dans le Beaujolais et le nord de Lyon.",
         url=f"{BASE_URL}/",
-        image=f"{BASE_URL}/img/og.png",
+        image=f"{BASE_URL}/img/og.png?v=3",
         page_class="home",
     )
 
