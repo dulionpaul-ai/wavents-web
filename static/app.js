@@ -20,7 +20,10 @@
       entries.forEach((entry) => {
         if (entry.isIntersecting) { entry.target.classList.add("is-in"); io.unobserve(entry.target); }
       });
-    }, { threshold: 0.12, rootMargin: "0px 0px -40px 0px" });
+    // Seuil à 0 (30/09, retour de Paul) : sur mobile, le haut du téléphone
+    // de l'accueil dépasse à peine sous les boutons ; avec 12 % exigés, il
+    // restait invisible au premier affichage et on ne devinait pas la suite.
+    }, { threshold: 0, rootMargin: "0px" });
     reveals.forEach((el) => io.observe(el));
   } else {
     reveals.forEach((el) => el.classList.add("is-in"));
