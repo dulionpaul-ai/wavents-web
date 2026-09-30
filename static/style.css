@@ -64,6 +64,8 @@ h1, h2, h3 { font-family: var(--display); line-height: 1.08; letter-spacing: -.0
 .nav-cta { background: rgba(255,255,255,.2); border: 1.5px solid rgba(255,255,255,.55); padding: 7px 16px; border-radius: 999px; font-weight: 700; opacity: 1 !important; }
 .nav.scrolled .nav-cta { background: var(--deep); color: #fff; border-color: var(--deep); }
 @media (max-width: 720px) { .nav-links a:not(.nav-cta) { display: none; } }
+/* Sur téléphone, un peu plus d'air au-dessus de l'épingle. */
+@media (max-width: 720px) { .nav { padding-top: 11px; } }
 /* Jeu de mots du logo (app.js) : « Wavents » invisible garde la place, le
    calque animé se superpose sans rien pousser. */
 .wm { position: relative; white-space: nowrap; }
