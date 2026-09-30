@@ -729,6 +729,19 @@ def home_page(events: list[dict], all_upcoming: list[dict], now: datetime) -> st
     </div>
   </section>
 
+  <section class="section feedback">
+    <div class="feedback-card reveal">
+      <span class="feedback-emoji" aria-hidden="true">🐞</span>
+      <div>
+        <p class="kicker">On compte sur toi</p>
+        <h2>Aide-nous à rendre Wavents parfaite</h2>
+        <p>On veut l'appli la plus parfaite possible, alors on encourage tous les retours, à fond&nbsp;! Un bug, un événement qui manque ou qui est faux, une idée, même minuscule&nbsp;: dis-le-nous, on lit absolument tout et on corrige vite.</p>
+        <div class="hero-actions"><a class="btn btn-sun" href="mailto:hello@wavents.fr?subject=Mon%20retour%20sur%20Wavents">✉️ Envoyer un retour</a></div>
+        <p class="feedback-note">Dans l'appli&nbsp;: « Signaler un problème » sur chaque fiche, ou Réglages → Nous contacter.</p>
+      </div>
+    </div>
+  </section>
+
   <section class="section app-band" id="appli">
     <div class="app-band-inner reveal">
       <img src="img/logo-256.png" alt="" width="140" height="140" class="float">
