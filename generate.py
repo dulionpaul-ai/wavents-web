@@ -420,6 +420,7 @@ def layout(title: str, body: str, *, description: str, url: str, image: str | No
         <a href="{root}#agenda">Agenda</a>
         <a href="{root}#carte">Carte</a>
         <a href="{root}confidentialite.html">Confidentialité</a>
+        <a href="mailto:hello@wavents.fr">Contact</a>
       </div>
     </div>
     <p class="footer-note">Informations issues des agendas publics et des organisateurs, mises à jour chaque jour. Vérifie auprès de l'organisateur avant de te déplacer.</p>
