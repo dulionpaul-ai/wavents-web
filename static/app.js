@@ -309,6 +309,67 @@
         $$(".map-chip").forEach((c) => c.classList.toggle("is-on", c === chip));
         show(chip.dataset.mapCat || "", "mapKids" in chip.dataset);
       }));
+
+      // Aller à une ville (Paul, 30/09) : d'abord les communes qui ont des
+      // sorties sur la carte, puis les autres via geo.api.gouv.fr.
+      const q = $("#map-q");
+      const sugg = $(".map-sugg");
+      if (q && sugg) {
+        // « Villefranche sur Saone » et « Villefranche-sur-Saône » : une seule ville.
+        const townKey = (name) => fold(name).replace(/[-'’]/g, " ").replace(/\s+/g, " ").trim();
+        const towns = {};
+        data.points.forEach((p) => {
+          if (!p.p || /^(agglo|communaute|pays |cc |ca )/.test(fold(p.p))) return;
+          const k = townKey(p.p);
+          const t = towns[k] || (towns[k] = { names: {}, la: 0, lo: 0, n: 0 });
+          t.names[p.p] = (t.names[p.p] || 0) + 1;
+          t.la += p.la; t.lo += p.lo; t.n++;
+        });
+        const local = Object.entries(towns).map(([key, t]) => ({
+          name: Object.keys(t.names).sort((a, b) => t.names[b] - t.names[a])[0],
+          la: t.la / t.n, lo: t.lo / t.n, n: t.n, key,
+        }));
+        let found = [], timer, ticket = 0;
+        const go = (t) => {
+          map.flyTo([t.la, t.lo], 13, { duration: 0.8 });
+          q.value = t.name; sugg.hidden = true; q.blur();
+        };
+        const render = () => {
+          sugg.innerHTML = found.map((t, i) => `<li><button type="button" data-i="${i}"><b>${esc(t.name)}</b><small>${t.n ? `${t.n} sortie${t.n > 1 ? "s" : ""}` : esc(t.dep || "")}</small></button></li>`).join("");
+          sugg.hidden = !found.length;
+        };
+        const near = (t) => Math.hypot(t.la - data.home[0], t.lo - data.home[1]);
+        q.addEventListener("input", () => {
+          const text = townKey(q.value);
+          clearTimeout(timer);
+          if (text.length < 2) { found = []; render(); return; }
+          found = local.filter((t) => t.key.startsWith(text) || t.key.includes(" " + text))
+            .sort((a, b) => b.n - a.n).slice(0, 6);
+          render();
+          const mine = ++ticket;
+          timer = setTimeout(() => {
+            fetch(`https://geo.api.gouv.fr/communes?nom=${encodeURIComponent(q.value.trim())}&fields=nom,centre,codeDepartement&boost=population&limit=15`)
+              .then((r) => r.json()).then((list) => {
+                if (mine !== ticket) return;
+                const seen = new Set(found.map((t) => t.key));
+                const extra = list.filter((c) => c.centre && !seen.has(townKey(c.nom)))
+                  .map((c) => ({ name: c.nom, la: c.centre.coordinates[1], lo: c.centre.coordinates[0], n: 0, dep: c.codeDepartement, key: townKey(c.nom) }))
+                  .sort((a, b) => near(a) - near(b));
+                found = found.concat(extra).slice(0, 6);
+                render();
+              }).catch(() => {});
+          }, 250);
+        });
+        q.addEventListener("keydown", (ev) => {
+          if (ev.key === "Enter" && found.length) { ev.preventDefault(); go(found[0]); }
+          if (ev.key === "Escape") sugg.hidden = true;
+        });
+        sugg.addEventListener("click", (ev) => {
+          const b = ev.target.closest("button[data-i]");
+          if (b) go(found[+b.dataset.i]);
+        });
+        document.addEventListener("click", (ev) => { if (!ev.target.closest(".map-search")) sugg.hidden = true; });
+      }
     });
     if ("IntersectionObserver" in window) {
       const io = new IntersectionObserver(([entry]) => { if (entry.isIntersecting) { io.disconnect(); start(); } }, { rootMargin: "300px" });

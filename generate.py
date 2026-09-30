@@ -698,7 +698,7 @@ def home_page(events: list[dict], all_upcoming: list[dict], now: datetime) -> st
   <div class="band-sun" aria-hidden="true"></div>
   <section class="section map-section" id="carte">
     <div class="section-head reveal"><div><p class="kicker">{len(shown)} sorties dans les {HOME_DAYS} prochains jours</p><h2>Sur la carte</h2></div></div>
-    <div class="map-wrap reveal"><div id="map" role="region" aria-label="Carte des événements"></div>
+    <div class="map-wrap reveal"><div class="map-box"><div id="map" role="region" aria-label="Carte des événements"></div><div class="map-search" role="search"><span aria-hidden="true">🔍</span><input type="search" id="map-q" placeholder="Aller à une ville…" autocomplete="off" aria-label="Aller à une ville sur la carte"><ul class="map-sugg" hidden></ul></div></div>
     <div class="map-legend" role="group" aria-label="Filtrer la carte"><button class="map-chip is-on" data-map-cat="">Tout</button><button class="map-chip" data-map-kids style="--cat:#E91E63">{_icon("child_care")} Enfants</button>{''.join(f'<button class="map-chip" data-map-cat="{cid}" style="--cat:{c}">{em} {l}</button>' for cid, (em, l, c) in CATEGORIES.items() if counts.get(cid))}</div></div>
   </section>
   </div>

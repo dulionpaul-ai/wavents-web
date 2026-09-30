@@ -269,6 +269,19 @@ h1, h2, h3 { font-family: var(--display); line-height: 1.08; letter-spacing: -.0
 /* --- Carte ------------------------------------------------------------- */
 .map-wrap { border-radius: 28px; overflow: hidden; background: var(--card); border: 1.5px solid var(--line); box-shadow: 0 20px 50px rgba(6,95,187,.16); }
 #map { height: min(600px, 70vh); background: #E7EEF0; }
+/* Recherche de ville posée sur la carte, à droite du zoom. */
+.map-box { position: relative; }
+.map-search { position: absolute; z-index: 1000; top: 10px; left: 56px; right: 10px; max-width: 360px;
+  display: flex; align-items: center; gap: 8px; padding: 0 14px; border-radius: 999px; background: var(--card); color: var(--ink);
+  border: 1.5px solid var(--line); box-shadow: 0 8px 22px rgba(6,40,90,.18); }
+.map-search input { flex: 1; min-width: 0; border: 0; outline: 0; background: transparent; color: inherit; font: inherit; font-size: 16px; padding: 10px 0; }
+.map-sugg { position: absolute; top: calc(100% + 6px); left: 0; right: 0; margin: 0; padding: 6px; list-style: none; border-radius: 18px;
+  background: var(--card); border: 1.5px solid var(--line); box-shadow: 0 14px 30px rgba(6,40,90,.22); }
+.map-sugg[hidden] { display: none; }
+.map-sugg button { width: 100%; display: flex; justify-content: space-between; align-items: baseline; gap: 10px; padding: 9px 12px;
+  border: 0; border-radius: 12px; background: transparent; text-align: left; }
+.map-sugg button:hover, .map-sugg button:focus-visible { background: color-mix(in srgb, var(--wave) 12%, transparent); outline: 0; }
+.map-sugg small { color: var(--ink-soft); font-size: .8rem; white-space: nowrap; }
 .map-legend { display: flex; flex-wrap: wrap; gap: 8px 16px; padding: 14px 18px; font-size: .85rem; font-weight: 500; }
 .map-legend span::before { content: ""; display: inline-block; width: 10px; height: 10px; border-radius: 50%; background: var(--cat); margin-right: 6px; }
 .wv-pin { position: relative; width: 36px; height: 36px; border-radius: 50%; background: var(--cat); border: 3px solid #fff;
