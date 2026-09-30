@@ -15,8 +15,8 @@
 
   /* Jeu de mots du logo (30/09, idée de Paul) : de temps en temps,
      « Wavents » se déplie en « Wave · events », « Vague · événements »,
-     « Une vague d'événements », puis revient au départ par les mêmes étapes,
-     à la même vitesse. Rare exprès : une première fois après 5 à 10 s, puis
+     « Une Vague d'événements », puis revient directement à « Wave · events »
+     et se referme, à la même vitesse qu'à l'aller. Rare exprès : une première fois après 5 à 10 s, puis
      une pause de 15 à 20 s entre deux passages. « Vague » et « événements »
      arrivent directement à leur place finale : ils ne bougent plus quand
      « Une » et « d' » apparaissent. */
@@ -91,10 +91,7 @@
       // 3 → 4 : Une vague d'événements (seuls « Une » et « d' » apparaissent)
       une.style.opacity = de.style.opacity = 1;
       await wait(T + PEAK);
-      // 4 → 3
-      une.style.opacity = de.style.opacity = 0;
-      await wait(T + HOLD);
-      // 3 → 2
+      // 4 → 2 : retour direct à Wave · events
       fit("Wave events"); open(une, false); open(de, false);
       await Promise.all([flip(w1, "Wave"), flip(w2, EVENTS, () => { eve().style.width = "auto"; })]);
       await wait(HOLD);
