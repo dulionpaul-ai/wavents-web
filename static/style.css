@@ -538,3 +538,15 @@ main h2 { font-size: 1.35rem; margin: 1.6em 0 .5em; color: var(--deep); }
 .feedback-card .hero-actions { margin-bottom: 12px; }
 .feedback-note { font-size: .88rem; color: var(--ink-soft); margin: 0 !important; }
 @media (max-width: 560px) { .feedback-card { flex-direction: column; gap: 14px; } .feedback-emoji { width: 52px; height: 52px; font-size: 1.6rem; } }
+
+/* Pages « Que faire à <commune> » (01/10/2026) */
+.town-hero { padding-bottom: 56px; }
+.town-hero h1 { font-family: Nunito, sans-serif; font-weight: 900; font-size: clamp(2rem, 5vw, 3.2rem); color: #fff; margin: 6px 0 12px; }
+.town-hero .kicker { color: var(--sun); }
+.town-hero .lead { max-width: 760px; color: rgba(255,255,255,.92); font-size: 1.05rem; line-height: 1.55; margin-bottom: 18px; }
+.town-hero .back { display: inline-block; margin-bottom: 14px; color: #fff; text-decoration: none; font-weight: 700; opacity: .9; }
+.town-links { display: flex; flex-wrap: wrap; gap: 10px; }
+.town-link { display: inline-flex; align-items: center; gap: 8px; padding: 9px 14px; border-radius: 999px; background: #fff; box-shadow: 0 2px 10px rgba(6, 95, 187, .10); color: var(--deep); font-weight: 700; text-decoration: none; }
+.town-link span { font-size: .8rem; font-weight: 800; color: #fff; background: #0B81E1; border-radius: 999px; padding: 2px 8px; }
+.town-link:hover { box-shadow: 0 4px 16px rgba(6, 95, 187, .2); }
+.ev-where .town-more { color: #fff; font-weight: 700; text-decoration: underline; text-underline-offset: 3px; white-space: nowrap; }

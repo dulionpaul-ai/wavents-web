@@ -36,3 +36,18 @@ jobs:
           path: site
       - id: deploy
         uses: actions/deploy-pages@v4
+      - name: Signaler les pages à Bing (IndexNow)
+        # Clé publique par conception (fichier 2c29f47b40715616fc2817b79ca473b0.txt à la racine du site).
+        continue-on-error: true
+        run: |
+          python - <<'PY'
+          import json, urllib.request
+          urls = json.load(open("site/indexnow.json"))
+          body = json.dumps({"host": "wavents.fr", "key": "2c29f47b40715616fc2817b79ca473b0",
+                             "keyLocation": "https://wavents.fr/2c29f47b40715616fc2817b79ca473b0.txt",
+                             "urlList": urls}).encode()
+          req = urllib.request.Request("https://api.indexnow.org/indexnow", data=body,
+                                       headers={"Content-Type": "application/json; charset=utf-8"})
+          with urllib.request.urlopen(req, timeout=60) as resp:
+              print("IndexNow", resp.status, len(urls), "pages")
+          PY

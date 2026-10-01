@@ -425,6 +425,7 @@ def layout(title: str, body: str, *, description: str, url: str, image: str | No
         <a href="{root}#week-end">Ce week-end</a>
         <a href="{root}#agenda">Agenda</a>
         <a href="{root}#carte">Carte</a>
+        <a href="{root}ville/">Par commune</a>
         <a href="{root}confidentialite.html">Confidentialité</a>
         <a href="mailto:hello@wavents.fr">Contact</a>
       </div>
@@ -793,7 +794,8 @@ NO_DESCRIPTION = ('<div class="panel soft"><h2>À propos</h2><p class="descripti
                   'encore donné plus de détails. Toutes les infos pratiques sont juste à côté 👉</p></div>')
 
 
-def event_page(event: dict, neighbours: list[dict], series: dict[str, list[dict]]) -> str:
+def event_page(event: dict, neighbours: list[dict], series: dict[str, list[dict]],
+               town_page: str | None = None) -> str:
     root = "../../"
     emoji, label, color = category(event)
     url = f"{BASE_URL}/{event_path(event)}"
@@ -841,7 +843,7 @@ def event_page(event: dict, neighbours: list[dict], series: dict[str, list[dict]
           <p class="cat-pill big">{emoji} {e(label)}</p>
           <h1>{e(event['title'])}</h1>
           <p class="ev-when">🗓️ {e(when)}</p>
-          <p class="ev-where">📍 {e(town or place)}</p>
+          <p class="ev-where">📍 {e(town or place)}{f' · <a class="town-more" href="{root}{town_page}">Toutes les sorties à {e(commune_page_name(event) or town)} →</a>' if town_page else ''}</p>
           <div class="badges">{''.join(badges)}</div>
         </div>
       </div>
@@ -876,9 +878,173 @@ def event_page(event: dict, neighbours: list[dict], series: dict[str, list[dict]
     )
 
 
+# --- Pages par commune (référencement, 01/10/2026) -----------------------------
+#
+# « Que faire à <commune> » : une page par commune qui a au moins
+# COMMUNE_MIN_EVENTS sorties à venir, régénérée chaque jour comme le reste.
+# Ce sont les recherches réelles des gens (Google comme assistants IA) ;
+# une page par événement ne ressort que si on cherche l'événement lui-même.
+
+COMMUNE_MIN_EVENTS = 3
+COMMUNE_NEAR_KM = 15
+
+
+def slugify(text: str) -> str:
+    return re.sub(r"[^a-z0-9]+", "-", fold(text)).strip("-") or "commune"
+
+
+def commune_path(name: str) -> str:
+    return f"ville/{slugify(name)}/"
+
+
+NOT_A_COMMUNE_START = {"rue", "place", "montee", "avenue", "av", "chemin", "boulevard", "bd", "allee",
+                       "impasse", "quai", "route", "residence", "hotel", "mediatheque", "theatre", "salle",
+                       "espace", "parc", "square", "cours", "parking", "centre", "eglise", "chateau"}
+
+
+def commune_page_name(event: dict) -> str | None:
+    """Nom de commune propre pour les pages « Que faire à » : arrondissements
+    de Lyon regroupés, restes d'adresse (« 162 rue … », « Place … »)
+    écartés, doublons du type « Belleville Belleville-en-Beaujolais »."""
+    name = commune_of(event)
+    m = re.search(r"\d{5}\s+(.+)$", name)
+    if m:
+        name = m.group(1)
+    name = re.sub(r"\s+\d+(?:er|e|ème)?\s+arrondissement$", "", name, flags=re.I).strip()
+    m = re.match(r"^([^\s-]+)[\s-]+(\1\b.*)$", name, flags=re.I)
+    if m:
+        name = m.group(2)
+    if not name or len(name) < 2 or re.search(r"\d", name):
+        return None
+    if fold(name.split(" ")[0].split("-")[0]) in NOT_A_COMMUNE_START:
+        return None
+    return name
+
+
+def group_by_commune(upcoming: list[dict]) -> dict[str, list[dict]]:
+    groups: dict[str, list[dict]] = {}
+    for ev in upcoming:
+        name = commune_page_name(ev)
+        if name:
+            groups.setdefault(name, []).append(ev)
+    return {name: evs for name, evs in groups.items() if len(evs) >= COMMUNE_MIN_EVENTS}
+
+
+def commune_center(events: list[dict]) -> tuple[float, float]:
+    return (sum(ev["latitude"] for ev in events) / len(events),
+            sum(ev["longitude"] for ev in events) / len(events))
+
+
+def commune_page(name: str, events: list[dict], communes: dict[str, list[dict]],
+                 series: dict[str, list[dict]], now: datetime) -> str:
+    root = "../../"
+    today = now.date()
+    first, last = weekend_range(today)
+    week_end = today + timedelta(days=7)
+    ordered = sorted(collapse_series(events), key=lambda ev: wall_time(ev["start_date"]))
+    long_ones = [ev for ev in ordered if is_long(ev)]
+    short = [ev for ev in ordered if not is_long(ev)]
+    today_list = [ev for ev in short if wall_time(ev["start_date"]).date() == today]
+    weekend_list = [ev for ev in short if overlaps(ev, first, last) and ev not in today_list]
+    week_list = [ev for ev in short if today < wall_time(ev["start_date"]).date() <= week_end
+                 and ev not in weekend_list]
+    later = [ev for ev in short if wall_time(ev["start_date"]).date() > week_end][:30]
+
+    def block(kicker: str, title: str, items: list[dict]) -> str:
+        if not items:
+            return ""
+        return (f'<section class="section"><div class="section-head"><div><p class="kicker">{e(kicker)}</p>'
+                f'<h2>{e(title)}</h2></div></div>'
+                f'<div class="rows">{"".join(row_card(ev, series, root) for ev in items)}</div></section>')
+
+    center = commune_center(events)
+    near = sorted(
+        ((other, distance_km(*commune_center(evs), center)) for other, evs in communes.items() if other != name),
+        key=lambda item: item[1],
+    )
+    near = [(other, km) for other, km in near if km <= COMMUNE_NEAR_KM][:12]
+    near_html = ""
+    if near:
+        links = "".join(
+            f'<a class="town-link" href="{root}{commune_path(other)}">{e(other)} <span>{len(communes[other])}</span></a>'
+            for other, _ in near)
+        near_html = (f'<section class="section"><div class="section-head"><div><p class="kicker">À moins de '
+                     f'{COMMUNE_NEAR_KM} km</p><h2>Autour de {e(name)}</h2></div></div>'
+                     f'<div class="town-links">{links}</div></section>')
+
+    free_count = sum(1 for ev in events if is_free(ev))
+    kids_count = sum(1 for ev in events if ev.get("for_kids"))
+    facts = [f"{len(events)} sorties à venir"]
+    if free_count:
+        facts.append(f"{free_count} gratuites")
+    if kids_count:
+        facts.append(f"{kids_count} pour les enfants")
+    intro = (f"Concerts, marchés, spectacles, expositions, fêtes… Toutes les sorties à {name} "
+             f"et autour, mises à jour chaque jour : {', '.join(facts)}.")
+    url = f"{BASE_URL}/{commune_path(name)}"
+    item_list = {
+        "@context": "https://schema.org",
+        "@graph": [
+            {"@type": "BreadcrumbList", "itemListElement": [
+                {"@type": "ListItem", "position": 1, "name": "Wavents", "item": f"{BASE_URL}/"},
+                {"@type": "ListItem", "position": 2, "name": "Communes", "item": f"{BASE_URL}/ville/"},
+                {"@type": "ListItem", "position": 3, "name": name, "item": url},
+            ]},
+            {"@type": "ItemList", "name": f"Que faire à {name}", "itemListElement": [
+                {"@type": "ListItem", "position": i + 1, "url": f"{BASE_URL}/{event_path(ev)}"}
+                for i, ev in enumerate(ordered[:30])
+            ]},
+        ],
+    }
+    body = f"""  <section class="ev-hero town-hero"><div class="ev-hero-inner">
+    <a class="back" href="{root}ville/">← Toutes les communes</a>
+    <p class="kicker">Agenda des sorties</p>
+    <h1>Que faire à {e(name)} ?</h1>
+    <p class="lead">{e(intro)}</p>
+    <div class="hero-actions">{play_cta()}</div>
+  </div></section>
+  {block("Aujourd'hui", f"Aujourd'hui à {name}", today_list)}
+  {block("Du vendredi au dimanche", f"Ce week-end à {name}", weekend_list)}
+  {block("Les 7 prochains jours", "Cette semaine", week_list)}
+  {block("Expositions, animations sur plusieurs jours", "En ce moment", long_ones[:20])}
+  {block("Et ensuite", "Plus tard", later)}
+  {near_html}"""
+    return layout(
+        f"Que faire à {name} ? Sorties, marchés, concerts – Wavents",
+        body,
+        description=intro,
+        url=url,
+        extra_head=f'<script type="application/ld+json">{json.dumps(item_list, ensure_ascii=False)}</script>',
+        depth=2,
+        page_class="town-page",
+    )
+
+
+def communes_index(communes: dict[str, list[dict]]) -> str:
+    root = "../"
+    links = "".join(
+        f'<a class="town-link" href="{root}{commune_path(name)}">{e(name)} <span>{len(evs)}</span></a>'
+        for name, evs in sorted(communes.items(), key=lambda item: fold(item[0])))
+    body = f"""  <section class="ev-hero town-hero"><div class="ev-hero-inner">
+    <p class="kicker">{len(communes)} communes</p>
+    <h1>Que faire près de chez toi ?</h1>
+    <p class="lead">Choisis ta commune : toutes les sorties à venir, mises à jour chaque jour.</p>
+  </div></section>
+  <section class="section"><div class="town-links">{links}</div></section>"""
+    return layout(
+        "Que faire près de chez toi ? Sorties par commune – Wavents",
+        body,
+        description="Concerts, marchés, fêtes, spectacles : les sorties à venir commune par commune, "
+                    "dans le Beaujolais et le nord de Lyon.",
+        url=f"{BASE_URL}/ville/",
+        depth=1,
+        page_class="town-page",
+    )
+
+
 # --- Main --------------------------------------------------------------------------
 
-def llms_txt(upcoming: list[dict], now: datetime) -> str:
+def llms_txt(upcoming: list[dict], now: datetime, communes: dict[str, list[dict]] | None = None) -> str:
     """Présentation du site pour les assistants IA (convention llms.txt) :
     ce qu'est Wavents, puis les sorties des 7 prochains jours avec leur lien."""
     # Sorties qui COMMENCENT dans la semaine, autour de Belleville (même
@@ -913,6 +1079,10 @@ def llms_txt(upcoming: list[dict], now: datetime) -> str:
         lines.append(f"- [{title}]({BASE_URL}/{event_path(ev)}): {when_label(ev)} · {place} · {category}")
     if not soon:
         lines.append("- Aucune sortie publiée pour l'instant.")
+    if communes:
+        lines += ["", "## Que faire dans chaque commune (pages mises à jour chaque jour)", ""]
+        for name, evs in sorted(communes.items(), key=lambda item: -len(item[1]))[:150]:
+            lines.append(f"- [Que faire à {name}]({BASE_URL}/{commune_path(name)}): {len(evs)} sorties à venir")
     return "\n".join(lines) + "\n"
 
 
@@ -936,22 +1106,42 @@ def main() -> int:
     for ev in events:
         by_day.setdefault(wall_time(ev["start_date"]).date(), []).append(ev)
 
+    communes = group_by_commune(upcoming)
     for ev in events:
         folder = out / event_path(ev)
         folder.mkdir(parents=True, exist_ok=True)
-        (folder / "index.html").write_text(event_page(ev, neighbours_of(ev, by_day), series), encoding="utf-8")
+        town = commune_page_name(ev)
+        town_page = commune_path(town) if town in communes else None
+        (folder / "index.html").write_text(event_page(ev, neighbours_of(ev, by_day), series, town_page), encoding="utf-8")
         (folder / "event.ics").write_text(ics(ev), encoding="utf-8")
     (out / "index.html").write_text(home_page(events, upcoming, now), encoding="utf-8")
 
-    urls = [f"{BASE_URL}/"] + [f"{BASE_URL}/{event_path(ev)}" for ev in events]
+    for name, evs in communes.items():
+        folder = out / commune_path(name)
+        folder.mkdir(parents=True, exist_ok=True)
+        (folder / "index.html").write_text(commune_page(name, evs, communes, series, now), encoding="utf-8")
+    (out / "ville").mkdir(exist_ok=True)
+    (out / "ville" / "index.html").write_text(communes_index(communes), encoding="utf-8")
+
+    urls = ([f"{BASE_URL}/", f"{BASE_URL}/ville/"]
+            + [f"{BASE_URL}/{commune_path(name)}" for name in communes]
+            + [f"{BASE_URL}/{event_path(ev)}" for ev in events])
     sitemap = "\n".join(f"  <url><loc>{html.escape(quote(u, safe=':/'))}</loc></url>" for u in urls)
     (out / "sitemap.xml").write_text(
         f'<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n{sitemap}\n</urlset>\n',
         encoding="utf-8",
     )
-    (out / "llms.txt").write_text(llms_txt(upcoming, now), encoding="utf-8")
+    (out / "llms.txt").write_text(llms_txt(upcoming, now, communes), encoding="utf-8")
     (out / "robots.txt").write_text(f"User-agent: *\nAllow: /\nSitemap: {BASE_URL}/sitemap.xml\n", encoding="utf-8")
-    print(f"{len(events)} pages d'événements générées dans {out}/")
+    # IndexNow (Bing, et par lui ChatGPT/Copilot) : liste des pages à
+    # signaler après la publication (étape du workflow pages.yml). Les pages
+    # communes changent chaque jour ; les événements, les 2 000 plus proches.
+    soonest = sorted(upcoming, key=lambda ev: ev["start_date"])[:2000]
+    (out / "indexnow.json").write_text(json.dumps(
+        [f"{BASE_URL}/", f"{BASE_URL}/ville/"]
+        + [f"{BASE_URL}/{commune_path(name)}" for name in communes]
+        + [f"{BASE_URL}/{event_path(ev)}" for ev in soonest]), encoding="utf-8")
+    print(f"{len(events)} pages d'événements et {len(communes)} pages communes générées dans {out}/")
     return 0
 
 
