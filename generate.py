@@ -1,6 +1,6 @@
 """Génère le site public de Wavents : une page d'accueil (vitrine de l'appli,
 sélection du week-end, carte, agenda filtrable des prochains jours autour de
-Belleville), une page par événement à venir, le sitemap.
+Belleville), une page par événement à venir, le sitemap et llms.txt (présentation pour les assistants IA).
 
 Lancé chaque jour par .github/workflows/pages.yml, puis publié sur GitHub
 Pages. Lit les événements publiés (`status = 'active'`) avec la clé anon
@@ -314,6 +314,10 @@ def json_ld(event: dict) -> str:
     if event.get("price_amount") and event.get("price_type") != "free":
         data["offers"] = {"@type": "Offer", "price": event["price_amount"], "priceCurrency": "EUR",
                           "url": event.get("website_url") or f"{BASE_URL}/{event_path(event)}"}
+    elif is_free(event):
+        # Prix « recommandé » par Google pour les résultats enrichis d'événements.
+        data["offers"] = {"@type": "Offer", "price": 0, "priceCurrency": "EUR",
+                          "url": f"{BASE_URL}/{event_path(event)}"}
     return json.dumps(data, ensure_ascii=False).replace("</", "<\\/")
 
 
@@ -874,6 +878,44 @@ def event_page(event: dict, neighbours: list[dict], series: dict[str, list[dict]
 
 # --- Main --------------------------------------------------------------------------
 
+def llms_txt(upcoming: list[dict], now: datetime) -> str:
+    """Présentation du site pour les assistants IA (convention llms.txt) :
+    ce qu'est Wavents, puis les sorties des 7 prochains jours avec leur lien."""
+    # Sorties qui COMMENCENT dans la semaine, autour de Belleville (même
+    # rayon que l'accueil) : pas les marchés ou expositions à l'année.
+    soon = sorted(
+        (ev for ev in upcoming
+         if now.date() <= wall_time(ev["start_date"]).date() <= (now + timedelta(days=7)).date()
+         and distance_km(ev["latitude"], ev["longitude"]) <= HOME_RADIUS_KM),
+        key=lambda ev: ev["start_date"],
+    )
+    lines = [
+        "# Wavents",
+        "",
+        "> Agenda gratuit des sorties locales du Beaujolais et du nord de Lyon :",
+        "> concerts, fêtes, marchés, spectacles, sport, visites, ateliers, brocantes.",
+        "> Les événements sont relevés chaque jour sur les sites des mairies,",
+        "> offices de tourisme et associations, puis vérifiés avant publication.",
+        "",
+        f"Site : {BASE_URL}/ (mis à jour chaque jour). Une page par événement,",
+        f"avec date, lieu, prix et données schema.org Event. Liste complète : {BASE_URL}/sitemap.xml.",
+        "Appli Android Wavents (carte, favoris, rappels, alertes) : bientôt sur Google Play.",
+        f"Contact : hello@wavents.fr. Confidentialité : {BASE_URL}/confidentialite.html.",
+        "",
+        f"## Sorties des 7 prochains jours (à moins de {HOME_RADIUS_KM} km de Belleville-en-Beaujolais)",
+        "",
+    ]
+    for ev in soon:
+        category = CATEGORIES.get(ev.get("category_id") or "", ("", "Sortie", ""))[1]
+        # Certains scrapers laissent des entités HTML (« l&#8217;Evidence »).
+        place = html.unescape(ev.get("location_name") or ev.get("address") or "")
+        title = html.unescape(ev["title"]).replace("[", "(").replace("]", ")")
+        lines.append(f"- [{title}]({BASE_URL}/{event_path(ev)}): {when_label(ev)} · {place} · {category}")
+    if not soon:
+        lines.append("- Aucune sortie publiée pour l'instant.")
+    return "\n".join(lines) + "\n"
+
+
 def main() -> int:
     out = Path(sys.argv[1] if len(sys.argv) > 1 else "site")
     if out.exists():
@@ -907,6 +949,7 @@ def main() -> int:
         f'<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n{sitemap}\n</urlset>\n',
         encoding="utf-8",
     )
+    (out / "llms.txt").write_text(llms_txt(upcoming, now), encoding="utf-8")
     (out / "robots.txt").write_text(f"User-agent: *\nAllow: /\nSitemap: {BASE_URL}/sitemap.xml\n", encoding="utf-8")
     print(f"{len(events)} pages d'événements générées dans {out}/")
     return 0
