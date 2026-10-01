@@ -386,8 +386,10 @@ def layout(title: str, body: str, *, description: str, url: str, image: str | No
   <meta property="og:url" content="{e(url)}">
   {og_image}
   <meta name="theme-color" content="#065FBB">
+  <link rel="icon" href="{root}favicon.ico" sizes="48x48">
   <link rel="icon" type="image/svg+xml" sizes="any" href="{root}img/favicon.svg">
-  <link rel="icon" type="image/png" href="{root}img/favicon.png">
+  <link rel="icon" type="image/png" sizes="96x96" href="{root}img/favicon-96.png">
+  <link rel="icon" type="image/png" sizes="192x192" href="{root}img/favicon-192.png">
   <link rel="apple-touch-icon" href="{root}img/apple-touch-icon.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
