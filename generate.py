@@ -739,7 +739,7 @@ def home_page(events: list[dict], all_upcoming: list[dict], now: datetime) -> st
 
   <section class="section feedback">
     <div class="feedback-card reveal">
-      <span class="feedback-emoji" aria-hidden="true">🙏</span>
+      <span class="feedback-emoji" aria-hidden="true">🫵</span>
       <div>
         <p class="kicker">On compte sur toi</p>
         <h2>Aide-nous à rendre Wavents parfaite</h2>
