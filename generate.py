@@ -737,9 +737,8 @@ def home_page(events: list[dict], all_upcoming: list[dict], now: datetime) -> st
       <div>
         <p class="kicker">On compte sur toi</p>
         <h2>Aide-nous à rendre Wavents parfaite</h2>
-        <p>On veut l'appli la plus parfaite possible, alors on encourage tous les retours, à fond&nbsp;! Un bug, un événement qui manque ou qui est faux, une idée, même minuscule&nbsp;: dis-le-nous, on lit absolument tout et on corrige vite.</p>
+        <p>On veut l'appli la plus parfaite possible. Un bug, un événement qui manque ou qui est faux, une idée&nbsp;? Dis-le-nous, on lit tout.</p>
         <div class="hero-actions"><a class="btn btn-sun" href="mailto:hello@wavents.fr?subject=Mon%20retour%20sur%20Wavents">✉️ Envoyer un retour</a></div>
-        <p class="feedback-note">Dans l'appli&nbsp;: « Signaler un problème » sur chaque fiche, ou Réglages → Nous contacter.</p>
       </div>
     </div>
   </section>
