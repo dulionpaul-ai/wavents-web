@@ -69,6 +69,7 @@ CATEGORIES = {
     "concert": (_icon("music_note"), "Concert", "#E91E63"),
     "fete": (_icon("celebration"), "Fête", "#FF5252"),
     "marche": (_icon("storefront"), "Marché", "#FF9800"),
+    "brocante": (_icon("sell"), "Brocante", "#D4A017"),
     "spectacle": (_icon("theater_comedy"), "Spectacle", "#8E24AA"),
     "sport": (_icon("sports_soccer"), "Sport", "#43A047"),
     "culture": (_icon("museum"), "Culture", "#7C4DFF"),
@@ -77,7 +78,7 @@ CATEGORIES = {
     "associatif_autre": (_icon("groups"), "Associatif", "#00BFA5"),
 }
 CATEGORY_PHOTO = {
-    "concert": "concert", "fete": "fete", "marche": "marche", "spectacle": "spectacle",
+    "concert": "concert", "fete": "fete", "marche": "marche", "brocante": "brocante", "spectacle": "spectacle",
     "sport": "sport", "culture": "culture", "atelier": "atelier", "visite": "visite",
     "associatif_autre": "associatif",
 }
