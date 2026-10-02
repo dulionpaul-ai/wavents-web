@@ -1127,21 +1127,101 @@ def theme_page(slug: str, page_title: str, h1: str, kicker: str, keep, days: int
             # Déjà commencé (sur deux jours, par exemple) : rangé au premier
             # jour affiché, pas à sa date de début passée.
             by_day.setdefault(max(wall_time(ev["start_date"]).date(), floor), []).append(ev)
-    blocks = []
+
+    # Mise en page du 02/10 (Paul : « c'est fouillis, une méga liste de
+    # cartes ») : temps forts en tête, raccourcis vers les jours, pastilles
+    # de filtre, marchés d'un même jour repliés sur une ligne. Toutes les
+    # sorties restent dans la page (Google, IA), seules les vues changent.
+    group_markets = slug != "marches"
+
+    def rows(evs: list[dict], limit: int) -> str:
+        markets = [ev for ev in evs if ev.get("category_id") == "marche"] if group_markets else []
+        if len(markets) < 3:
+            return f'<div class="rows">{"".join(row_card(ev, series, root) for ev in evs[:limit])}</div>'
+        others_ = [ev for ev in evs if ev.get("category_id") != "marche"][:limit]
+        towns = list(dict.fromkeys(commune_of(ev) for ev in markets if commune_of(ev)))
+        towns_label = ", ".join(towns[:4]) + ("…" if len(towns) > 4 else "")
+        emoji, _, color = CATEGORIES["marche"]
+        folded = (f'<details class="market-fold" style="--cat:{color}"><summary>'
+                  f'<span class="cat-chip">{emoji} Marché</span><b>{len(markets)} marchés</b>'
+                  f'<span class="row-date">{e(towns_label)}</span><span class="fold-more">Voir</span></summary>'
+                  f'<div class="rows">{"".join(row_card(ev, series, root) for ev in markets)}</div></details>')
+        return f'<div class="rows">{"".join(row_card(ev, series, root) for ev in others_)}</div>{folded}'
+
+    blocks, day_links = [], []
     for d in sorted(by_day):
         label = "Aujourd'hui" if d == today else ("Demain" if d == today + timedelta(days=1) else cap(day_label(d)))
+        anchor = f"j{d:%Y%m%d}"
+        day_links.append(f'<a class="chip day-link" href="#{anchor}">{e(label)}</a>')
+        n = len(by_day[d])
         blocks.append(
-            f'<section class="section"><div class="section-head"><div><p class="kicker">{e(label)}</p>'
-            f'<h2>{len(by_day[d])} sortie{"s" if len(by_day[d]) > 1 else ""}</h2></div></div>'
-            f'<div class="rows">{"".join(row_card(ev, series, root) for ev in by_day[d][:40])}</div></section>')
+            f'<section class="section theme-day" id="{anchor}"><div class="section-head"><div><p class="kicker">{e(label)}</p>'
+            f'<h2><span class="t-count">{n}</span> sortie{"s" if n > 1 else ""}</h2></div></div>'
+            f'{rows(by_day[d], 40)}</section>')
     if long_ones:
+        day_links.append('<a class="chip day-link" href="#jlong">Sur plusieurs jours</a>')
         blocks.append(
-            '<section class="section"><div class="section-head"><div><p class="kicker">Sur plusieurs jours</p>'
+            '<section class="section theme-day" id="jlong"><div class="section-head"><div><p class="kicker">Sur plusieurs jours</p>'
             '<h2>En ce moment</h2></div></div>'
-            f'<div class="rows">{"".join(row_card(ev, series, root) for ev in long_ones[:30])}</div></section>')
+            f'{rows(long_ones, 30)}</section>')
     if not blocks:
         blocks.append('<section class="section"><p class="lead">Rien pour l\'instant : reviens demain, '
                       'l\'agenda est mis à jour chaque jour.</p></section>')
+
+    # Temps forts : vraies photos d'abord, hors marchés et expositions longues.
+    highlights = []
+    if slug != "marches" and len(ordered) > 12:
+        seen = set()
+        for ev in sorted(ordered, key=lambda ev: (
+                ev.get("category_id") == "marche", is_long(ev), not real_image(ev), not ev.get("featured"),
+                round(distance_km(ev["latitude"], ev["longitude"]) / 8), ev["start_date"])):
+            key = re.sub(r"[^a-z0-9]", "", fold(ev["title"]))[:14]
+            if key in seen or ev.get("category_id") == "marche" or is_long(ev):
+                continue
+            seen.add(key)
+            highlights.append(ev)
+            if len(highlights) == 6:
+                break
+    top = (f'<section class="section theme-top"><div class="section-head"><div><p class="kicker">À ne pas manquer</p>'
+           f'<h2>Les temps forts</h2></div></div>'
+           f'<div class="grid">{"".join(card(ev, series, root) for ev in highlights)}</div></section>'
+           if len(highlights) >= 3 else "")
+
+    # Pastilles : catégories présentes (sauf pages d'une seule catégorie),
+    # Gratuit et Enfants (sauf sur leur propre page).
+    chips = []
+    if slug not in ("marches", "brocantes"):
+        counts: dict[str, int] = {}
+        for ev in ordered:
+            counts[ev.get("category_id") or "associatif_autre"] = counts.get(ev.get("category_id") or "associatif_autre", 0) + 1
+        present = [c for c, _ in sorted(counts.items(), key=lambda kv: -kv[1]) if c in CATEGORIES][:7]
+        if len(present) > 1:
+            chips.append('<button class="chip is-on" data-tcat="">Tout</button>')
+            for c in present:
+                emoji, label, color = CATEGORIES[c]
+                chips.append(f'<button class="chip" data-tcat="{c}" style="--cat:{color}">{emoji} {e(label)}</button>')
+    if slug != "gratuit":
+        chips.append('<button class="chip toggle" data-ttoggle="free">Gratuit</button>')
+    if slug != "enfants":
+        chips.append('<button class="chip toggle" data-ttoggle="kids">Enfants</button>')
+    bar = ""
+    if chips or len(day_links) > 1:
+        if len(day_links) > 8:
+            # Pages sur plusieurs semaines (brocantes…) : un raccourci par semaine.
+            day_links = []
+            for d in sorted(by_day):
+                monday = d - timedelta(days=d.weekday())
+                if any(f'data-week="{monday:%Y%m%d}"' in l for l in day_links):
+                    continue
+                wlabel = ("Cette semaine" if monday <= today else
+                          "Semaine prochaine" if monday <= today + timedelta(days=7) else
+                          f"Sem. du {monday.day} {MONTHS_SHORT[monday.month - 1]}")
+                day_links.append(f'<a class="chip day-link" data-week="{monday:%Y%m%d}" href="#j{d:%Y%m%d}">{e(wlabel)}</a>')
+            if long_ones:
+                day_links.append('<a class="chip day-link" href="#jlong">Sur plusieurs jours</a>')
+        days_row = f'<div class="chips day-links">{"".join(day_links)}</div>' if len(day_links) > 1 else ""
+        bar = (f'<div class="filters theme-filters">{days_row}<div class="chips">{"".join(chips)}</div>'
+               f'<p class="t-empty" hidden>Aucune sortie avec ces filtres.</p></div>')
     others = "".join(
         f'<a class="town-link" href="{root}{t[0]}/">{e(t[2])}</a>' for t in THEMES if t[0] != slug)
     intro = (f"{len(ordered)} sorties {span} dans le Beaujolais, le Val de Saône et le nord de Lyon "
@@ -1163,7 +1243,8 @@ def theme_page(slug: str, page_title: str, h1: str, kicker: str, keep, days: int
     <p class="lead">{e(intro)}</p>
     <div class="hero-actions">{play_cta()}</div>
   </div></section>
-  {"".join(blocks)}
+  {top}
+  <div class="theme-list">{bar}{"".join(blocks)}</div>
   <section class="section"><div class="section-head"><div><p class="kicker">Et aussi</p><h2>D'autres idées</h2></div></div>
     <div class="town-links">{others}<a class="town-link" href="{root}ville/">Par commune</a></div></section>"""
     return layout(

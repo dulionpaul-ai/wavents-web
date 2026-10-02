@@ -245,6 +245,49 @@
     apply();
   }
 
+  /* Pages thématiques : pastilles de filtre (catégorie, Gratuit, Enfants) */
+  const themeList = $(".theme-list");
+  if (themeList) {
+    const st = { cat: "", free: false, kids: false };
+    const top = $(".theme-top");
+    const apply = () => {
+      const filtering = st.cat || st.free || st.kids;
+      let total = 0;
+      $$(".theme-day", themeList).forEach((sec) => {
+        let n = 0;
+        $$(".row-card", sec).forEach((c) => {
+          const ok = (!st.cat || c.dataset.cat === st.cat) && (!st.free || c.dataset.free === "1")
+            && (!st.kids || c.dataset.kids === "1");
+          c.hidden = !ok;
+          if (ok) n++;
+        });
+        $$(".market-fold", sec).forEach((f) => {
+          const shown = $$(".row-card", f).some((c) => !c.hidden);
+          f.hidden = !shown;
+          if (st.cat === "marche") f.open = true;
+        });
+        sec.hidden = n === 0;
+        const cnt = $(".t-count", sec);
+        if (cnt) cnt.textContent = n;
+        total += n;
+      });
+      if (top) top.hidden = !!filtering;
+      const empty = $(".t-empty", themeList);
+      if (empty) empty.hidden = total > 0;
+    };
+    $$(".chip[data-tcat]", themeList).forEach((chip) => chip.addEventListener("click", () => {
+      st.cat = chip.dataset.tcat;
+      $$(".chip[data-tcat]", themeList).forEach((c) => c.classList.toggle("is-on", c === chip));
+      apply();
+    }));
+    $$(".chip[data-ttoggle]", themeList).forEach((chip) => chip.addEventListener("click", () => {
+      const key = chip.dataset.ttoggle;
+      st[key] = !st[key];
+      chip.classList.toggle("is-on", st[key]);
+      apply();
+    }));
+  }
+
   /* Cartes Leaflet (chargé en différé) */
   const whenLeaflet = (fn) => {
     if (window.L && window.L.markerClusterGroup) return fn();

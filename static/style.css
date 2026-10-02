@@ -558,3 +558,22 @@ main h2 { font-size: 1.35rem; margin: 1.6em 0 .5em; color: var(--deep); }
 .prose a { color: #065FBB; }
 .prose .hero-actions { margin-top: 2em; }
 .prose .store-badge { background: var(--deep); border-color: var(--deep); backdrop-filter: none; }
+
+/* --- Pages thématiques (02/10) : temps forts, raccourcis, marchés repliés -- */
+.theme-filters { padding-left: clamp(16px, 4vw, 40px); padding-right: clamp(16px, 4vw, 40px); }
+.theme-filters .chips { padding-top: 6px; padding-bottom: 4px; }
+.day-links .chip { text-decoration: none; color: var(--ink); background: transparent; }
+.theme-day { scroll-margin-top: 170px; }
+.t-empty { margin: 8px 2px 0; color: var(--ink-soft); }
+.market-fold { margin-top: 14px; border: 1.5px solid var(--line); border-radius: 18px; background: var(--card); }
+.market-fold > summary { list-style: none; cursor: pointer; display: flex; flex-wrap: wrap; align-items: center; gap: 6px 12px; padding: 14px 16px; }
+.market-fold > summary::-webkit-details-marker { display: none; }
+.market-fold > summary .row-date { flex: 1 1 200px; color: var(--ink-soft); }
+.market-fold .fold-more { font-weight: 700; color: var(--deep); }
+.market-fold[open] .fold-more { display: none; }
+.market-fold > .rows { padding: 0 14px 14px; }
+@media (max-width: 700px) {
+  .theme-top .grid { display: flex; overflow-x: auto; scroll-snap-type: x mandatory; gap: 12px; padding-bottom: 8px; scrollbar-width: none; }
+  .theme-top .grid::-webkit-scrollbar { display: none; }
+  .theme-top .card { flex: 0 0 72%; scroll-snap-align: start; }
+}
