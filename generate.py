@@ -1236,15 +1236,25 @@ def faq_page(upcoming: list[dict], communes: dict[str, list[dict]], theme_counts
         ("Quelle zone couvre Wavents ?",
          f"Le Beaujolais, le Val de Saône, Villefranche-sur-Saône, Mâcon et le nord de Lyon : "
          f"{len(communes)} communes ont des sorties à venir ({BASE_URL}/ville/)."),
-        ("Comment ajouter mon événement ?",
-         "Gratuitement, depuis l'appli Wavents : bouton « + », puis une photo de l'affiche suffit, "
-         "l'appli remplit la fiche. L'événement est relu puis publié, en général en quelques minutes."),
+        ("D'où viennent les événements ? Sont-ils fiables ?",
+         "Wavents rassemble chaque jour les sorties annoncées publiquement dans la région, et celles que "
+         "les habitants et les organisateurs ajoutent eux-mêmes. Chaque événement est vérifié avant "
+         "publication, et chaque fiche renvoie vers l'organisateur. Une erreur ? Signale-la depuis la "
+         "fiche dans l'appli, elle est corrigée rapidement."),
+        ("Je suis organisateur, une association ou une mairie : comment ajouter mes événements ?",
+         "Gratuitement, depuis l'appli Wavents : bouton « + », puis une photo de l'affiche suffit, la "
+         "fiche se remplit toute seule. L'événement est publié après vérification, en général dans la "
+         "journée."),
         ("Wavents est-il gratuit ?",
          "Oui, le site et l'appli sont gratuits et sans compte. Wavents ne vend pas de billets : "
          "chaque fiche renvoie vers l'organisateur."),
+        ("L'appli est-elle disponible sur iPhone et Android ?",
+         "L'appli Wavents arrive bientôt sur l'App Store et le Play Store. En attendant, toutes les "
+         "sorties sont consultables sur ce site, depuis n'importe quel téléphone."),
         ("Comment être prévenu des nouvelles sorties ?",
          "Dans l'appli, fais une recherche (par exemple « loto » autour de ta ville) et enregistre-la : "
-         "tu reçois chaque soir une notification quand de nouveaux événements correspondent."),
+         "tu reçois chaque soir une notification quand de nouveaux événements correspondent. L'appli "
+         "prévient aussi des nouveautés près de chez toi."),
     ]
     schema = {
         "@context": "https://schema.org",
