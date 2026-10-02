@@ -1187,7 +1187,7 @@ def about_page(upcoming: list[dict], communes: dict[str, list[dict]]) -> str:
   <section class="section prose">
     <h2>Qui sommes-nous ?</h2>
     <p>Wavents est né à Belleville-en-Beaujolais, d'une envie simple : ne plus rater la fête de
-    quartier, le concert du village voisin ou la brocante du dimanche parce qu'on ne savait pas.</p>
+    quartier, le concert du village voisin ou la brocante du dimanche, juste parce qu'on n'était pas au courant.</p>
     <h2>Quelle zone ?</h2>
     <p>Le Beaujolais, le Val de Saône (côté Rhône et côté Ain), Villefranche-sur-Saône, Mâcon et le
     nord de Lyon. En ce moment : <strong>{len(upcoming)} sorties à venir</strong> dans
