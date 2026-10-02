@@ -557,3 +557,4 @@ main h2 { font-size: 1.35rem; margin: 1.6em 0 .5em; color: var(--deep); }
 .prose p { font-size: 1.05rem; line-height: 1.6; margin: 0 0 1em; }
 .prose a { color: #065FBB; }
 .prose .hero-actions { margin-top: 2em; }
+.prose .store-badge { background: var(--deep); border-color: var(--deep); backdrop-filter: none; }
