@@ -550,3 +550,10 @@ main h2 { font-size: 1.35rem; margin: 1.6em 0 .5em; color: var(--deep); }
 .town-link span { font-size: .8rem; font-weight: 800; color: #fff; background: #0B81E1; border-radius: 999px; padding: 2px 8px; }
 .town-link:hover { box-shadow: 0 4px 16px rgba(6, 95, 187, .2); }
 .ev-where .town-more { color: #fff; font-weight: 700; text-decoration: underline; text-underline-offset: 3px; white-space: nowrap; }
+
+/* Pages À propos et FAQ (02/10/2026) : texte courant lisible. */
+.prose { max-width: 760px; margin: 0 auto; }
+.prose h2 { font-family: Nunito, sans-serif; font-weight: 800; font-size: 1.35rem; margin: 1.6em 0 .4em; color: var(--ink, #0E2A47); }
+.prose p { font-size: 1.05rem; line-height: 1.6; margin: 0 0 1em; }
+.prose a { color: #065FBB; }
+.prose .hero-actions { margin-top: 2em; }

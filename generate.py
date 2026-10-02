@@ -427,6 +427,13 @@ def layout(title: str, body: str, *, description: str, url: str, image: str | No
         <a href="{root}#agenda">Agenda</a>
         <a href="{root}#carte">Carte</a>
         <a href="{root}ville/">Par commune</a>
+        <a href="{root}ce-week-end/">Ce week-end dans le Beaujolais</a>
+        <a href="{root}marches/">Marchés</a>
+        <a href="{root}brocantes/">Brocantes</a>
+        <a href="{root}gratuit/">Sorties gratuites</a>
+        <a href="{root}enfants/">Avec les enfants</a>
+        <a href="{root}a-propos/">À propos</a>
+        <a href="{root}faq/">Questions fréquentes</a>
         <a href="{root}confidentialite.html">Confidentialité</a>
         <a href="mailto:hello@wavents.fr">Contact</a>
       </div>
@@ -769,6 +776,8 @@ def home_page(events: list[dict], all_upcoming: list[dict], now: datetime) -> st
         description="Concerts, marchés, fêtes de village, spectacles… Des dizaines de sorties chaque jour dans le Beaujolais et le nord de Lyon (pour l'instant !), près de chez toi.",
         url=f"{BASE_URL}/",
         image=f"{BASE_URL}/img/og.png?v=3",
+        extra_head=(f'<script type="application/ld+json">{json.dumps(ORGANIZATION, ensure_ascii=False)}</script>'
+                    f'<script type="application/ld+json">{json.dumps(WEBSITE, ensure_ascii=False)}</script>'),
         page_class="home",
     )
 
@@ -1043,6 +1052,230 @@ def communes_index(communes: dict[str, list[dict]]) -> str:
     )
 
 
+# --- Identité, pages thématiques, À propos, FAQ (02/10/2026) -----------------------
+# Référencement (docs/referencement.md du dépôt Wavents) : une fiche
+# d'identité schema.org pour que Google et les assistants IA sachent ce
+# qu'est Wavents (Google Business n'accepte pas les services 100 % en
+# ligne), des pages qui répondent aux recherches réelles (« que faire ce
+# week-end dans le Beaujolais », « marchés », « brocantes »…), régénérées
+# chaque jour, et une FAQ.
+
+THEME_RADIUS_KM = 40
+
+ORGANIZATION = {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    "name": "Wavents",
+    "url": f"{BASE_URL}/",
+    "logo": f"{BASE_URL}/img/logo-256.png",
+    "email": "hello@wavents.fr",
+    "description": (
+        "Wavents rassemble chaque jour les événements locaux du Beaujolais, du Val de Saône et "
+        "du nord de Lyon : marchés, concerts, fêtes de village, spectacles, brocantes, sorties "
+        "en famille. Agenda gratuit sur le site et dans l'appli Android."
+    ),
+    "areaServed": ["Beaujolais", "Val de Saône", "Villefranche-sur-Saône", "Mâcon", "Lyon"],
+    "foundingLocation": "Belleville-en-Beaujolais",
+    "sameAs": [PLAY_STORE_URL],
+}
+
+WEBSITE = {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    "name": "Wavents",
+    "url": f"{BASE_URL}/",
+    "inLanguage": "fr-FR",
+}
+
+THEMES = [
+    # slug, titre de page, h1, accroche, filtre, horizon (jours)
+    ("ce-week-end", "Que faire ce week-end dans le Beaujolais ?", "Que faire ce week-end ?",
+     "Ce week-end", None, None),
+    ("marches", "Marchés du Beaujolais et du Val de Saône", "Les marchés près de chez toi",
+     "Marchés", lambda ev: ev.get("category_id") == "marche", 14),
+    ("brocantes", "Brocantes et vide-greniers dans le Beaujolais", "Brocantes et vide-greniers",
+     "Brocantes", lambda ev: ev.get("category_id") == "brocante", 45),
+    ("gratuit", "Sorties gratuites dans le Beaujolais", "Sorties gratuites",
+     "Gratuit", is_free, 14),
+    ("enfants", "Sorties avec les enfants dans le Beaujolais", "Sorties avec les enfants",
+     "En famille", lambda ev: bool(ev.get("for_kids")), 21),
+]
+
+
+def theme_page(slug: str, page_title: str, h1: str, kicker: str, keep, days: int | None,
+               upcoming: list[dict], series: dict[str, list[dict]], now: datetime) -> tuple[str, int]:
+    root = "../"
+    today = now.date()
+    pool = [ev for ev in upcoming if distance_km(ev["latitude"], ev["longitude"]) <= THEME_RADIUS_KM]
+    if slug == "ce-week-end":
+        first, last = weekend_range(today)
+        items = [ev for ev in pool if overlaps(ev, first, last)]
+        span = f"du {day_label(first)} au {day_label(last)}"
+        floor = max(first, today)
+    else:
+        horizon = today + timedelta(days=days)
+        items = [ev for ev in pool if keep(ev) and wall_time(ev["start_date"]).date() <= horizon]
+        span = f"dans les {days} prochains jours"
+        floor = today
+    ordered = sorted(collapse_series(items), key=lambda ev: (is_long(ev), wall_time(ev["start_date"])))
+    by_day: dict[date, list[dict]] = {}
+    long_ones = []
+    for ev in ordered:
+        if is_long(ev):
+            long_ones.append(ev)
+        else:
+            # Déjà commencé (sur deux jours, par exemple) : rangé au premier
+            # jour affiché, pas à sa date de début passée.
+            by_day.setdefault(max(wall_time(ev["start_date"]).date(), floor), []).append(ev)
+    blocks = []
+    for d in sorted(by_day):
+        label = "Aujourd'hui" if d == today else ("Demain" if d == today + timedelta(days=1) else cap(day_label(d)))
+        blocks.append(
+            f'<section class="section"><div class="section-head"><div><p class="kicker">{e(label)}</p>'
+            f'<h2>{len(by_day[d])} sortie{"s" if len(by_day[d]) > 1 else ""}</h2></div></div>'
+            f'<div class="rows">{"".join(row_card(ev, series, root) for ev in by_day[d][:40])}</div></section>')
+    if long_ones:
+        blocks.append(
+            '<section class="section"><div class="section-head"><div><p class="kicker">Sur plusieurs jours</p>'
+            '<h2>En ce moment</h2></div></div>'
+            f'<div class="rows">{"".join(row_card(ev, series, root) for ev in long_ones[:30])}</div></section>')
+    if not blocks:
+        blocks.append('<section class="section"><p class="lead">Rien pour l\'instant : reviens demain, '
+                      'l\'agenda est mis à jour chaque jour.</p></section>')
+    others = "".join(
+        f'<a class="town-link" href="{root}{t[0]}/">{e(t[2])}</a>' for t in THEMES if t[0] != slug)
+    intro = (f"{len(ordered)} sorties {span} dans le Beaujolais, le Val de Saône et le nord de Lyon "
+             f"(à moins de {THEME_RADIUS_KM} km de Belleville), mises à jour chaque jour.")
+    url = f"{BASE_URL}/{slug}/"
+    item_list = {
+        "@context": "https://schema.org",
+        "@type": "ItemList",
+        "name": page_title,
+        "itemListElement": [
+            {"@type": "ListItem", "position": i + 1, "url": f"{BASE_URL}/{event_path(ev)}"}
+            for i, ev in enumerate(ordered[:50])
+        ],
+    }
+    body = f"""  <section class="ev-hero town-hero"><div class="ev-hero-inner">
+    <a class="back" href="{root}">← Accueil</a>
+    <p class="kicker">{e(kicker)}</p>
+    <h1>{e(h1)}</h1>
+    <p class="lead">{e(intro)}</p>
+    <div class="hero-actions">{play_cta()}</div>
+  </div></section>
+  {"".join(blocks)}
+  <section class="section"><div class="section-head"><div><p class="kicker">Et aussi</p><h2>D'autres idées</h2></div></div>
+    <div class="town-links">{others}<a class="town-link" href="{root}ville/">Par commune</a></div></section>"""
+    return layout(
+        f"{page_title} – Wavents",
+        body,
+        description=intro,
+        url=url,
+        extra_head=f'<script type="application/ld+json">{json.dumps(item_list, ensure_ascii=False)}</script>',
+        depth=1,
+        page_class="town-page",
+    ), len(ordered)
+
+
+def about_page(upcoming: list[dict], communes: dict[str, list[dict]]) -> str:
+    root = "../"
+    body = f"""  <section class="ev-hero town-hero"><div class="ev-hero-inner">
+    <p class="kicker">À propos</p>
+    <h1>Wavents, l'agenda des sorties près de chez toi</h1>
+    <p class="lead">Toutes les sorties locales au même endroit, sans compte et gratuitement.</p>
+  </div></section>
+  <section class="section prose">
+    <h2>Qui sommes-nous ?</h2>
+    <p>Wavents est né à Belleville-en-Beaujolais, d'une envie simple : ne plus rater la fête de
+    quartier, le concert du village voisin ou la brocante du dimanche parce qu'on ne savait pas.</p>
+    <h2>Quelle zone ?</h2>
+    <p>Le Beaujolais, le Val de Saône (côté Rhône et côté Ain), Villefranche-sur-Saône, Mâcon et le
+    nord de Lyon. En ce moment : <strong>{len(upcoming)} sorties à venir</strong> dans
+    <strong>{len(communes)} communes</strong>. La zone s'agrandit petit à petit.</p>
+    <h2>D'où viennent les événements ?</h2>
+    <p>Des agendas publics : mairies, offices de tourisme, médiathèques, salles de spectacle,
+    associations, billetteries et presse locale. Ils sont relus chaque jour : doublons
+    regroupés, dates, prix et catégories vérifiés, événements annulés retirés. Les organisateurs
+    peuvent aussi ajouter leurs événements gratuitement depuis l'appli.</p>
+    <h2>Combien ça coûte ?</h2>
+    <p>Rien : le site et l'appli sont gratuits, sans compte. Wavents ne vend pas de billets ;
+    chaque fiche renvoie vers l'organisateur.</p>
+    <h2>Contact</h2>
+    <p>Une erreur, un événement oublié, une idée ? Écris à <a href="mailto:hello@wavents.fr">hello@wavents.fr</a>
+    ou signale-le depuis la fiche dans l'appli.</p>
+    <div class="hero-actions">{play_cta()}</div>
+  </section>"""
+    return layout(
+        "À propos de Wavents – l'agenda des sorties du Beaujolais",
+        body,
+        description="Wavents rassemble chaque jour les événements locaux du Beaujolais, du Val de Saône et du "
+                    "nord de Lyon, depuis les agendas publics et les organisateurs. Gratuit, sans compte.",
+        url=f"{BASE_URL}/a-propos/",
+        extra_head=f'<script type="application/ld+json">{json.dumps(ORGANIZATION, ensure_ascii=False)}</script>',
+        depth=1,
+        page_class="town-page",
+    )
+
+
+def faq_page(upcoming: list[dict], communes: dict[str, list[dict]], theme_counts: dict[str, int]) -> str:
+    root = "../"
+    qa = [
+        ("Que faire ce week-end dans le Beaujolais ?",
+         f"Wavents liste {theme_counts.get('ce-week-end', 0)} sorties ce week-end à moins de "
+         f"{THEME_RADIUS_KM} km de Belleville-en-Beaujolais : marchés, concerts, fêtes de village, "
+         f"spectacles, brocantes. La liste complète, mise à jour chaque jour, est sur "
+         f"{BASE_URL}/ce-week-end/."),
+        ("Où trouver les marchés et brocantes près de chez moi ?",
+         f"Les marchés sont sur {BASE_URL}/marches/ et les brocantes et vide-greniers sur "
+         f"{BASE_URL}/brocantes/, avec la date, le lieu et les horaires. Dans l'appli, la carte les "
+         "montre autour de toi."),
+        ("Y a-t-il des sorties gratuites ou pour les enfants ?",
+         f"Oui : {theme_counts.get('gratuit', 0)} sorties gratuites dans les 14 prochains jours "
+         f"({BASE_URL}/gratuit/) et {theme_counts.get('enfants', 0)} sorties pensées pour les enfants "
+         f"ou en famille ({BASE_URL}/enfants/)."),
+        ("Quelle zone couvre Wavents ?",
+         f"Le Beaujolais, le Val de Saône, Villefranche-sur-Saône, Mâcon et le nord de Lyon : "
+         f"{len(communes)} communes ont des sorties à venir ({BASE_URL}/ville/)."),
+        ("Comment ajouter mon événement ?",
+         "Gratuitement, depuis l'appli Wavents : bouton « + », puis une photo de l'affiche suffit, "
+         "l'appli remplit la fiche. L'événement est relu puis publié, en général en quelques minutes."),
+        ("Wavents est-il gratuit ?",
+         "Oui, le site et l'appli sont gratuits et sans compte. Wavents ne vend pas de billets : "
+         "chaque fiche renvoie vers l'organisateur."),
+        ("Comment être prévenu des nouvelles sorties ?",
+         "Dans l'appli, fais une recherche (par exemple « loto » autour de ta ville) et enregistre-la : "
+         "tu reçois chaque soir une notification quand de nouveaux événements correspondent."),
+    ]
+    schema = {
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        "mainEntity": [
+            {"@type": "Question", "name": q, "acceptedAnswer": {"@type": "Answer", "text": a}} for q, a in qa
+        ],
+    }
+    def linkify(text: str) -> str:
+        return re.sub(r"(https://[^\s)]+?)(?=[.,]?(?:\s|\)|$))",
+                      lambda m: f'<a href="{m.group(1)}">{m.group(1).replace(BASE_URL, "wavents.fr")}</a>', e(text))
+    items = "".join(f"<h2>{e(q)}</h2><p>{linkify(a)}</p>" for q, a in qa)
+    body = f"""  <section class="ev-hero town-hero"><div class="ev-hero-inner">
+    <p class="kicker">Questions fréquentes</p>
+    <h1>Tout savoir sur Wavents</h1>
+  </div></section>
+  <section class="section prose">{items}
+    <div class="hero-actions">{play_cta()}</div>
+  </section>"""
+    return layout(
+        "Questions fréquentes – Wavents, sorties dans le Beaujolais",
+        body,
+        description="Que faire ce week-end dans le Beaujolais, où trouver les marchés et brocantes, sorties "
+                    "gratuites et en famille, comment ajouter un événement : les réponses.",
+        url=f"{BASE_URL}/faq/",
+        extra_head=f'<script type="application/ld+json">{json.dumps(schema, ensure_ascii=False)}</script>',
+        depth=1,
+        page_class="town-page",
+    )
+
+
 # --- Main --------------------------------------------------------------------------
 
 def llms_txt(upcoming: list[dict], now: datetime, communes: dict[str, list[dict]] | None = None) -> str:
@@ -1068,6 +1301,15 @@ def llms_txt(upcoming: list[dict], now: datetime, communes: dict[str, list[dict]
         f"avec date, lieu, prix et données schema.org Event. Liste complète : {BASE_URL}/sitemap.xml.",
         "Appli Android Wavents (carte, favoris, rappels, alertes) : bientôt sur Google Play.",
         f"Contact : hello@wavents.fr. Confidentialité : {BASE_URL}/confidentialite.html.",
+        f"À propos : {BASE_URL}/a-propos/. Questions fréquentes : {BASE_URL}/faq/.",
+        "",
+        "## Pages thématiques (mises à jour chaque jour)",
+        "",
+        f"- [Que faire ce week-end dans le Beaujolais]({BASE_URL}/ce-week-end/)",
+        f"- [Marchés du Beaujolais et du Val de Saône]({BASE_URL}/marches/)",
+        f"- [Brocantes et vide-greniers]({BASE_URL}/brocantes/)",
+        f"- [Sorties gratuites]({BASE_URL}/gratuit/)",
+        f"- [Sorties avec les enfants]({BASE_URL}/enfants/)",
         "",
         f"## Sorties des 7 prochains jours (à moins de {HOME_RADIUS_KM} km de Belleville-en-Beaujolais)",
         "",
@@ -1124,7 +1366,19 @@ def main() -> int:
     (out / "ville").mkdir(exist_ok=True)
     (out / "ville" / "index.html").write_text(communes_index(communes), encoding="utf-8")
 
-    urls = ([f"{BASE_URL}/", f"{BASE_URL}/ville/"]
+    theme_counts: dict[str, int] = {}
+    for slug, page_title, h1, kicker, keep, days in THEMES:
+        page, count = theme_page(slug, page_title, h1, kicker, keep, days, upcoming, series, now)
+        theme_counts[slug] = count
+        (out / slug).mkdir(exist_ok=True)
+        (out / slug / "index.html").write_text(page, encoding="utf-8")
+    (out / "a-propos").mkdir(exist_ok=True)
+    (out / "a-propos" / "index.html").write_text(about_page(upcoming, communes), encoding="utf-8")
+    (out / "faq").mkdir(exist_ok=True)
+    (out / "faq" / "index.html").write_text(faq_page(upcoming, communes, theme_counts), encoding="utf-8")
+    extra_pages = [f"{BASE_URL}/{t[0]}/" for t in THEMES] + [f"{BASE_URL}/a-propos/", f"{BASE_URL}/faq/"]
+
+    urls = ([f"{BASE_URL}/", f"{BASE_URL}/ville/"] + extra_pages
             + [f"{BASE_URL}/{commune_path(name)}" for name in communes]
             + [f"{BASE_URL}/{event_path(ev)}" for ev in events])
     sitemap = "\n".join(f"  <url><loc>{html.escape(quote(u, safe=':/'))}</loc></url>" for u in urls)
@@ -1139,7 +1393,7 @@ def main() -> int:
     # communes changent chaque jour ; les événements, les 2 000 plus proches.
     soonest = sorted(upcoming, key=lambda ev: ev["start_date"])[:2000]
     (out / "indexnow.json").write_text(json.dumps(
-        [f"{BASE_URL}/", f"{BASE_URL}/ville/"]
+        [f"{BASE_URL}/", f"{BASE_URL}/ville/"] + extra_pages
         + [f"{BASE_URL}/{commune_path(name)}" for name in communes]
         + [f"{BASE_URL}/{event_path(ev)}" for ev in soonest]), encoding="utf-8")
     print(f"{len(events)} pages d'événements et {len(communes)} pages communes générées dans {out}/")
