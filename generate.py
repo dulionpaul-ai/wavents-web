@@ -47,6 +47,9 @@ PLAY_STORE_URL = "https://play.google.com/store/apps/details?id=com.wavents.wave
 # Passer à True le jour où l'appli est publiée sur le Play Store (test
 # ouvert ou production) : avant, la fiche renvoie une erreur 404.
 PLAY_STORE_PUBLISHED = False
+# Adresse de la fiche App Store (https://apps.apple.com/fr/app/wavents/id…)
+# à renseigner le jour où Apple publie l'appli.
+APP_STORE_URL: str | None = None
 
 PARIS = ZoneInfo("Europe/Paris")
 HOME = (46.1075, 4.7536)  # centre de Belleville-en-Beaujolais, comme l'appli
@@ -365,7 +368,10 @@ def play_cta(extra_class: str = "") -> str:
 
 
 def app_store_soon(extra_class: str = "") -> str:
-    """Badge « Bientôt sur l'App Store » (pas encore de version iPhone)."""
+    """Badge App Store : lien si l'appli est publiée, sinon « Bientôt »."""
+    if APP_STORE_URL:
+        return (f'<a class="store-badge {extra_class}" href="{APP_STORE_URL}"><span class="store-icon apple">{_icon("phone_iphone")}</span>'
+                f"<span><small>Disponible sur</small>l'App Store</span></a>")
     return (f'<span class="store-badge soon {extra_class}"><span class="store-icon apple">{_icon("phone_iphone")}</span>'
             f"<span><small>Bientôt sur</small>l'App Store</span></span>")
 
@@ -412,7 +418,7 @@ def layout(title: str, body: str, *, description: str, url: str, image: str | No
       <a href="{root}#week-end">Ce week-end</a>
       <a href="{root}#carte">Carte</a>
       <a href="{root}#agenda">Agenda</a>
-      <a href="{root}#appli" class="nav-cta">L'appli</a>
+      <a href="{root}app/" class="nav-cta">L'appli</a>
     </nav>
   </header>
 {body}
@@ -1420,6 +1426,44 @@ def llms_txt(upcoming: list[dict], now: datetime, communes: dict[str, list[dict]
     return "\n".join(lines) + "\n"
 
 
+def app_page(upcoming: list[dict], communes: dict[str, list[dict]]) -> str:
+    """Page d'installation (cible du QR code des affiches) : envoie vers le
+    bon store selon le téléphone dès que l'appli y est publiée."""
+    targets = {"android": PLAY_STORE_URL if PLAY_STORE_PUBLISHED else None, "ios": APP_STORE_URL}
+    redirect = f"""<script>
+(function () {{
+  var t = {json.dumps(targets)};
+  var ua = navigator.userAgent || "";
+  var dest = /android/i.test(ua) ? t.android : (/iphone|ipad|ipod/i.test(ua) ? t.ios : null);
+  if (dest) location.replace(dest);
+}})();
+</script>"""
+    body = f"""  <section class="ev-hero town-hero"><div class="ev-hero-inner">
+    <p class="kicker">L'appli Wavents</p>
+    <h1>Toutes les sorties autour de chez toi, dans ta poche</h1>
+    <p class="lead">{len(upcoming)} sorties à venir dans {len(communes)} communes : concerts, marchés,
+    brocantes, spectacles, sorties en famille. Gratuit, sans compte.</p>
+    <div class="hero-actions">{play_cta('light')}</div>
+  </div></section>
+  <section class="section prose">
+    <h2>Pourquoi l'appli ?</h2>
+    <p><strong>La carte des sorties</strong> autour de toi : aujourd'hui, ce week-end ou cette semaine.</p>
+    <p><strong>Des alertes</strong> : une recherche enregistrée te prévient quand une sortie qui te plaît est publiée.</p>
+    <p><strong>Des rappels</strong> pour ne plus rater la brocante du dimanche ou le concert du village voisin.</p>
+    <p>En attendant, tout l'agenda est aussi sur le site : <a href="../#agenda">parcourir les sorties</a>.</p>
+  </section>"""
+    return layout(
+        "Télécharger l'appli Wavents – les sorties du Beaujolais",
+        body,
+        description="L'appli gratuite des sorties autour de Belleville-en-Beaujolais, Villefranche et Mâcon : "
+                    "carte, alertes et rappels. Sans compte.",
+        url=f"{BASE_URL}/app/",
+        extra_head=redirect,
+        depth=1,
+        page_class="town-page",
+    )
+
+
 def main() -> int:
     out = Path(sys.argv[1] if len(sys.argv) > 1 else "site")
     if out.exists():
@@ -1467,7 +1511,10 @@ def main() -> int:
     (out / "a-propos" / "index.html").write_text(about_page(upcoming, communes), encoding="utf-8")
     (out / "faq").mkdir(exist_ok=True)
     (out / "faq" / "index.html").write_text(faq_page(upcoming, communes, theme_counts), encoding="utf-8")
-    extra_pages = [f"{BASE_URL}/{t[0]}/" for t in THEMES] + [f"{BASE_URL}/a-propos/", f"{BASE_URL}/faq/"]
+    (out / "app").mkdir(exist_ok=True)
+    (out / "app" / "index.html").write_text(app_page(upcoming, communes), encoding="utf-8")
+    extra_pages = ([f"{BASE_URL}/{t[0]}/" for t in THEMES]
+                   + [f"{BASE_URL}/a-propos/", f"{BASE_URL}/faq/", f"{BASE_URL}/app/"])
 
     urls = ([f"{BASE_URL}/", f"{BASE_URL}/ville/"] + extra_pages
             + [f"{BASE_URL}/{commune_path(name)}" for name in communes]
