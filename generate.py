@@ -437,7 +437,7 @@ def layout(title: str, body: str, *, description: str, url: str, image: str | No
         <a href="{root}marches/">Marchés</a>
         <a href="{root}brocantes/">Brocantes</a>
         <a href="{root}gratuit/">Sorties gratuites</a>
-        <a href="{root}enfants/">Avec les enfants</a>
+        <a href="{root}enfants/">En famille</a>
         <a href="{root}a-propos/">À propos</a>
         <a href="{root}faq/">Questions fréquentes</a>
         <a href="{root}confidentialite.html">Confidentialité</a>
@@ -491,7 +491,7 @@ def card(event: dict, series: dict[str, list[dict]], root: str = "", *, size: st
     if is_free(event):
         badges.append('<span class="badge free">Gratuit</span>')
     if event.get("for_kids"):
-        badges.append('<span class="badge kids">Enfants</span>')
+        badges.append('<span class="badge kids">En famille</span>')
     if recurring:
         badges.append(f'<span class="badge series">{e(recurring)}</span>')
     search = fold(f"{event['title']} {commune_of(event)} {event.get('location_name') or ''} {label}")
@@ -522,7 +522,7 @@ def row_card(event: dict, series: dict[str, list[dict]], root: str = "") -> str:
     if is_free(event):
         badges.append('<span class="badge free">Gratuit</span>')
     if event.get("for_kids"):
-        badges.append('<span class="badge kids">Enfants</span>')
+        badges.append('<span class="badge kids">En famille</span>')
     search = fold(f"{event['title']} {commune_of(event)} {event.get('location_name') or ''} {label}")
     return f"""<a class="row-card" href="{root}{event_path(event)}" data-cat="{e(event.get('category_id') or '')}" data-free="{1 if is_free(event) else 0}" data-kids="{1 if event.get('for_kids') else 0}" data-q="{e(search)}" style="--cat:{color}">
   <span class="row-media">{media(event, root)}</span>
@@ -583,7 +583,7 @@ def phone_mockup(events: list[dict]) -> str:
   <div class="phone-notch"></div>
   <div class="phone-screen">
     <div class="ph-search">🔍 Rechercher un événement…</div>
-    <div class="ph-chips"><span class="on">Ce week-end</span><span>Gratuit</span><span>Enfants</span></div>
+    <div class="ph-chips"><span class="on">Ce week-end</span><span>Gratuit</span><span>En famille</span></div>
     <div class="ph-map"><span class="pin p1"></span><span class="pin p2"></span><span class="pin p3"></span><span class="pin p4"></span><span class="pin p5"></span><span class="me"></span></div>
     {''.join(rows)}
   </div>
@@ -624,7 +624,7 @@ def home_page(events: list[dict], all_upcoming: list[dict], now: datetime) -> st
     if kids_count:
         cat_tiles = (f'<a class="cat-tile kids" href="#agenda" data-filter-kids style="--cat:#E91E63">'
                      f'<span class="ms kids-art" aria-hidden="true">family_restroom</span>'
-                     f'<span class="cat-tile-label"><b><span class="cat-emoji">{_icon("child_care")}</span>Pour les enfants</b>'
+                     f'<span class="cat-tile-label"><b><span class="cat-emoji">{_icon("child_care")}</span>En famille</b>'
                      f'<small>{kids_count} à venir</small></span></a>') + cat_tiles
     chips = "".join(
         f'<button class="chip" data-cat="{cid}" style="--cat:{color}">{emoji} {label}</button>'
@@ -724,7 +724,7 @@ def home_page(events: list[dict], all_upcoming: list[dict], now: datetime) -> st
   <section class="section map-section" id="carte">
     <div class="section-head reveal"><div><p class="kicker">{len(shown)} sorties dans les {HOME_DAYS} prochains jours</p><h2>Sur la carte</h2></div></div>
     <div class="map-wrap reveal"><div class="map-box"><div id="map" role="region" aria-label="Carte des événements"></div><div class="map-search" role="search"><span aria-hidden="true">🔍</span><input type="search" id="map-q" placeholder="Aller à une ville…" autocomplete="off" aria-label="Aller à une ville sur la carte"><ul class="map-sugg" hidden></ul></div></div>
-    <div class="map-legend" role="group" aria-label="Filtrer la carte"><button class="map-chip is-on" data-map-cat="">Tout</button><button class="map-chip" data-map-kids style="--cat:#E91E63">{_icon("child_care")} Enfants</button>{''.join(f'<button class="map-chip" data-map-cat="{cid}" style="--cat:{c}">{em} {l}</button>' for cid, (em, l, c) in CATEGORIES.items() if counts.get(cid))}</div></div>
+    <div class="map-legend" role="group" aria-label="Filtrer la carte"><button class="map-chip is-on" data-map-cat="">Tout</button><button class="map-chip" data-map-kids style="--cat:#E91E63">{_icon("child_care")} En famille</button>{''.join(f'<button class="map-chip" data-map-cat="{cid}" style="--cat:{c}">{em} {l}</button>' for cid, (em, l, c) in CATEGORIES.items() if counts.get(cid))}</div></div>
   </section>
   </div>
 
@@ -734,7 +734,7 @@ def home_page(events: list[dict], all_upcoming: list[dict], now: datetime) -> st
       <label class="search"><span>🔍</span><input type="search" id="q" placeholder="Un village, un concert, un loto…" autocomplete="off"></label>
       <div class="chips">
         <button class="chip is-on" data-cat="">Tout</button>
-        <button class="chip toggle" data-toggle="kids">{_icon("child_care")} Enfants</button>
+        <button class="chip toggle" data-toggle="kids">{_icon("child_care")} En famille</button>
         <button class="chip toggle" data-toggle="free">{_icon("money_off")} Gratuit</button>
         {chips}
       </div>
@@ -749,7 +749,7 @@ def home_page(events: list[dict], all_upcoming: list[dict], now: datetime) -> st
     <div class="section-head reveal center"><div><p class="kicker">Comment ça marche</p><h2>Ton agenda local, sans effort</h2></div></div>
     <div class="how-grid">
       <div class="how-card reveal" style="--c:#01BAEF"><span class="how-num">🔎</span><h3>On fouille pour toi</h3><p>Wavents trouve les événements des mairies, offices de tourisme, salles de spectacle, associations, billetteries… de la région. L'outil s'étend chaque jour avec de nouvelles zones et de nouvelles sources.</p></div>
-      <div class="how-card reveal" style="--c:#FF8A1E"><span class="how-num">🪄</span><h3>On trie et on vérifie</h3><p>Doublons fusionnés, catégories, prix, « pour les enfants » : tout est rangé pour que tu trouves en deux secondes ce qui t'intéresse.</p></div>
+      <div class="how-card reveal" style="--c:#FF8A1E"><span class="how-num">🪄</span><h3>On trie et on vérifie</h3><p>Doublons fusionnés, catégories, prix, « en famille » : tout est rangé pour que tu trouves en deux secondes ce qui t'intéresse.</p></div>
       <div class="how-card reveal" style="--c:#FFD66B"><span class="how-num">🔔</span><h3>Tu ne rates plus rien</h3><p>Favoris, rappels avant l'événement et notifications quand ça bouge près de chez toi, dans les catégories que tu aimes.</p></div>
     </div>
   </section>
@@ -843,7 +843,7 @@ def event_page(event: dict, neighbours: list[dict], series: dict[str, list[dict]
     if is_free(event):
         badges.append('<span class="badge free">💚 Gratuit</span>')
     if event.get("for_kids"):
-        badges.append('<span class="badge kids">🧸 Pour les enfants</span>')
+        badges.append('<span class="badge kids">🧸 En famille</span>')
     recurring = series_label(series.get(series_key(event) or "", []))
     if recurring:
         badges.append(f'<span class="badge series">🔁 {e(recurring)}</span>')
@@ -996,7 +996,7 @@ def commune_page(name: str, events: list[dict], communes: dict[str, list[dict]],
     if free_count:
         facts.append(f"{free_count} gratuites")
     if kids_count:
-        facts.append(f"{kids_count} pour les enfants")
+        facts.append(f"{kids_count} en famille")
     intro = (f"Concerts, marchés, spectacles, expositions, fêtes… Toutes les sorties à {name} "
              f"et autour, mises à jour chaque jour : {', '.join(facts)}.")
     url = f"{BASE_URL}/{commune_path(name)}"
@@ -1105,7 +1105,7 @@ THEMES = [
      "Brocantes", lambda ev: ev.get("category_id") == "brocante", 45),
     ("gratuit", "Sorties gratuites dans le Beaujolais", "Sorties gratuites",
      "Gratuit", is_free, 14),
-    ("enfants", "Sorties avec les enfants dans le Beaujolais", "Sorties avec les enfants",
+    ("enfants", "Sorties en famille et avec les enfants dans le Beaujolais", "Sorties en famille",
      "En famille", lambda ev: bool(ev.get("for_kids")), 21),
 ]
 
@@ -1211,7 +1211,7 @@ def theme_page(slug: str, page_title: str, h1: str, kicker: str, keep, days: int
     if slug != "gratuit":
         chips.append('<button class="chip toggle" data-ttoggle="free">Gratuit</button>')
     if slug != "enfants":
-        chips.append('<button class="chip toggle" data-ttoggle="kids">Enfants</button>')
+        chips.append('<button class="chip toggle" data-ttoggle="kids">En famille</button>')
     bar = ""
     if chips or len(day_links) > 1:
         if len(day_links) > 8:
@@ -1408,7 +1408,7 @@ def llms_txt(upcoming: list[dict], now: datetime, communes: dict[str, list[dict]
         f"- [Marchés du Beaujolais et du Val de Saône]({BASE_URL}/marches/)",
         f"- [Brocantes et vide-greniers]({BASE_URL}/brocantes/)",
         f"- [Sorties gratuites]({BASE_URL}/gratuit/)",
-        f"- [Sorties avec les enfants]({BASE_URL}/enfants/)",
+        f"- [Sorties en famille]({BASE_URL}/enfants/)",
         "",
         f"## Sorties des 7 prochains jours (à moins de {HOME_RADIUS_KM} km de Belleville-en-Beaujolais)",
         "",
