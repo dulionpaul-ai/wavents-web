@@ -441,6 +441,8 @@ def layout(title: str, body: str, *, description: str, url: str, image: str | No
         <a href="{root}a-propos/">À propos</a>
         <a href="{root}faq/">Questions fréquentes</a>
         <a href="{root}confidentialite.html">Confidentialité</a>
+        <a href="{root}mentions-legales.html">Mentions légales</a>
+        <a href="{root}cgu.html">Conditions d'utilisation</a>
         <a href="mailto:hello@wavents.fr">Contact</a>
       </div>
     </div>
