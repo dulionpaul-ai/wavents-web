@@ -455,7 +455,7 @@ h1, h2, h3 { font-family: var(--display); line-height: 1.08; letter-spacing: -.0
 .intro-stage { display: flex; flex-direction: column; align-items: center; gap: 22px; padding: 0 16px; text-align: center; }
 .intro-pin { position: relative; width: 84px; height: 96px; animation: intro-pop .5s cubic-bezier(.3,1.6,.5,1) 1.6s both; }
 .intro-pin img { position: relative; width: 100%; height: 100%; object-fit: contain; }
-.intro-pin .ring { position: absolute; left: 50%; top: 45%; width: 90px; height: 90px; margin: -45px 0 0 -45px;
+.intro-pin .ring { position: absolute; left: 50%; top: 99%; /* pointe de l'épingle, comme l'appli */ width: 90px; height: 90px; margin: -45px 0 0 -45px;
   border: 3px solid rgba(255,255,255,.8); border-radius: 50%; animation: intro-radar 1.4s ease-out 1.9s both; }
 .intro-pin .ring.r2 { animation-delay: 2.25s; }
 .intro-words { position: relative; width: min(92vw, 760px); height: 1.25em; font: 900 clamp(1.6rem, 7vw, 3.6rem)/1.25 var(--display); }
