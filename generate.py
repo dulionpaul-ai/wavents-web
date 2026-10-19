@@ -426,7 +426,7 @@ def layout(title: str, body: str, *, description: str, url: str, image: str | No
     <div class="footer-inner">
       <div class="footer-brand">
         <img src="{root}img/logo-256.png" alt="" width="64" height="64">
-        <div><strong>Wavents</strong><p>Toutes les sorties autour de chez toi.<br>Fait avec ❤️ à Belleville-en-Beaujolais.</p></div>
+        <div><strong>Wavents</strong><p>Suis la vague&nbsp;: ne rate plus rien près de chez toi.<br>Fait avec ❤️ à Belleville-en-Beaujolais.</p></div>
       </div>
       <div class="footer-links">
         <a href="{root}#week-end">Ce week-end</a>
@@ -669,9 +669,8 @@ def home_page(events: list[dict], all_upcoming: list[dict], now: datetime) -> st
     <div class="hero-inner">
       <div class="hero-copy reveal">
         <p class="eyebrow"><span class="pulse"></span> {len(all_upcoming)} événements à venir en ce moment</p>
-        <h1>Découvre les événements <span class="sunny">près de chez toi</span></h1>
+        <h1>Suis la vague&nbsp;: <span class="sunny">ne rate plus rien près de chez toi</span></h1>
         <p class="lead">Wavents trouve chaque jour des concerts, marchés, animations, brocantes… dans le Beaujolais et le nord de Lyon (pour l'instant&nbsp;!).</p>
-        <p class="punch">Ne rate plus la fête de quartier en bas de chez toi juste parce que tu ne savais pas.</p>
         <div class="hero-actions">
           <a class="btn btn-sun" href="#week-end">Voir ce week-end</a>
           <div class="store-row">{play_cta()}</div>
