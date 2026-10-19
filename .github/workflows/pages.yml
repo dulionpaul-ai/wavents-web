@@ -3,7 +3,14 @@ name: Publier le site
 
 on:
   schedule:
-    # 11:15 UTC : après l'import du matin (dépôt Wavents, souvent en retard).
+    # Juste après minuit à Paris (22:20 UTC en été, 23:20 UTC en hiver ; les
+    # deux tournent, le premier ne change rien en hiver) : sans ça, « aujourd'hui »
+    # restait la veille jusqu'à la génération du matin, que GitHub lance
+    # souvent avec 3 h de retard (Paul, 19/10 : site encore au 18 à 13 h 40).
+    - cron: "20 22 * * *"
+    - cron: "20 23 * * *"
+    # 05:30 UTC : après l'import de la nuit ; 11:15 UTC : après celui du matin.
+    - cron: "30 5 * * *"
     - cron: "15 11 * * *"
   workflow_dispatch:
   push:
