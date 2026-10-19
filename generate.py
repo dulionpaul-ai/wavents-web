@@ -361,7 +361,7 @@ def ics(event: dict) -> str:
 
 def play_cta(extra_class: str = "") -> str:
     if PLAY_STORE_PUBLISHED:
-        return (f'<a class="store-badge {extra_class}" href="{PLAY_STORE_URL}">'
+        return (f'<a class="store-badge {extra_class}" href="{PLAY_STORE_URL}" data-goatcounter-click="clic-google-play">'
                 f'<span class="store-icon">▶</span><span><small>Disponible sur</small>Google Play</span></a>' + app_store_soon(extra_class))
     return (f'<span class="store-badge soon {extra_class}"><span class="store-icon">▶</span>'
             f'<span><small>Bientôt sur</small>Google Play</span></span>' + app_store_soon(extra_class))
@@ -370,7 +370,7 @@ def play_cta(extra_class: str = "") -> str:
 def app_store_soon(extra_class: str = "") -> str:
     """Badge App Store : lien si l'appli est publiée, sinon « Bientôt »."""
     if APP_STORE_URL:
-        return (f'<a class="store-badge {extra_class}" href="{APP_STORE_URL}"><span class="store-icon apple">{_icon("phone_iphone")}</span>'
+        return (f'<a class="store-badge {extra_class}" href="{APP_STORE_URL}" data-goatcounter-click="clic-app-store"><span class="store-icon apple">{_icon("phone_iphone")}</span>'
                 f"<span><small>Disponible sur</small>l'App Store</span></a>")
     return (f'<span class="store-badge soon {extra_class}"><span class="store-icon apple">{_icon("phone_iphone")}</span>'
             f"<span><small>Bientôt sur</small>l'App Store</span></span>")
@@ -418,7 +418,7 @@ def layout(title: str, body: str, *, description: str, url: str, image: str | No
       <a href="{root}#week-end">Ce week-end</a>
       <a href="{root}#carte">Carte</a>
       <a href="{root}#agenda">Agenda</a>
-      <a href="{root}app/" class="nav-cta">L'appli</a>
+      <a href="{root}app/" class="nav-cta" data-goatcounter-click="clic-menu-appli">L'appli</a>
     </nav>
   </header>
 {body}
@@ -760,7 +760,7 @@ def home_page(events: list[dict], all_upcoming: list[dict], now: datetime) -> st
         <p class="kicker">On compte sur toi</p>
         <h2>Aide-nous à rendre Wavents parfaite</h2>
         <p>On veut l'appli la plus parfaite possible. Un bug, un événement qui manque ou qui est faux, une idée&nbsp;? Dis-le-nous, on lit tout.</p>
-        <div class="hero-actions"><a class="btn btn-sun" href="mailto:hello@wavents.fr?subject=Mon%20retour%20sur%20Wavents">✉️ Envoyer un retour</a></div>
+        <div class="hero-actions"><a class="btn btn-sun" href="mailto:hello@wavents.fr?subject=Mon%20retour%20sur%20Wavents" data-goatcounter-click="clic-retour">✉️ Envoyer un retour</a></div>
       </div>
     </div>
   </section>
@@ -825,11 +825,11 @@ def event_page(event: dict, neighbours: list[dict], series: dict[str, list[dict]
     maps = f"https://www.google.com/maps/dir/?api=1&destination={lat},{lon}"
     image = image_for(event, root)
 
-    actions = [f'<a class="btn btn-sun" href="event.ics" download="wavents-{event["id"][:8]}.ics">📅 Ajouter à mon agenda</a>',
-               f'<a class="btn btn-ghost" href="{maps}" target="_blank" rel="noopener">🧭 Y aller</a>',
-               '<button class="btn btn-ghost" data-share>🔗 Partager</button>']
+    actions = [f'<a class="btn btn-sun" href="event.ics" download="wavents-{event["id"][:8]}.ics" data-goatcounter-click="clic-agenda">📅 Ajouter à mon agenda</a>',
+               f'<a class="btn btn-ghost" href="{maps}" target="_blank" rel="noopener" data-goatcounter-click="clic-itineraire">🧭 Y aller</a>',
+               '<button class="btn btn-ghost" data-share data-goatcounter-click="clic-partager">🔗 Partager</button>']
     if (event.get("website_url") or "").startswith("http"):
-        actions.append(f'<a class="btn btn-ghost" href="{e(event["website_url"])}" rel="nofollow noopener" target="_blank">🌐 Site de l\'organisateur</a>')
+        actions.append(f'<a class="btn btn-ghost" href="{e(event["website_url"])}" rel="nofollow noopener" target="_blank" data-goatcounter-click="clic-site-organisateur">🌐 Site de l\'organisateur</a>')
 
     other_dates = [ev for ev in series.get(series_key(event) or "", [])
                    if ev["id"] != event["id"] and end_of(ev) >= datetime.now()][:10]
@@ -1436,7 +1436,17 @@ def app_page(upcoming: list[dict], communes: dict[str, list[dict]]) -> str:
   var t = {json.dumps(targets)};
   var ua = navigator.userAgent || "";
   var dest = /android/i.test(ua) ? t.android : (/iphone|ipad|ipod/i.test(ua) ? t.ios : null);
-  if (dest) location.replace(dest);
+  // Canal d'arrivée (?ref=presse, mairies, facebook, affiche… ; 19/10) :
+  // compté par GoatCounter avant la redirection (sinon la visite partait
+  // vers le store sans être comptée) et transmis au Play Store, qui
+  // l'affiche dans ses sources d'installation.
+  var ref = (location.search.match(/[?&](?:ref|utm_source)=([^&]+)/) || [])[1] || "";
+  if (dest) {{
+    new Image().src = "https://wavents.goatcounter.com/count?p=" + encodeURIComponent("/app/" + (ref ? "?ref=" + ref : ""))
+      + "&r=" + encodeURIComponent(document.referrer) + (ref ? "&q=" + encodeURIComponent("ref=" + ref) : "") + "&rnd=" + Math.random();
+    if (ref && dest === t.android) dest += "&referrer=" + encodeURIComponent("utm_source=" + ref);
+    setTimeout(function () {{ location.replace(dest); }}, 350);
+  }}
 }})();
 </script>"""
     body = f"""  <section class="ev-hero town-hero"><div class="ev-hero-inner">
