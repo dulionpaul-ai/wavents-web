@@ -194,6 +194,13 @@ def absolute_image(event: dict) -> str:
     return real_image(event) or f"{BASE_URL}/{category_photo(event.get('category_id'), '')}"
 
 
+def share_card(event: dict) -> str:
+    """Image de partage (WhatsApp, Facebook…) : carte photo + titre + date +
+    lieu + logo, fabriquée au premier partage par la fonction Supabase
+    share-card (dépôt Wavents), puis gardée (19/10/2026)."""
+    return f"{SUPABASE_URL}/functions/v1/share-card?id={event['id']}"
+
+
 def event_path(event: dict) -> str:
     return f"e/{event['id']}/"
 
@@ -380,6 +387,8 @@ def layout(title: str, body: str, *, description: str, url: str, image: str | No
            extra_head: str = "", depth: int = 0, page_class: str = "") -> str:
     root = "../" * depth
     og_image = (f'<meta property="og:image" content="{e(image)}">\n  '
+                f'<meta property="og:image:width" content="1200">\n  '
+                f'<meta property="og:image:height" content="630">\n  '
                 f'<meta name="twitter:card" content="summary_large_image">') if image else ""
     return f"""<!doctype html>
 <html lang="fr">
@@ -888,7 +897,7 @@ def event_page(event: dict, neighbours: list[dict], series: dict[str, list[dict]
         body,
         description=summary,
         url=url,
-        image=absolute_image(event),
+        image=share_card(event),
         extra_head=f'<script type="application/ld+json">{json_ld(event)}</script>',
         depth=2,
         page_class="event-page",
