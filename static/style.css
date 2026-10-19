@@ -441,6 +441,38 @@ h1, h2, h3 { font-family: var(--display); line-height: 1.08; letter-spacing: -.0
   .reveal { opacity: 1; transform: none; }
 }
 
+/* --- Intro de la première visite (accueil seulement, Paul, 19/10) --------
+   Même histoire que l'écran de lancement de l'appli, en plus court :
+   « Une vague d'événements » → « a Wave of events » → « Wavents », l'épingle
+   et son radar, puis le slogan. Une seule fois (localStorage), touchée =
+   passée, jamais avec « réduire les animations ». */
+.intro { position: fixed; inset: 0; z-index: 9999; display: grid; place-items: center; color: #fff; cursor: pointer;
+  background: radial-gradient(circle at 100% 100%, rgba(255,214,107,.5) 0%, rgba(255,214,107,0) 45%),
+              radial-gradient(circle at 0% 0%, var(--deep) 0%, rgba(6,95,187,0) 60%),
+              linear-gradient(160deg, #0B81E1 0%, #01BAEF 100%);
+  transition: opacity .45s ease; }
+.intro.out { opacity: 0; pointer-events: none; }
+.intro-stage { display: flex; flex-direction: column; align-items: center; gap: 22px; padding: 0 16px; text-align: center; }
+.intro-pin { position: relative; width: 84px; height: 96px; animation: intro-pop .5s cubic-bezier(.3,1.6,.5,1) 1.6s both; }
+.intro-pin img { position: relative; width: 100%; height: 100%; object-fit: contain; }
+.intro-pin .ring { position: absolute; left: 50%; top: 45%; width: 90px; height: 90px; margin: -45px 0 0 -45px;
+  border: 3px solid rgba(255,255,255,.8); border-radius: 50%; animation: intro-radar 1.4s ease-out 1.9s both; }
+.intro-pin .ring.r2 { animation-delay: 2.25s; }
+.intro-words { position: relative; width: min(92vw, 760px); height: 1.25em; font: 900 clamp(1.6rem, 7vw, 3.6rem)/1.25 var(--display); }
+.intro-words span { position: absolute; inset: 0; opacity: 0; white-space: nowrap; }
+.intro-words .i1 { animation: intro-in-out .9s ease 0s both; }
+.intro-words .i2 { animation: intro-in-out .9s ease .8s both; }
+.intro-words .i3 { animation: intro-stay .6s ease 1.6s both; }
+.intro-slogan { margin: 0; font: 800 clamp(1.1rem, 3.6vw, 1.6rem)/1.35 var(--display); color: var(--sun); max-width: 22em;
+  animation: intro-reveal .9s ease-out 2.05s both; }
+@keyframes intro-in-out { 0% { opacity: 0; transform: translateY(.3em); } 22%, 78% { opacity: 1; transform: none; }
+  100% { opacity: 0; transform: translateY(-.3em); } }
+@keyframes intro-stay { from { opacity: 0; letter-spacing: .35em; } to { opacity: 1; letter-spacing: -.01em; } }
+@keyframes intro-pop { from { opacity: 0; transform: scale(.4); } to { opacity: 1; transform: none; } }
+@keyframes intro-radar { from { opacity: .8; transform: scale(.4); } to { opacity: 0; transform: scale(3); } }
+@keyframes intro-reveal { from { clip-path: circle(0 at 50% -60%); } to { clip-path: circle(160% at 50% -60%); } }
+@media (prefers-reduced-motion: reduce) { .intro { display: none; } }
+
 /* --- Pages statiques (confidentialité, 404) ----------------------------- */
 main { max-width: 760px; margin: 0 auto; padding: 40px 16px; }
 main h1 { font-size: 2.3rem; margin-bottom: .6em; color: var(--deep); }

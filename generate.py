@@ -673,7 +673,28 @@ def home_page(events: list[dict], all_upcoming: list[dict], now: datetime) -> st
     payload = json.dumps({"points": map_points, "cats": categories_js, "home": HOME}, ensure_ascii=False)
     data_script = f'<script id="wv-data" type="application/json">{payload.replace("</", "<" + chr(92) + "/")}</script>'
 
-    body = f"""  <section class="hero">
+    # Intro de la première visite (styles « Intro » de style.css) : retirée
+    # avant d'être peinte si elle a déjà été vue, si le stockage local est
+    # bloqué ou si l'on préfère moins d'animations.
+    intro = """  <div class="intro" id="wv-intro" aria-hidden="true">
+    <div class="intro-stage">
+      <div class="intro-pin"><span class="ring"></span><span class="ring r2"></span><img src="img/pin-card.png" alt=""></div>
+      <div class="intro-words"><span class="i1">Une vague d'événements</span><span class="i2">a Wave of events</span><span class="i3">Wavents</span></div>
+      <p class="intro-slogan">Suis la vague&nbsp;: ne rate plus rien près de chez toi</p>
+    </div>
+  </div>
+  <script>(function () {
+    var el = document.getElementById("wv-intro");
+    try {
+      if (localStorage.getItem("wv_intro") || matchMedia("(prefers-reduced-motion: reduce)").matches) { el.remove(); return; }
+      localStorage.setItem("wv_intro", "1");
+    } catch (err) { el.remove(); return; }
+    function out() { el.classList.add("out"); setTimeout(function () { el.remove(); }, 500); }
+    el.addEventListener("click", out);
+    setTimeout(out, 3400);
+  })();</script>
+"""
+    body = intro + f"""  <section class="hero">
     <div class="hero-bg"><div class="sun"></div></div>
     <div class="hero-inner">
       <div class="hero-copy reveal">
