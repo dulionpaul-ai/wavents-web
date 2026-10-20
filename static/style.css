@@ -613,12 +613,32 @@ main h2 { font-size: 1.35rem; margin: 1.6em 0 .5em; color: var(--deep); }
 /* --- Ajouter un événement (menu, accueil, page /ajouter/, 20/10/2026) --- */
 .nav-add, .nav.scrolled .nav-add { background: var(--sun); color: #3A2A00; border-color: var(--sun); white-space: nowrap; }
 @media (max-width: 720px) { .nav-long { display: none; } }
-.scroller.demos { grid-auto-columns: 210px; gap: 18px; }
-.vdemo { flex: none; width: 210px; margin: 0; text-align: center; scroll-snap-align: start; }
-.vdemo .vphone { width: 210px; height: 373px; border-radius: 28px; overflow: hidden; background: var(--blue);
-  border: 5px solid #fff; box-shadow: 0 16px 34px rgba(6,95,187,.22); box-sizing: border-box; }
-.vdemo video { width: 100%; height: 100%; object-fit: cover; display: block; cursor: pointer; }
-.vdemo figcaption { font-family: var(--display); font-weight: 800; font-size: 1.02rem; line-height: 1.2; margin-top: 12px; }
+.demo-wrap { display: grid; grid-template-columns: auto 1fr; gap: 20px 56px; align-items: center; max-width: 900px; margin: 0 auto; }
+.vphone { width: 260px; height: 462px; border-radius: 34px; overflow: hidden; background: var(--blue); border: 6px solid #fff;
+  box-shadow: 0 20px 44px rgba(6,95,187,.25); box-sizing: border-box; grid-row: span 2; }
+.vphone video { width: 100%; height: 100%; object-fit: cover; display: block; cursor: pointer; transition: opacity .18s; }
+.vphone video.swap { opacity: 0; }
+.demo-cap { display: none; }
+.demo-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+.demo-list button { display: flex; align-items: center; gap: 14px; width: 100%; text-align: left; background: none; border: 0;
+  border-radius: 16px; padding: 9px 14px; font: inherit; font-family: var(--display); font-weight: 800; font-size: 1.08rem;
+  color: var(--ink-soft); cursor: pointer; }
+.demo-list button:hover { background: color-mix(in srgb, var(--card) 70%, transparent); }
+.demo-list button.on { background: var(--card); color: var(--ink); box-shadow: 0 8px 22px rgba(6,95,187,.12); }
+.demo-num { flex: none; width: 30px; height: 30px; border-radius: 50%; display: grid; place-items: center; font-size: .9rem;
+  background: var(--line); color: var(--ink-soft); }
+.demo-list button.on .demo-num { background: var(--deep); color: #fff; }
+@media (max-width: 700px) {
+  .demo-wrap { grid-template-columns: 1fr; justify-items: center; gap: 14px; }
+  .vphone { grid-row: auto; width: 240px; height: 427px; }
+  .demo-cap { display: block; margin: 4px 0 0; min-height: 2.5em; text-align: center; font-family: var(--display); font-weight: 800; font-size: 1.1rem; line-height: 1.25; }
+  .demo-list { display: flex; gap: 4px; }
+  .demo-list button { padding: 8px; border-radius: 50%; }
+  .demo-list button.on { background: none; box-shadow: none; }
+  .demo-txt { display: none; }
+  .demo-num { width: 12px; height: 12px; font-size: 0; }
+}
+@media (max-width: 440px) { .nav-brand { gap: 8px; } }
 .orga { display: grid; grid-template-columns: auto 1fr auto; gap: 28px; align-items: center; background: var(--card);
   border-radius: var(--radius); padding: 30px 34px; border: 1.5px solid var(--line); box-shadow: 0 14px 34px rgba(6,95,187,.12); }
 .orga-ico { font-size: 3rem; }
@@ -683,3 +703,4 @@ main h2 { font-size: 1.35rem; margin: 1.6em 0 .5em; color: var(--deep); }
   .card-form { padding: 20px 16px; }
 }
 .drop img[hidden] { display: none; }
+@media (max-width: 420px) and (prefers-reduced-motion: reduce) { .nav-brand { font-size: 1.2rem; } }

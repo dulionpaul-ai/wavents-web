@@ -745,6 +745,7 @@ def home_page(events: list[dict], all_upcoming: list[dict], now: datetime) -> st
   </section>''' if ongoing else ''}
   </div>
 
+{demos_section()}
   <section class="section">
     <div class="section-head reveal"><div><p class="kicker">Envie de quoi ?</p><h2>Par catégorie</h2></div></div>
     <div class="cat-grid reveal">{cat_tiles}</div>
@@ -776,7 +777,7 @@ def home_page(events: list[dict], all_upcoming: list[dict], now: datetime) -> st
     <p class="empty" id="empty" hidden>Aucune sortie ne correspond. Essaie un autre filtre&nbsp;!</p>
   </section>
 
-{demos_section()}
+{orga_section()}
   <section class="section how">
     <div class="section-head reveal center"><div><p class="kicker">Comment ça marche</p><h2>Ton agenda local, sans effort</h2></div></div>
     <div class="how-grid">
@@ -1470,17 +1471,28 @@ DEMOS = [("affiche", "Une affiche en photo, la fiche se remplit"), ("alertes", "
 
 
 def demos_section() -> str:
-    tiles = "".join(
-        f'<figure class="vdemo"><div class="vphone"><video muted loop playsinline preload="metadata" aria-label="{e(t)}">'
-        f'<source src="videos/{k}.webm#t=3" type="video/webm"><source src="videos/{k}.mp4#t=3" type="video/mp4"></video></div>'
-        f'<figcaption>{e(t)}</figcaption></figure>' for k, t in DEMOS)
-    return f"""  <section class="section" id="ce-que-fait-l-appli">
-    <div class="section-head reveal"><div><p class="kicker">En 6 secondes chacune</p><h2>Ce que fait l'appli</h2></div>
-      <div class="scroller-nav"><button data-scroll="-1" aria-label="Précédent">←</button><button data-scroll="1" aria-label="Suivant">→</button></div></div>
-    <div class="scroller demos reveal">{tiles}</div>
+    """Un seul téléphone, les vidéos s'enchaînent (Paul, 20/10 : une à la
+    fois, la suivante arrive toute seule) ; la liste à côté (ordinateur) ou
+    les points dessous (téléphone) permettent d'en choisir une (app.js)."""
+    items = "".join(
+        f'<li><button type="button" data-demo="{k}" class="{"on" if i == 0 else ""}" aria-label="{e(t)}">'
+        f'<span class="demo-num">{i + 1}</span><span class="demo-txt">{e(t)}</span></button></li>'
+        for i, (k, t) in enumerate(DEMOS))
+    first, titre = DEMOS[0]
+    return f"""  <section class="section demo-section" id="ce-que-fait-l-appli">
+    <div class="section-head reveal"><div><p class="kicker">En 6 secondes chacune</p><h2>Ce que fait l'appli</h2></div></div>
+    <div class="demo-wrap reveal">
+      <div class="vphone"><video muted playsinline preload="metadata" aria-label="Démonstration de l'appli Wavents">
+        <source src="videos/{first}.webm#t=3" type="video/webm"><source src="videos/{first}.mp4#t=3" type="video/mp4"></video></div>
+      <p class="demo-cap" aria-live="polite">{e(titre)}</p>
+      <ol class="demo-list">{items}</ol>
+    </div>
   </section>
+"""
 
-  <section class="section">
+
+def orga_section() -> str:
+    return """  <section class="section">
     <div class="orga reveal"><span class="orga-ico" aria-hidden="true">📣</span>
       <div><p class="kicker">Mairie, association, comité des fêtes, commerçant</p><h2>Tu organises un événement&nbsp;?</h2>
       <p>Ajoute-le gratuitement depuis ton ordinateur : une photo de l'affiche suffit, on s'occupe du reste.</p></div>

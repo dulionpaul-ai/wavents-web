@@ -79,6 +79,12 @@
       const scale = Math.min(1, room / ruler.offsetWidth);
       layer.style.transform = scale < 1 ? `scale(${scale.toFixed(3)})` : "";
     };
+    // Au repos aussi (Paul, 20/10 : « Wavents » passait sous « + Ajouter »
+    // sur téléphone tant que l'animation n'avait pas tourné).
+    const rest = () => { if (!mark.classList.contains("wm-play")) fit("Wavents"); };
+    rest();
+    if (document.fonts) document.fonts.ready.then(rest);
+    window.addEventListener("resize", rest);
     const play = async () => {
       mark.classList.add("wm-play");
       // 1 → 2 : Wave · events
@@ -151,15 +157,39 @@
     scroller.scrollBy({ left: parseInt(btn.dataset.scroll, 10) * scroller.clientWidth * 0.85, behavior: "smooth" });
   }));
 
-  /* « Ce que fait l'appli » : chaque vidéo joue quand elle est visible
-     (image fixe si l'on préfère moins d'animations ; un toucher la lance). */
-  $$(".vdemo video").forEach((v) => {
-    v.addEventListener("click", () => (v.paused ? v.play() : v.pause()));
-    if (calm || !("IntersectionObserver" in window)) return;
-    new IntersectionObserver(([entry]) => {
-      if (entry.isIntersecting) v.play().catch(() => {}); else v.pause();
-    }, { threshold: 0.4 }).observe(v);
-  });
+  /* « Ce que fait l'appli » : un téléphone, les vidéos s'enchaînent quand
+     la rubrique est visible ; la liste (ou les points) en choisit une.
+     Image fixe si l'on préfère moins d'animations (un toucher la lance). */
+  const demo = $(".demo-wrap");
+  if (demo) {
+    const video = $("video", demo);
+    const items = $$("[data-demo]", demo);
+    const cap = $(".demo-cap", demo);
+    const ext = video.canPlayType('video/webm; codecs="vp9"') ? "webm" : "mp4";
+    let index = 0, visible = false;
+    const show = (i, play) => {
+      index = (i + items.length) % items.length;
+      items.forEach((b, k) => b.classList.toggle("on", k === index));
+      cap.textContent = items[index].getAttribute("aria-label");
+      video.classList.add("swap");
+      setTimeout(() => {
+        video.src = `videos/${items[index].dataset.demo}.${ext}`;
+        video.classList.remove("swap");
+        if (play) video.play().catch(() => {});
+      }, 180);
+    };
+    video.addEventListener("ended", () => { if (visible) show(index + 1, true); });
+    video.addEventListener("click", () => (video.paused ? video.play().catch(() => {}) : video.pause()));
+    items.forEach((b, k) => b.addEventListener("click", () => show(k, true)));
+    if (!calm && "IntersectionObserver" in window) {
+      let started = false;
+      new IntersectionObserver(([entry]) => {
+        visible = entry.isIntersecting;
+        if (!visible) { video.pause(); return; }
+        if (!started) { started = true; show(0, true); } else video.play().catch(() => {});
+      }, { threshold: 0.5 }).observe(video);
+    }
+  }
 
   /* Agenda : un onglet par jour, filtres, « voir les autres » */
   const agenda = $(".agenda");
