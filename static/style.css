@@ -639,8 +639,7 @@ main h2 { font-size: 1.35rem; margin: 1.6em 0 .5em; color: var(--deep); }
 .drop img { width: 92px; height: 124px; object-fit: cover; border-radius: 10px; flex: none; }
 .drop b { font-family: var(--display); font-size: 1.1rem; overflow-wrap: anywhere; }
 .drop p { margin: 4px 0 0; color: var(--ink-soft); font-size: .95rem; }
-.lien-row { display: flex; gap: 12px; }
-.lien-row input { flex: 1; min-width: 0; }
+.lien-go { margin-top: 10px; }
 .add-page input, .add-page select, .add-page textarea { font: inherit; color: var(--ink); width: 100%; box-sizing: border-box;
   border: 1.5px solid var(--line); border-radius: 14px; padding: 11px 14px; background: var(--card); }
 .add-page input.ai, .add-page select.ai, .add-page textarea.ai { border-color: #9CCDF0; background: color-mix(in srgb, var(--card) 85%, var(--wave)); }
@@ -681,7 +680,6 @@ main h2 { font-size: 1.35rem; margin: 1.6em 0 .5em; color: var(--deep); }
   .mode { display: flex; align-items: center; gap: 14px; text-align: left; padding: 14px 16px; }
   .mode > span { margin: 0; font-size: 1.7rem; }
   .grid2 { grid-template-columns: 1fr; }
-  .lien-row { flex-direction: column; }
   .card-form { padding: 20px 16px; }
 }
 .drop img[hidden] { display: none; }

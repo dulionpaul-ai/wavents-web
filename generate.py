@@ -1503,7 +1503,7 @@ def add_page() -> str:
     <form id="add-form" data-supabase="{SUPABASE_URL}" data-key="{SUPABASE_ANON_KEY}" novalidate>
       <div class="modes" role="group" aria-label="Comment veux-tu ajouter ton événement ?">
         <button type="button" class="mode on" data-mode="affiche" aria-pressed="true"><span aria-hidden="true">📷</span><div>J'ai une affiche<small>Le plus rapide</small></div></button>
-        <button type="button" class="mode" data-mode="lien" aria-pressed="false"><span aria-hidden="true">🔗</span><div>J'ai un lien<small>Ta page ou ton agenda</small></div></button>
+        <button type="button" class="mode" data-mode="lien" aria-pressed="false"><span aria-hidden="true">🔗</span><div>J'ai un lien ou un texte<small>Ta page, ta publication</small></div></button>
         <button type="button" class="mode" data-mode="main" aria-pressed="false"><span aria-hidden="true">✍️</span><div>Je remplis<small>Tout à la main</small></div></button>
       </div>
 
@@ -1517,8 +1517,9 @@ def add_page() -> str:
       </div>
 
       <div id="step-lien" hidden>
-        <div class="lien-row"><input type="url" id="lien" placeholder="https://… (page de ton événement ou ton agenda)" aria-label="Lien de la page">
-          <button type="button" class="btn btn-sun" id="lien-go">Lire la page</button></div>
+        <textarea id="lien" rows="3" aria-label="Lien de la page ou texte de la publication"
+          placeholder="Le lien de ta page (https://…), ou le texte de ta publication Facebook, de ton e-mail…"></textarea>
+        <button type="button" class="btn btn-sun lien-go" id="lien-go">Lire</button>
         <p class="add-status" id="lien-status" aria-live="polite"></p>
       </div>
 

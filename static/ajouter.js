@@ -97,12 +97,21 @@
 
   // --- Lien --------------------------------------------------------------------
   $("lien-go").addEventListener("click", function () {
-    var url = $("lien").value.trim();
-    if (!/^https?:\/\/\S+\.\S+/.test(url)) { status("lien-status", "Colle l'adresse complète de la page (https://…).", "err"); return; }
-    status("lien-status", "Lecture de la page…", "busy");
-    appel("parse-event-text", { url: url }).then(function (res) {
+    // Un lien seul : la page est lue par le serveur. Facebook et Instagram
+    // ne se lisent pas (pas de lecture de Facebook, règle de Paul) : on
+    // demande d'en coller le texte. Sinon, le texte collé est lu tel quel.
+    var v = $("lien").value.trim();
+    if (!v) { status("lien-status", "Colle un lien ou un texte.", "err"); return; }
+    var lien = /^https?:\/\/\S+$/.test(v);
+    if (lien && /(^|\.)(facebook\.com|fb\.me|fb\.com|instagram\.com)\//i.test(v.replace(/^https?:\/\//, ""))) {
+      status("lien-status", "Les liens Facebook et Instagram ne peuvent pas être lus : copie plutôt le texte de ta publication ici, ou envoie ton affiche.", "err");
+      return;
+    }
+    if (!lien && v.length < 30) { status("lien-status", "Texte trop court : colle toute la publication, ou le lien complet (https://…).", "err"); return; }
+    status("lien-status", lien ? "Lecture de la page…" : "Lecture du texte…", "busy");
+    appel("parse-event-text", lien ? { url: v } : { text: v }).then(function (res) {
       state.photo = null; state.photoUrl = res.pageImage || null;
-      status("lien-status", "✓ Page lue : vérifie la fiche ci-dessous.", "ok");
+      status("lien-status", "✓ Lu : vérifie la fiche ci-dessous.", "ok");
       remplir(res);
     }).catch(function (err) {
       status("lien-status", (err.message || "Lecture impossible") + " Tu peux remplir la fiche à la main.", "err");
