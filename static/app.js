@@ -151,6 +151,16 @@
     scroller.scrollBy({ left: parseInt(btn.dataset.scroll, 10) * scroller.clientWidth * 0.85, behavior: "smooth" });
   }));
 
+  /* « Ce que fait l'appli » : chaque vidéo joue quand elle est visible
+     (image fixe si l'on préfère moins d'animations ; un toucher la lance). */
+  $$(".vdemo video").forEach((v) => {
+    v.addEventListener("click", () => (v.paused ? v.play() : v.pause()));
+    if (calm || !("IntersectionObserver" in window)) return;
+    new IntersectionObserver(([entry]) => {
+      if (entry.isIntersecting) v.play().catch(() => {}); else v.pause();
+    }, { threshold: 0.4 }).observe(v);
+  });
+
   /* Agenda : un onglet par jour, filtres, « voir les autres » */
   const agenda = $(".agenda");
   if (agenda) {

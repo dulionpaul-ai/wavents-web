@@ -427,6 +427,7 @@ def layout(title: str, body: str, *, description: str, url: str, image: str | No
       <a href="{root}#week-end">Ce week-end</a>
       <a href="{root}#carte">Carte</a>
       <a href="{root}#agenda">Agenda</a>
+      <a href="{root}ajouter/" class="nav-cta nav-add" data-goatcounter-click="clic-menu-ajouter">+ Ajouter<span class="nav-long"> un événement</span></a>
       <a href="{root}app/" class="nav-cta" data-goatcounter-click="clic-menu-appli">L'appli</a>
     </nav>
   </header>
@@ -448,6 +449,7 @@ def layout(title: str, body: str, *, description: str, url: str, image: str | No
         <a href="{root}gratuit/">Sorties gratuites</a>
         <a href="{root}enfants/">En famille</a>
         <a href="{root}a-propos/">À propos</a>
+        <a href="{root}ajouter/">Ajouter un événement</a>
         <a href="{root}faq/">Questions fréquentes</a>
         <a href="{root}confidentialite.html">Confidentialité</a>
         <a href="{root}mentions-legales.html">Mentions légales</a>
@@ -774,6 +776,7 @@ def home_page(events: list[dict], all_upcoming: list[dict], now: datetime) -> st
     <p class="empty" id="empty" hidden>Aucune sortie ne correspond. Essaie un autre filtre&nbsp;!</p>
   </section>
 
+{demos_section()}
   <section class="section how">
     <div class="section-head reveal center"><div><p class="kicker">Comment ça marche</p><h2>Ton agenda local, sans effort</h2></div></div>
     <div class="how-grid">
@@ -1314,7 +1317,7 @@ def about_page(upcoming: list[dict], communes: dict[str, list[dict]]) -> str:
     <p>Des agendas publics : mairies, offices de tourisme, médiathèques, salles de spectacle,
     associations, billetteries et presse locale. Ils sont relus chaque jour : doublons
     regroupés, dates, prix et catégories vérifiés, événements annulés retirés. Les organisateurs
-    peuvent aussi ajouter leurs événements gratuitement depuis l'appli.</p>
+    peuvent aussi ajouter leurs événements gratuitement sur <a href="../ajouter/">wavents.fr/ajouter</a> ou depuis l'appli.</p>
     <h2>Combien ça coûte ?</h2>
     <p>Rien : le site et l'appli sont gratuits, sans compte. Wavents ne vend pas de billets ;
     chaque fiche renvoie vers l'organisateur.</p>
@@ -1360,8 +1363,8 @@ def faq_page(upcoming: list[dict], communes: dict[str, list[dict]], theme_counts
          "publication, et chaque fiche renvoie vers l'organisateur. Une erreur ? Signale-la depuis la "
          "fiche dans l'appli, elle est corrigée rapidement."),
         ("Je suis organisateur, une association ou une mairie : comment ajouter mes événements ?",
-         "Gratuitement, depuis l'appli Wavents : bouton « + », puis une photo de l'affiche suffit, la "
-         "fiche se remplit toute seule. L'événement est publié après vérification, en général dans la "
+         "Gratuitement, sur wavents.fr/ajouter depuis un ordinateur, ou depuis l'appli Wavents (bouton « + ») : "
+         "une photo de l'affiche ou le lien de ta page suffit, la fiche se remplit toute seule. L'événement est publié après vérification, en général dans la "
          "journée."),
         ("Wavents est-il gratuit ?",
          "Oui, le site et l'appli sont gratuits et sans compte. Wavents ne vend pas de billets : "
@@ -1455,6 +1458,125 @@ def llms_txt(upcoming: list[dict], now: datetime, communes: dict[str, list[dict]
         for name, evs in sorted(communes.items(), key=lambda item: -len(item[1]))[:150]:
             lines.append(f"- [Que faire à {name}]({BASE_URL}/{commune_path(name)}): {len(evs)} sorties à venir")
     return "\n".join(lines) + "\n"
+
+
+# Rubrique « Ce que fait l'appli » (maquette validée par Paul le 20/10/2026) :
+# les animations des stories Wavents (scripts/story_wavents.py du dépôt de
+# l'appli), réduites en 360 x 640 sans le son dans static/videos/ (WebM, et MP4 pour Safari).
+DEMOS = [("affiche", "Une affiche en photo, la fiche se remplit"), ("alertes", "Une alerte, et tu ne rates plus rien"),
+         ("weekend", "Ton week-end en un coup d'œil"), ("itineraire", "Le GPS t'y emmène"),
+         ("agenda", "Dans ton agenda en un toucher"), ("partage", "Partage à tes amis"),
+         ("sombre", "Le mode sombre"), ("sources", "D'où viennent les sorties")]
+
+
+def demos_section() -> str:
+    tiles = "".join(
+        f'<figure class="vdemo"><div class="vphone"><video muted loop playsinline preload="metadata" aria-label="{e(t)}">'
+        f'<source src="videos/{k}.webm#t=3" type="video/webm"><source src="videos/{k}.mp4#t=3" type="video/mp4"></video></div>'
+        f'<figcaption>{e(t)}</figcaption></figure>' for k, t in DEMOS)
+    return f"""  <section class="section" id="ce-que-fait-l-appli">
+    <div class="section-head reveal"><div><p class="kicker">En 6 secondes chacune</p><h2>Ce que fait l'appli</h2></div>
+      <div class="scroller-nav"><button data-scroll="-1" aria-label="Précédent">←</button><button data-scroll="1" aria-label="Suivant">→</button></div></div>
+    <div class="scroller demos reveal">{tiles}</div>
+  </section>
+
+  <section class="section">
+    <div class="orga reveal"><span class="orga-ico" aria-hidden="true">📣</span>
+      <div><p class="kicker">Mairie, association, comité des fêtes, commerçant</p><h2>Tu organises un événement&nbsp;?</h2>
+      <p>Ajoute-le gratuitement depuis ton ordinateur : une photo de l'affiche suffit, on s'occupe du reste.</p></div>
+      <a class="btn btn-sun" href="ajouter/" data-goatcounter-click="clic-accueil-ajouter">+ Ajouter un événement</a></div>
+  </section>
+"""
+
+
+def add_page() -> str:
+    """Formulaire « Ajouter un événement » (static/ajouter.js) : même chemin
+    que le formulaire de l'appli, fiche masquée jusqu'à vérification."""
+    cats = "".join(f'<option value="{cid}">{e(label)}</option>' for cid, (_, label, _) in CATEGORIES.items())
+    body = f"""  <section class="ev-hero town-hero"><div class="ev-hero-inner">
+    <p class="kicker">Gratuit, sans compte</p>
+    <h1>Ajoute ton événement</h1>
+    <p class="lead">Mairies, associations, comités des fêtes, commerçants : ton événement apparaît sur l'appli Wavents
+    et sur wavents.fr, près de ceux qui habitent autour.</p>
+  </div></section>
+  <main class="section add-page">
+    <form id="add-form" data-supabase="{SUPABASE_URL}" data-key="{SUPABASE_ANON_KEY}" novalidate>
+      <div class="modes" role="group" aria-label="Comment veux-tu ajouter ton événement ?">
+        <button type="button" class="mode on" data-mode="affiche" aria-pressed="true"><span aria-hidden="true">📷</span><div>J'ai une affiche<small>Le plus rapide</small></div></button>
+        <button type="button" class="mode" data-mode="lien" aria-pressed="false"><span aria-hidden="true">🔗</span><div>J'ai un lien<small>Ta page ou ton agenda</small></div></button>
+        <button type="button" class="mode" data-mode="main" aria-pressed="false"><span aria-hidden="true">✍️</span><div>Je remplis<small>Tout à la main</small></div></button>
+      </div>
+
+      <div id="step-affiche">
+        <label class="drop" id="drop">
+          <input type="file" id="file" accept="image/jpeg,image/png,image/webp" hidden>
+          <img id="drop-img" alt="" hidden>
+          <div><b id="drop-name">Glisse ton affiche ici</b><p>ou clique pour la choisir (JPG, PNG).</p>
+          <p class="add-status" id="affiche-status" aria-live="polite"></p></div>
+        </label>
+      </div>
+
+      <div id="step-lien" hidden>
+        <div class="lien-row"><input type="url" id="lien" placeholder="https://… (page de ton événement ou ton agenda)" aria-label="Lien de la page">
+          <button type="button" class="btn btn-sun" id="lien-go">Lire la page</button></div>
+        <p class="add-status" id="lien-status" aria-live="polite"></p>
+      </div>
+
+      <div class="card-form" id="fiche" hidden>
+        <h2>Vérifie la fiche</h2>
+        <p class="hint" id="fiche-hint"></p>
+        <div id="occurrences" class="occurrences" hidden></div>
+        <label class="f"><span>Titre *</span><input id="titre" maxlength="300" required></label>
+        <div class="grid2">
+          <label class="f"><span>Catégorie *</span><select id="categorie" required><option value="">Choisis…</option>{cats}</select></label>
+          <label class="f"><span>Lieu</span><input id="lieu" placeholder="Salle des fêtes, place du marché…"></label>
+        </div>
+        <label class="f adresse"><span>Adresse *</span><input id="adresse" autocomplete="off" placeholder="Rue et commune">
+          <ul class="sugg" id="adresse-sugg" hidden></ul></label>
+        <div class="grid2">
+          <label class="f"><span>Date *</span><input type="date" id="date" required></label>
+          <label class="f"><span>Heure</span><input type="time" id="heure"></label>
+          <label class="f"><span>Date de fin (si plusieurs jours)</span><input type="date" id="date-fin"></label>
+          <label class="f"><span>Heure de fin</span><input type="time" id="heure-fin"></label>
+        </div>
+        <fieldset class="f prix"><span>Prix</span>
+          <label><input type="radio" name="prix" value="gratuit"> Gratuit</label>
+          <label><input type="radio" name="prix" value="payant"> Payant</label>
+          <label><input type="radio" name="prix" value="inconnu" checked> Je ne sais pas</label>
+          <label class="montant" id="montant-box" hidden>Prix en €<input id="montant" inputmode="decimal" placeholder="5"></label>
+        </fieldset>
+        <label class="check"><input type="checkbox" id="famille"> En famille</label>
+        <label class="f"><span>Description</span><textarea id="description" rows="4" maxlength="10000"></textarea></label>
+        <div class="grid2">
+          <label class="f"><span>Lien (site, billetterie)</span><input type="url" id="site"></label>
+          <label class="f"><span>E-mail de contact (affiché sur la fiche)</span><input type="email" id="email"></label>
+          <label class="f"><span>Téléphone (affiché sur la fiche)</span><input type="tel" id="tel"></label>
+        </div>
+        <input id="piege" name="site_web" tabindex="-1" autocomplete="off" class="piege" aria-hidden="true">
+        <button class="btn btn-sun send" id="envoyer" type="submit">Envoyer mon événement</button>
+        <p class="add-status" id="envoi-status" aria-live="polite"></p>
+        <p class="note">Chaque fiche est vérifiée avant publication, en général dans la journée.</p>
+      </div>
+    </form>
+
+    <div class="card-form merci" id="merci" hidden>
+      <h2>Merci&nbsp;! 🎉</h2>
+      <p id="merci-n"></p>
+      <p>On la vérifie, en général dans la journée.</p>
+      <p id="merci-lien">Une fois publiée, elle sera ici : <a id="merci-a" href="#"></a></p>
+      <p><a class="btn btn-sun" href="./">Ajouter un autre événement</a></p>
+    </div>
+  </main>
+  <script src="../ajouter.js" defer></script>"""
+    return layout(
+        "Ajouter un événement – Wavents",
+        body,
+        description="Mairies, associations, organisateurs : ajoutez gratuitement votre événement sur Wavents, "
+                    "l'agenda des sorties du Beaujolais. Une photo de l'affiche suffit.",
+        url=f"{BASE_URL}/ajouter/",
+        depth=1,
+        page_class="town-page",
+    )
 
 
 def app_page(upcoming: list[dict], communes: dict[str, list[dict]]) -> str:
@@ -1552,10 +1674,12 @@ def main() -> int:
     (out / "a-propos" / "index.html").write_text(about_page(upcoming, communes), encoding="utf-8")
     (out / "faq").mkdir(exist_ok=True)
     (out / "faq" / "index.html").write_text(faq_page(upcoming, communes, theme_counts), encoding="utf-8")
+    (out / "ajouter").mkdir(exist_ok=True)
+    (out / "ajouter" / "index.html").write_text(add_page(), encoding="utf-8")
     (out / "app").mkdir(exist_ok=True)
     (out / "app" / "index.html").write_text(app_page(upcoming, communes), encoding="utf-8")
     extra_pages = ([f"{BASE_URL}/{t[0]}/" for t in THEMES]
-                   + [f"{BASE_URL}/a-propos/", f"{BASE_URL}/faq/", f"{BASE_URL}/app/"])
+                   + [f"{BASE_URL}/a-propos/", f"{BASE_URL}/faq/", f"{BASE_URL}/app/", f"{BASE_URL}/ajouter/"])
 
     urls = ([f"{BASE_URL}/", f"{BASE_URL}/ville/"] + extra_pages
             + [f"{BASE_URL}/{commune_path(name)}" for name in communes]
