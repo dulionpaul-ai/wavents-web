@@ -12,6 +12,11 @@ de Belleville-en-Beaujolais, et la politique de confidentialité de l'appli.
 - `static/` : feuille de style (direction « pop », refonte du 27/09/2026),
   `app.js` (filtres de l'agenda, carte Leaflet, partage), logo, photos des
   catégories, page 404, confidentialité.
+- Ajouter un événement (20/10/2026) : page `ajouter/` (`static/ajouter.js`) :
+  affiche, lien ou texte collé lus par les fonctions `parse-event-photo` /
+  `parse-event-text` de l'appli, fiche envoyée masquée (`source = 'app'`),
+  vérifiée comme celles de l'appli. Rubrique « Ce que fait l'appli » de
+  l'accueil : vidéos des stories dans `static/videos/`.
 - Accueil : sélection du week-end, « En ce moment » (expos et animations
   sur plusieurs jours), catégories, carte, agenda filtrable des 21
   prochains jours (marchés regroupés comme dans l'appli). Page événement :
