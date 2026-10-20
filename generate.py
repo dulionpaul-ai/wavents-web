@@ -427,7 +427,7 @@ def layout(title: str, body: str, *, description: str, url: str, image: str | No
       <a href="{root}#week-end">Ce week-end</a>
       <a href="{root}#carte">Carte</a>
       <a href="{root}#agenda">Agenda</a>
-      <a href="{root}ajouter/" class="nav-cta nav-add" data-goatcounter-click="clic-menu-ajouter">+ Ajouter<span class="nav-long"> un événement</span></a>
+      <a href="{root}ajouter/" class="nav-cta nav-add" data-goatcounter-click="clic-menu-ajouter">+ Ajouter un événement</a>
       <a href="{root}app/" class="nav-cta" data-goatcounter-click="clic-menu-appli">L'appli</a>
     </nav>
   </header>
@@ -1471,22 +1471,21 @@ DEMOS = [("affiche", "Une affiche en photo, la fiche se remplit"), ("alertes", "
 
 
 def demos_section() -> str:
-    """Un seul téléphone, les vidéos s'enchaînent (Paul, 20/10 : une à la
-    fois, la suivante arrive toute seule) ; la liste à côté (ordinateur) ou
-    les points dessous (téléphone) permettent d'en choisir une (app.js)."""
-    items = "".join(
-        f'<li><button type="button" data-demo="{k}" class="{"on" if i == 0 else ""}" aria-label="{e(t)}">'
-        f'<span class="demo-num">{i + 1}</span><span class="demo-txt">{e(t)}</span></button></li>'
+    """Un téléphone par vidéo, qu'on fait glisser (Paul, 20/10) : celle du
+    milieu joue, puis la suivante arrive toute seule (app.js)."""
+    phones = "".join(
+        f'<figure class="dphone{" on" if i == 0 else ""}" data-demo="{k}"><div class="vphone">'
+        f'<video muted playsinline preload="none" poster="videos/{k}.jpg" aria-label="{e(t)}">'
+        f'<source src="videos/{k}.webm" type="video/webm"><source src="videos/{k}.mp4" type="video/mp4"></video>'
+        f'</div><figcaption>{e(t)}</figcaption></figure>'
         for i, (k, t) in enumerate(DEMOS))
-    first, titre = DEMOS[0]
+    dots = "".join(f'<button type="button" aria-label="Vidéo {i + 1}"{" class=on" if i == 0 else ""}></button>'
+                   for i in range(len(DEMOS)))
     return f"""  <section class="section demo-section" id="ce-que-fait-l-appli">
-    <div class="section-head reveal"><div><p class="kicker">En 6 secondes chacune</p><h2>Ce que fait l'appli</h2></div></div>
-    <div class="demo-wrap reveal">
-      <div class="vphone"><video muted playsinline preload="metadata" aria-label="Démonstration de l'appli Wavents">
-        <source src="videos/{first}.webm#t=3" type="video/webm"><source src="videos/{first}.mp4#t=3" type="video/mp4"></video></div>
-      <p class="demo-cap" aria-live="polite">{e(titre)}</p>
-      <ol class="demo-list">{items}</ol>
-    </div>
+    <div class="section-head reveal"><div><p class="kicker">En 6 secondes chacune</p><h2>Ce que fait l'appli</h2></div>
+      <div class="scroller-nav"><button data-demo-step="-1" aria-label="Précédente">←</button><button data-demo-step="1" aria-label="Suivante">→</button></div></div>
+    <div class="demo-track reveal">{phones}</div>
+    <div class="demo-dots">{dots}</div>
   </section>
 """
 

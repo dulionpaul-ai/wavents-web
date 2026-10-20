@@ -157,37 +157,53 @@
     scroller.scrollBy({ left: parseInt(btn.dataset.scroll, 10) * scroller.clientWidth * 0.85, behavior: "smooth" });
   }));
 
-  /* « Ce que fait l'appli » : un téléphone, les vidéos s'enchaînent quand
-     la rubrique est visible ; la liste (ou les points) en choisit une.
-     Image fixe si l'on préfère moins d'animations (un toucher la lance). */
-  const demo = $(".demo-wrap");
-  if (demo) {
-    const video = $("video", demo);
-    const items = $$("[data-demo]", demo);
-    const cap = $(".demo-cap", demo);
-    const ext = video.canPlayType('video/webm; codecs="vp9"') ? "webm" : "mp4";
-    let index = 0, visible = false;
-    const show = (i, play) => {
-      index = (i + items.length) % items.length;
-      items.forEach((b, k) => b.classList.toggle("on", k === index));
-      cap.textContent = items[index].getAttribute("aria-label");
-      video.classList.add("swap");
-      setTimeout(() => {
-        video.src = `videos/${items[index].dataset.demo}.${ext}`;
-        video.classList.remove("swap");
-        if (play) video.play().catch(() => {});
-      }, 180);
+  /* « Ce que fait l'appli » : un téléphone par vidéo, on les fait glisser.
+     Celle du milieu joue ; à la fin, la suivante glisse au milieu toute
+     seule (seulement si la rubrique est visible). Image fixe si l'on
+     préfère moins d'animations (un toucher lance la vidéo). */
+  const track = $(".demo-track");
+  if (track) {
+    const phones = $$(".dphone", track);
+    const videos = phones.map((f) => $("video", f));
+    const dots = $$(".demo-dots button");
+    let index = 0, visible = false, timer = null;
+    const center = (i) => {
+      const f = phones[(i + phones.length) % phones.length];
+      track.scrollTo({ left: f.offsetLeft - (track.clientWidth - f.offsetWidth) / 2, behavior: "smooth" });
     };
-    video.addEventListener("ended", () => { if (visible) show(index + 1, true); });
-    video.addEventListener("click", () => (video.paused ? video.play().catch(() => {}) : video.pause()));
-    items.forEach((b, k) => b.addEventListener("click", () => show(k, true)));
-    if (!calm && "IntersectionObserver" in window) {
-      let started = false;
+    const activate = (i) => {
+      if (i === index && phones[i].classList.contains("on") && (!visible || !videos[i].paused)) return;
+      index = i;
+      phones.forEach((f, k) => f.classList.toggle("on", k === i));
+      dots.forEach((d, k) => d.classList.toggle("on", k === i));
+      videos.forEach((v, k) => { if (k !== i) v.pause(); });
+      if (visible && !calm) { videos[i].currentTime = 0; videos[i].play().catch(() => {}); }
+    };
+    const nearest = () => {
+      const mid = track.scrollLeft + track.clientWidth / 2;
+      let best = 0, gap = Infinity;
+      phones.forEach((f, k) => {
+        const d = Math.abs(f.offsetLeft + f.offsetWidth / 2 - mid);
+        if (d < gap) { gap = d; best = k; }
+      });
+      return best;
+    };
+    track.addEventListener("scroll", () => { clearTimeout(timer); timer = setTimeout(() => activate(nearest()), 120); }, { passive: true });
+    videos.forEach((v, k) => {
+      v.addEventListener("ended", () => { if (visible && k === index) center(k + 1 < phones.length ? k + 1 : 0); });
+      v.addEventListener("click", () => {
+        if (k !== index) { center(k); return; }
+        v.paused ? v.play().catch(() => {}) : v.pause();
+      });
+    });
+    dots.forEach((d, k) => d.addEventListener("click", () => center(k)));
+    $$("[data-demo-step]").forEach((b) => b.addEventListener("click", () => center(index + parseInt(b.dataset.demoStep, 10))));
+    if ("IntersectionObserver" in window) {
       new IntersectionObserver(([entry]) => {
         visible = entry.isIntersecting;
-        if (!visible) { video.pause(); return; }
-        if (!started) { started = true; show(0, true); } else video.play().catch(() => {});
-      }, { threshold: 0.5 }).observe(video);
+        if (!visible) videos.forEach((v) => v.pause());
+        else if (!calm) videos[index].play().catch(() => {});
+      }, { threshold: 0.5 }).observe(track);
     }
   }
 
