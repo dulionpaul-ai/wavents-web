@@ -1385,6 +1385,159 @@ def theme_page(slug: str, page_title: str, h1: str, kicker: str, keep, days: int
     ), len(ordered)
 
 
+# Pages « grands rendez-vous » (22/10, accord de Paul) : les assistants IA
+# ne trouvent aucun programme à jour de ces fêtes (docs/referencement.md du
+# dépôt Wavents). Adresse sans année, gardée d'une édition à l'autre ; les
+# dates de l'édition sont à mettre à jour chaque année.
+FESTIVALS = [
+    {
+        "slug": "sarmentelles-beaujeu",
+        "name": "Les Sarmentelles de Beaujeu",
+        "short": "Sarmentelles",
+        "town": "Beaujeu",
+        "first": date(2026, 11, 18),
+        "last": date(2026, 11, 22),
+        "match": r"sarmentelle",
+        "lead": "Le programme complet de la fête du Beaujolais nouveau à Beaujeu, jour par jour.",
+        # Encart « C'est quoi ? » : sources vérifiées le 22/10/2026 (site
+        # officiel sarmentelles.fr, agenda de la Ville de Lyon). L'année de la
+        # première édition n'est donnée par aucune source : ne pas l'écrire.
+        "story": [
+            ("C'est quoi ?",
+             "La grande fête du Beaujolais nouveau, organisée par l'association Les Sarmentelles de Beaujeu "
+             "la veille du troisième jeudi de novembre, jour de sortie du Beaujolais nouveau. À minuit pile, "
+             "après un défilé aux flambeaux, le vin nouveau est mis en perce place de l'Hôtel-de-Ville, avec "
+             "feu d'artifice et dégustation du nouveau millésime. Autour, cinq jours de fête : parcours "
+             "dégustation des 12 appellations du Beaujolais, soirées et repas sous le grand chapiteau, marché "
+             "gourmand, salon des vins, journée en famille. L'édition 2026 est la 38e."),
+            ("Pourquoi à Beaujeu ?",
+             "Beaujeu est la capitale historique du Beaujolais : la seigneurie des sires de Beaujeu, connue "
+             "depuis le Xe siècle, a donné son nom à toute la région. La fête du vin nouveau s'y tient depuis "
+             "près de quarante ans."),
+            ("Où ?",
+             "À Beaujeu (Rhône), au cœur du Haut-Beaujolais, à une quinzaine de kilomètres à l'ouest de "
+             "Belleville-en-Beaujolais et à une cinquantaine au nord de Lyon. La fête occupe le centre du "
+             "bourg : place de l'Hôtel-de-Ville, promenade des Sarmentelles (grand chapiteau), théâtre et "
+             "salle du stade."),
+        ],
+        "official": "https://www.sarmentelles.fr/",
+        "nearby_title": "Le Beaujolais nouveau ailleurs",
+        "nearby_match": r"beaujolais[- ]nouveaux?|beaujolais primeurs?|primeurs? du beaujolais",
+    },
+]
+
+
+def festival_page(fest: dict, upcoming: list[dict], series: dict[str, list[dict]], now: datetime) -> str:
+    root = "../"
+    first, last = fest["first"], fest["last"]
+    year = first.year
+    in_window = [ev for ev in upcoming
+                 if wall_time(ev["start_date"]).date() <= last and end_of(ev).date() >= first - timedelta(days=1)]
+
+    def text_of(ev: dict) -> str:
+        return fold(f"{ev['title']} {ev.get('description') or ''} {ev.get('location_name') or ''}")
+
+    items = sorted((ev for ev in in_window if re.search(fest["match"], text_of(ev))),
+                   key=lambda ev: wall_time(ev["start_date"]))
+    nearby = sorted((ev for ev in collapse_series(in_window) if ev not in items
+                     and distance_km(ev["latitude"], ev["longitude"]) <= THEME_RADIUS_KM
+                     and re.search(fest["nearby_match"], text_of(ev))),
+                    key=lambda ev: wall_time(ev["start_date"]))
+    # Même titre le même jour (fiche en double pas encore fusionnée) : une seule ligne.
+    nearby = list({(fold(ev["title"]), ev["start_date"][:10]): ev for ev in reversed(nearby)}.values())[::-1]
+
+    span = (f"du {DAYS[first.weekday()]} {first.day} au {DAYS[last.weekday()]} {last.day} "
+            f"{MONTHS[last.month - 1]} {year}")
+    amounts = sorted(ev["price_amount"] for ev in items
+                     if ev.get("price_type") == "paid" and ev.get("price_amount"))
+    facts = [("Quand", cap(span)), ("Où", f"{fest['town']} (Rhône)")]
+    if items:
+        facts.append(("Au programme", f"{len(items)} rendez-vous sur Wavents"))
+    if len(amounts) > 1:
+        facts.append(("Tarifs", f"de {amounts[0]:g} € à {amounts[-1]:g} € selon les rendez-vous"))
+    facts_html = "".join(f"<div><dt>{e(k)}</dt><dd>{e(v)}</dd></div>" for k, v in facts)
+
+    by_day: dict[date, list[dict]] = {}
+    for ev in items:
+        by_day.setdefault(wall_time(ev["start_date"]).date(), []).append(ev)
+    days_html = "".join(
+        f'<section class="section"><div class="section-head"><div><p class="kicker">{e(cap(day_label(d)))}</p>'
+        f'<h2>{len(evs)} rendez-vous</h2></div></div>'
+        f'<div class="rows">{"".join(row_card(ev, series, root) for ev in evs)}</div></section>'
+        for d, evs in sorted(by_day.items()))
+    if not items:
+        days_html = ('<section class="section"><p class="lead">Le programme n\'est pas encore publié : '
+                     'reviens bientôt, cette page est mise à jour chaque jour.</p></section>')
+    nearby_html = ""
+    if nearby:
+        nearby_html = (f'<section class="section"><div class="section-head"><div><p class="kicker">Même semaine, '
+                       f'à moins de {THEME_RADIUS_KM} km</p><h2>{e(fest["nearby_title"])}</h2></div></div>'
+                       f'<div class="rows">{"".join(row_card(ev, series, root) for ev in nearby)}</div></section>')
+
+    qa = [(f"Quand ont lieu {fest['name'].replace('Les ', 'les ', 1)} {year} ?",
+           f"{fest['name']} {year} ont lieu {span}, à {fest['town']}.")]
+    if items:
+        qa.append((f"Quel est le programme des {fest['short']} {year} ?",
+                   "Au programme : " + " ; ".join(
+                       f"{day_label(wall_time(ev['start_date']))}"
+                       + (f" à {hour_label(wall_time(ev['start_date']))}" if ev.get("start_time_known")
+                          and (wall_time(ev['start_date']).hour or wall_time(ev['start_date']).minute) else "")
+                       + f", {ev['title']}" for ev in items) + "."))
+    if len(amounts) > 1:
+        qa.append((f"Combien coûtent les {fest['short']} ?",
+                   f"Les tarifs relevés vont de {amounts[0]:g} € à {amounts[-1]:g} € selon les soirées et "
+                   "les repas. Le détail est sur chaque fiche, avec le lien vers l'organisateur."))
+    if nearby:
+        qa.append(("Où fêter le Beaujolais nouveau ailleurs dans le Beaujolais ?",
+                   f"Wavents liste {len(nearby)} autres soirées et animations la même semaine, à moins de "
+                   f"{THEME_RADIUS_KM} km de Belleville-en-Beaujolais, par exemple à "
+                   + ", ".join(list(dict.fromkeys(commune_of(ev) for ev in nearby if commune_of(ev)))[:6]) + "."))
+    story_html = "".join(f"<h2>{e(t)}</h2><p>{e(p)}</p>" for t, p in fest["story"])
+    story_html += (f'<p class="fest-source">Site officiel : <a href="{e(fest["official"])}" rel="noopener">'
+                   f'{e(fest["official"].split("//")[1].strip("/").removeprefix("www."))}</a></p>')
+    faq_html = "".join(f"<h3>{e(q)}</h3><p>{e(a)}</p>" for q, a in qa)
+
+    url = f"{BASE_URL}/{fest['slug']}/"
+    schema = {
+        "@context": "https://schema.org",
+        "@graph": [
+            {"@type": "ItemList", "name": f"Programme des {fest['short']} {year}", "itemListElement": [
+                {"@type": "ListItem", "position": i + 1, "url": f"{BASE_URL}/{event_path(ev)}"}
+                for i, ev in enumerate(items)
+            ]},
+            {"@type": "FAQPage", "mainEntity": [
+                {"@type": "Question", "name": q, "acceptedAnswer": {"@type": "Answer", "text": a}} for q, a in qa
+            ]},
+        ],
+    }
+    image = next((real_image(ev) for ev in items if real_image(ev)), None)
+    intro = (f"{fest['name']} {year}, {span} : c'est quoi, où, et tout le programme jour par jour, "
+             "mis à jour chaque jour.")
+    body = f"""  <section class="ev-hero town-hero"><div class="ev-hero-inner">
+    <a class="back" href="{root}">← Accueil</a>
+    <p class="kicker">Grand rendez-vous</p>
+    <h1>{e(fest['name'])} {year}</h1>
+    <p class="lead">{e(fest['lead'])}</p>
+    <div class="hero-actions">{play_cta()}</div>
+  </div></section>
+  <section class="section"><div class="panel soft fest-story">{story_html}</div>
+    <dl class="fest-facts">{facts_html}</dl></section>
+  {days_html}
+  {nearby_html}
+  <section class="section prose"><h2>Questions fréquentes</h2>{faq_html}</section>
+  <section class="section"><div class="town-links"><a class="town-link" href="{root}{commune_path(fest['town'])}">Que faire à {e(fest['town'])}</a><a class="town-link" href="{root}ce-week-end/">Ce week-end dans le Beaujolais</a></div></section>"""
+    return layout(
+        f"{fest['name']} {year} : programme et dates – Wavents",
+        body,
+        description=intro,
+        url=url,
+        image=image,
+        extra_head=f'<script type="application/ld+json">{json.dumps(schema, ensure_ascii=False)}</script>',
+        depth=1,
+        page_class="town-page",
+    )
+
+
 def about_page(upcoming: list[dict], communes: dict[str, list[dict]]) -> str:
     root = "../"
     body = f"""  <section class="ev-hero town-hero"><div class="ev-hero-inner">
@@ -1535,6 +1688,7 @@ def llms_txt(upcoming: list[dict], now: datetime, communes: dict[str, list[dict]
         f"- [Brocantes et vide-greniers]({BASE_URL}/brocantes/)",
         f"- [Sorties gratuites]({BASE_URL}/gratuit/)",
         f"- [Sorties en famille]({BASE_URL}/enfants/)",
+        *[f"- [{f['name']} {f['first'].year} : programme]({BASE_URL}/{f['slug']}/)" for f in FESTIVALS],
         "",
         f"## Sorties des 7 prochains jours (à moins de {HOME_RADIUS_KM} km de Belleville-en-Beaujolais)",
         "",
@@ -1780,6 +1934,9 @@ def main() -> int:
         theme_counts[slug] = count
         (out / slug).mkdir(exist_ok=True)
         (out / slug / "index.html").write_text(page, encoding="utf-8")
+    for fest in FESTIVALS:
+        (out / fest["slug"]).mkdir(exist_ok=True)
+        (out / fest["slug"] / "index.html").write_text(festival_page(fest, upcoming, series, now), encoding="utf-8")
     (out / "a-propos").mkdir(exist_ok=True)
     (out / "a-propos" / "index.html").write_text(about_page(upcoming, communes), encoding="utf-8")
     (out / "faq").mkdir(exist_ok=True)
@@ -1788,7 +1945,7 @@ def main() -> int:
     (out / "ajouter" / "index.html").write_text(add_page(), encoding="utf-8")
     (out / "app").mkdir(exist_ok=True)
     (out / "app" / "index.html").write_text(app_page(upcoming, communes), encoding="utf-8")
-    extra_pages = ([f"{BASE_URL}/{t[0]}/" for t in THEMES]
+    extra_pages = ([f"{BASE_URL}/{t[0]}/" for t in THEMES] + [f"{BASE_URL}/{f['slug']}/" for f in FESTIVALS]
                    + [f"{BASE_URL}/a-propos/", f"{BASE_URL}/faq/", f"{BASE_URL}/app/", f"{BASE_URL}/ajouter/"])
 
     urls = ([f"{BASE_URL}/", f"{BASE_URL}/ville/"] + extra_pages

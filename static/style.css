@@ -713,3 +713,15 @@ main h2 { font-size: 1.35rem; margin: 1.6em 0 .5em; color: var(--deep); }
     font-size: 20px; line-height: 1; cursor: pointer; padding: 4px; }
   .qr-close:hover { color: var(--ink); }
 }
+
+/* Pages « grands rendez-vous » (22/10) : l'essentiel en tête. */
+.fest-facts { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin: 0; }
+.fest-facts div { background: var(--card); border: 1px solid var(--line); border-radius: 18px; padding: 14px 16px; }
+.fest-facts dt { font-size: .8rem; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; color: var(--ink-soft); }
+.fest-facts dd { margin: 4px 0 0; font-family: var(--display); font-weight: 800; font-size: 1.05rem; color: var(--ink); }
+.prose h3 { font-family: var(--display); font-weight: 800; font-size: 1.1rem; margin: 1.4em 0 .3em; color: var(--ink); }
+.fest-story { margin-bottom: 16px; }
+.fest-story h2 { font-family: var(--display); font-weight: 800; font-size: 1.15rem !important; margin: 0 0 6px; color: var(--ink); }
+.fest-story p { margin: 0 0 16px; line-height: 1.6; color: var(--ink); }
+.fest-story .fest-source { margin: 0; font-size: .9rem; color: var(--ink-soft); }
+.fest-story .fest-source a { color: var(--blue); font-weight: 700; }
