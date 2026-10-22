@@ -1483,6 +1483,168 @@ FESTIVALS = [
                  "la mise en perce à minuit. Programme complet : wavents.fr/sarmentelles-beaujeu/.")],
         "related": ["sarmentelles-beaujeu"],
     },
+    {
+        "slug": "halloween",
+        "name": "Halloween",
+        "short": "Halloween",
+        "town": None,
+        "first": date(2026, 10, 22),
+        "last": date(2026, 11, 1),
+        "match": r"halloween",
+        "when": "Samedi 31 octobre 2026",
+        "where": "Autour de Belleville",
+        "unit": "animations",
+        "unit1": "animation",
+        "teaser": "Défilés costumés, chasses aux bonbons, ateliers et soirées frissons autour de chez toi.",
+        "lead": "Défilés costumés, chasses aux bonbons, ateliers, contes et soirées frissons : toutes les "
+                "animations d'Halloween autour de chez toi, jour par jour.",
+        # Sources vérifiées le 22/10/2026 : brut.media, consoglobe.com,
+        # vikidia (Samhain, Jack O'Lantern, années 1990) ; vacances : onisep.fr.
+        "story": [
+            ("C'est quoi ?",
+             "Halloween, c'est la soirée du 31 octobre, veille de la Toussaint : on se déguise en sorcière, en "
+             "fantôme ou en citrouille, les enfants font la tournée des maisons pour réclamer des bonbons, et "
+             "l'on creuse des citrouilles en lanternes. Autour de chez nous, ce sont surtout des fêtes pour les "
+             "enfants, pendant les vacances de la Toussaint (du 17 octobre au 2 novembre 2026)."),
+            ("Un peu d'histoire",
+             "Halloween vient de Samhain, une fête celte d'Irlande et d'Écosse qui marquait la fin des "
+             "récoltes : on croyait alors que la frontière entre les vivants et les esprits s'amincissait. Son "
+             "nom vient de « All Hallows' Eve », la veille de la Toussaint. Les émigrés irlandais l'ont emportée "
+             "aux États-Unis, où le navet creusé de la lanterne est devenu citrouille. En France, la fête s'est "
+             "surtout répandue à la fin des années 1990."),
+            ("Où le fêter ?",
+             "Dans les villages, les médiathèques, les fermes et les salles des fêtes du Beaujolais et du Val "
+             "de Saône. Ci-dessous, toutes les animations d'Halloween que Wavents connaît à moins de 40 km de "
+             "Belleville-en-Beaujolais."),
+        ],
+        "program_q": "Que faire pour Halloween {year} dans le Beaujolais ?",
+        "count_q": "Y a-t-il des animations d'Halloween pour les enfants, et des gratuites ?",
+        "faq": [("Quand est Halloween {year} ?",
+                 "Le samedi 31 octobre {year}, veille de la Toussaint. Beaucoup d'animations ont lieu pendant "
+                 "les vacances de la Toussaint, du 17 octobre au 2 novembre {year}.")],
+        "related": [],
+    },
+    {
+        "slug": "marches-de-noel",
+        "name": "Les marchés de Noël",
+        "short": "marchés de Noël",
+        "town": None,
+        "first": date(2026, 10, 31),
+        "last": date(2026, 12, 24),
+        "match": r"marches? (de|du) noel|marche de l.avent|noel des createurs",
+        "exclude": r"halloween",
+        "when": "De novembre au 24 décembre 2026",
+        "where": "Beaujolais et Val de Saône",
+        "unit": "marchés",
+        "unit1": "marché",
+        "teaser": "Chalets, vin chaud, artisans et idées cadeaux : tous les marchés de Noël autour de chez toi.",
+        "lead": "Chalets, vin chaud, artisans et idées cadeaux : tous les marchés de Noël du Beaujolais et du "
+                "Val de Saône, week-end par week-end.",
+        # Sources vérifiées le 22/10/2026 : noel.strasbourg.eu (Christkindelsmärik, 1570).
+        "story": [
+            ("C'est quoi ?",
+             "Chalets, vin chaud, artisans, idées cadeaux et parfois le Père Noël : les marchés de Noël "
+             "rythment l'Avent. Dans le Beaujolais et autour, ce sont souvent des marchés de village, d'école "
+             "ou d'association, le temps d'un week-end, dans une salle des fêtes ou sur la place."),
+            ("Un peu d'histoire",
+             "La tradition vient d'Alsace et des pays germaniques : le marché de Noël de Strasbourg, le "
+             "Christkindelsmärik (« marché de l'Enfant Jésus » en alsacien), remonte à 1570 et compte parmi "
+             "les plus anciens d'Europe. Il a longtemps été le seul en France ; les marchés de Noël se sont "
+             "depuis répandus dans tout le pays."),
+            ("Où les trouver ?",
+             "Ci-dessous, tous les marchés de Noël que Wavents connaît à moins de 40 km de "
+             "Belleville-en-Beaujolais, jour par jour. La liste s'allonge chaque jour à l'approche de "
+             "décembre."),
+        ],
+        "program_q": "Où trouver un marché de Noël dans le Beaujolais en {year} ?",
+        "faq": [("Quand ont lieu les marchés de Noël {year} ?",
+                 "Surtout les week-ends de fin novembre et de décembre, jusqu'au 24 décembre {year}. Chaque "
+                 "marché a ses dates et ses horaires sur sa fiche.")],
+        "related": ["fete-des-lumieres"],
+    },
+    {
+        "slug": "fete-des-lumieres",
+        "name": "La Fête des Lumières",
+        "short": "Fête des Lumières",
+        "town": None,
+        "first": date(2026, 12, 4),
+        "last": date(2026, 12, 9),
+        "match": r"fete des lumieres|lumignons?|illuminations? du 8 decembre|fete du 8 decembre|course des lumieres",
+        "when": "Mardi 8 décembre 2026 (à Lyon, du 5 au 8)",
+        "where": "Lyon et ses environs",
+        "unit": "rendez-vous",
+        "unit1": "rendez-vous",
+        "teaser": "Lumignons aux fenêtres, lanternes et illuminations du 8 décembre, à Lyon et dans les villages.",
+        "lead": "Lumignons, lanternes, illuminations et vin chaud : la Fête des Lumières à Lyon et dans les "
+                "villages autour, jour par jour.",
+        # Sources vérifiées le 22/10/2026 : herodote.net, lyoncapitale.fr,
+        # visiterlyon.com (1852, lumignons, festival depuis 1999), icalendrier.fr (5-8/12/2026).
+        "story": [
+            ("C'est quoi ?",
+             "Le 8 décembre, Lyon et sa région posent des lumignons, de petites bougies dans des verres, sur "
+             "le bord de leurs fenêtres. À Lyon, la Fête des Lumières dure quatre jours, du 5 au 8 décembre "
+             "2026, avec des créations lumineuses dans toute la ville. Dans les villages autour, on fête le "
+             "8 décembre plus simplement : lanternes, processions, illuminations et vin chaud."),
+            ("Un peu d'histoire",
+             "Le 8 décembre 1852, Lyon devait inaugurer la statue dorée de la Vierge, sur la colline de "
+             "Fourvière. Le mauvais temps a fait annuler les illuminations prévues ; quand le ciel s'est "
+             "dégagé, les Lyonnais ont spontanément posé des bougies à leurs fenêtres. La tradition des "
+             "lumignons était née ; le grand festival de lumière de Lyon s'y est ajouté à partir de 1999."),
+            ("Où la fêter ?",
+             "À Lyon bien sûr, mais aussi dans les communes du Beaujolais, du Val de Saône et des Monts d'Or. "
+             "Ci-dessous, tous les rendez-vous que Wavents connaît à moins de 40 km de "
+             "Belleville-en-Beaujolais."),
+        ],
+        "program_q": "Où fêter le 8 décembre {year} autour de Lyon et dans le Beaujolais ?",
+        "faq": [("Quand a lieu la Fête des Lumières {year} ?",
+                 "À Lyon, du samedi 5 au mardi 8 décembre {year}. Le 8 décembre, jour de la fête, les "
+                 "habitants de toute la région posent des lumignons à leurs fenêtres."),
+                ("D'où vient la Fête des Lumières ?",
+                 "Du 8 décembre 1852 : ce soir-là, les Lyonnais ont illuminé leurs fenêtres pour l'inauguration "
+                 "de la statue de la Vierge de Fourvière.")],
+        "related": ["marches-de-noel"],
+    },
+    {
+        "slug": "conscrits-villefranche",
+        "name": "La fête des Conscrits de Villefranche",
+        "short": "Conscrits",
+        "town": None,
+        "town_link": "Villefranche-sur-Saône",
+        "first": date(2027, 1, 15),
+        "last": date(2027, 2, 7),
+        "match": r"conscrit",
+        "when": "Fin janvier 2027 (dates pas encore annoncées)",
+        "where": "Villefranche-sur-Saône",
+        "unit": "rendez-vous",
+        "unit1": "rendez-vous",
+        "teaser": "La grande fête de Villefranche, fin janvier : la Vague, le défilé des classes.",
+        "lead": "La grande fête de Villefranche-sur-Saône, fin janvier : la Vague, le défilé des classes, et "
+                "les fêtes des conscrits dans les villages autour.",
+        # Sources vérifiées le 22/10/2026 : fiche de l'inventaire du patrimoine
+        # culturel immatériel (culture.gouv.fr), lyoncapitale.fr. Dates 2027
+        # non publiées le 22/10 : à renseigner dès qu'elles le sont.
+        "story": [
+            ("C'est quoi ?",
+             "La fête des Conscrits est la grande fête de Villefranche-sur-Saône, chaque année pendant six "
+             "jours fin janvier. Les hommes d'une même classe, c'est-à-dire nés une année se terminant par le "
+             "même chiffre, la fêtent ensemble à 20, 30, 40, 50 ans et plus. Temps forts : la Vague, le grand "
+             "défilé des classes dans les rues, et le banquet."),
+            ("Un peu d'histoire",
+             "Elle est née sous la Troisième République, autour du conseil de révision et du tirage au sort qui "
+             "désignaient les jeunes de 20 ans appelés au service militaire. Leurs aînés s'y sont peu à peu "
+             "joints, jusqu'à en faire la fête de toute la ville et de ses environs. Elle est inscrite depuis "
+             "2020 à l'inventaire national du patrimoine culturel immatériel."),
+            ("Où ?",
+             "À Villefranche-sur-Saône, dans le centre-ville. Beaucoup de villages du Beaujolais ont aussi "
+             "leur fête des conscrits ou des classes : Wavents les liste ci-dessous dès qu'elles sont "
+             "annoncées."),
+        ],
+        "program_q": "Quelles fêtes des conscrits en janvier {year} ?",
+        "faq": [("Quand a lieu la fête des Conscrits de Villefranche {year} ?",
+                 "Chaque année fin janvier, pendant six jours. Les dates de {year} n'ont pas encore été "
+                 "annoncées : cette page sera mise à jour dès qu'elles le seront.")],
+        "related": [],
+    },
 ]
 
 
@@ -1530,7 +1692,8 @@ def festival_page(fest: dict, upcoming: list[dict], series: dict[str, list[dict]
 
     by_day: dict[date, list[dict]] = {}
     for ev in items:
-        by_day.setdefault(wall_time(ev["start_date"]).date(), []).append(ev)
+        # Déjà commencé (animation sur toutes les vacances…) : rangé à aujourd'hui.
+        by_day.setdefault(max(wall_time(ev["start_date"]).date(), now.date()), []).append(ev)
     days_html = "".join(
         f'<section class="section"><div class="section-head"><div><p class="kicker">{e(cap(day_label(d)))}</p>'
         f'<h2>{len(evs)} {fest.get("unit", "rendez-vous") if len(evs) > 1 else fest.get("unit1", "rendez-vous")}</h2></div></div>'
@@ -1565,6 +1728,12 @@ def festival_page(fest: dict, upcoming: list[dict], series: dict[str, list[dict]
                        + f", {ev['title']}" + ("" if fest.get("town") else f" ({commune_of(ev)})")
                        for ev in listed)
                    + (f", et {len(items) - len(listed)} autres sur cette page." if len(items) > len(listed) else ".")))
+    if fest.get("count_q") and items:
+        kids = sum(1 for ev in items if ev.get("for_kids"))
+        free = sum(1 for ev in items if is_free(ev))
+        qa.append((fest["count_q"].format(year=year),
+                   f"Oui : sur les {len(items)} {fest.get('unit', 'rendez-vous')} de cette page, {kids} sont "
+                   f"signalés « En famille » et {free} sont gratuits. Les badges sur chaque ligne aident à choisir."))
     if fest.get("town") and len(amounts) > 1:
         qa.append((f"Combien coûtent les {fest['short']} ?",
                    f"Les tarifs relevés vont de {amounts[0]:g} € à {amounts[-1]:g} € selon les soirées et "
@@ -1578,7 +1747,8 @@ def festival_page(fest: dict, upcoming: list[dict], series: dict[str, list[dict]
         story_html += (f'<p class="fest-source">Site officiel : <a href="{e(fest["official"])}" rel="noopener">'
                        f'{e(fest["official"].split("//")[1].strip("/").removeprefix("www."))}</a></p>')
     faq_html = "".join(f"<h3>{e(q)}</h3><p>{e(a)}</p>" for q, a in qa)
-    links = [(f"{root}{commune_path(fest['town'])}", f"Que faire à {fest['town']}")] if fest.get("town") else []
+    town_link = fest.get("town_link") or fest.get("town")
+    links = [(f"{root}{commune_path(town_link)}", f"Que faire à {town_link}")] if town_link else []
     links += [(f"{root}{f['slug']}/", f["name"]) for f in FESTIVALS
               if f["slug"] != fest["slug"] and f not in related]
     links.append((f"{root}ce-week-end/", "Ce week-end dans le Beaujolais"))
