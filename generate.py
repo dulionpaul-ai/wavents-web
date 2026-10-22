@@ -417,6 +417,20 @@ def app_store_soon(extra_class: str = "") -> str:
             f"<span><small>Bientôt sur</small>l'App Store</span></span>")
 
 
+def qr_card(root: str) -> str:
+    """QR code pour installer l'appli, sur ordinateur seulement (Paul,
+    22/10/2026) : petite carte en bas à droite, refermable ; jamais sur
+    téléphone (CSS, écran large avec souris). Canal « site » dans
+    GoatCounter et la Play Console."""
+    if not PLAY_STORE_PUBLISHED:
+        return ""
+    stores = "Android" + (" et iPhone" if APP_STORE_URL else ", bientôt iPhone")
+    return (f'<aside class="qr-card" aria-label="Installer l\'appli Wavents">'
+            f'<button class="qr-close" type="button" aria-label="Fermer">×</button>'
+            f'<img src="{root}img/qr_site.png" width="150" height="150" alt="QR code pour installer l\'appli Wavents">'
+            f'<p><strong>L\'appli sur ton téléphone</strong>Scanne pour l\'installer ({stores})</p></aside>')
+
+
 def layout(title: str, body: str, *, description: str, url: str, image: str | None = None,
            extra_head: str = "", depth: int = 0, page_class: str = "", canonical: str | None = None) -> str:
     root = "../" * depth
@@ -493,6 +507,7 @@ def layout(title: str, body: str, *, description: str, url: str, image: str | No
     </div>
     <p class="footer-note">Informations issues des agendas publics et des organisateurs, mises à jour chaque jour. Vérifie auprès de l'organisateur avant de te déplacer.</p>
   </footer>
+  {qr_card(root)}
   <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js" defer></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.5.3/leaflet.markercluster.js" defer></script>
   <script src="{root}app.js" defer></script>

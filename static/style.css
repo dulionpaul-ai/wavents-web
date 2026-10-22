@@ -694,3 +694,22 @@ main h2 { font-size: 1.35rem; margin: 1.6em 0 .5em; color: var(--deep); }
 }
 .drop img[hidden] { display: none; }
 @media (max-width: 420px) and (prefers-reduced-motion: reduce) { .nav-brand { font-size: 1.2rem; } }
+
+/* QR code d'installation, sur ordinateur seulement (22/10/2026) */
+.qr-card { display: none; }
+@media (hover: hover) and (pointer: fine) and (min-width: 1000px) {
+  .qr-card {
+    display: block; position: fixed; right: 24px; bottom: 24px; z-index: 900; width: 190px;
+    padding: 16px 16px 14px; border-radius: 20px; background: var(--card); color: var(--ink);
+    border: 1px solid var(--line); box-shadow: 0 14px 40px rgba(6, 40, 79, .22); text-align: center;
+    opacity: 0; transform: translateY(16px); transition: opacity .5s ease, transform .5s ease;
+  }
+  .qr-card.show { opacity: 1; transform: none; }
+  .qr-card.closed { display: none; }
+  .qr-card img { display: block; width: 150px; height: 150px; margin: 0 auto 10px; border-radius: 12px; background: #fff; }
+  .qr-card p { margin: 0; font-size: 13px; line-height: 1.35; color: var(--ink-soft); }
+  .qr-card strong { display: block; font-family: var(--display); font-size: 15px; color: var(--ink); margin-bottom: 2px; }
+  .qr-close { position: absolute; top: 6px; right: 8px; border: 0; background: none; color: var(--ink-soft);
+    font-size: 20px; line-height: 1; cursor: pointer; padding: 4px; }
+  .qr-close:hover { color: var(--ink); }
+}

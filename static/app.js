@@ -516,3 +516,18 @@
     }
   }));
 })();
+
+// QR code d'installation sur ordinateur (22/10/2026) : apparaît après 2 s,
+// refermable ; le choix est retenu sur ce navigateur.
+(function () {
+  var card = document.querySelector('.qr-card');
+  if (!card) return;
+  var closed = false;
+  try { closed = localStorage.getItem('wv_qr_closed') === '1'; } catch (e) {}
+  if (closed) { card.classList.add('closed'); return; }
+  setTimeout(function () { card.classList.add('show'); }, 2000);
+  card.querySelector('.qr-close').addEventListener('click', function () {
+    card.classList.add('closed');
+    try { localStorage.setItem('wv_qr_closed', '1'); } catch (e) {}
+  });
+})();
