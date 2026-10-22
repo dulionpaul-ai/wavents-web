@@ -46,7 +46,7 @@ BASE_URL = os.environ.get("PAGES_BASE_URL", "https://wavents.fr").rstrip("/")
 PLAY_STORE_URL = "https://play.google.com/store/apps/details?id=com.wavents.wavents"
 # Passer à True le jour où l'appli est publiée sur le Play Store (test
 # ouvert ou production) : avant, la fiche renvoie une erreur 404.
-PLAY_STORE_PUBLISHED = False
+PLAY_STORE_PUBLISHED = True  # en production depuis le 21/10/2026 (Paul, 22/10 : « c'est officiel »)
 # Adresse de la fiche App Store (https://apps.apple.com/fr/app/wavents/id…)
 # à renseigner le jour où Apple publie l'appli.
 APP_STORE_URL: str | None = None
@@ -301,13 +301,18 @@ def repeat_key(event: dict) -> str:
     return f"{fold(event['title']).strip()}|{event['latitude']:.3f}|{event['longitude']:.3f}|{text}"
 
 
-def repeat_canonicals(events: list[dict], now: datetime) -> dict[str, str]:
+def repeat_groups(events: list[dict]) -> dict[str, list[dict]]:
     groups: dict[str, list[dict]] = {}
     for ev in events:
         groups.setdefault(repeat_key(ev), []).append(ev)
-    canonical: dict[str, str] = {}
     for items in groups.values():
         items.sort(key=lambda ev: (ev["start_date"], ev["id"]))
+    return groups
+
+
+def repeat_canonicals(groups: dict[str, list[dict]], now: datetime) -> dict[str, str]:
+    canonical: dict[str, str] = {}
+    for items in groups.values():
         main = next((ev for ev in items if end_of(ev) >= now), items[0])
         for ev in items:
             canonical[ev["id"]] = main["id"]
@@ -876,7 +881,8 @@ NO_DESCRIPTION = ('<div class="panel soft"><h2>À propos</h2><p class="descripti
 
 
 def event_page(event: dict, neighbours: list[dict], series: dict[str, list[dict]],
-               town_page: str | None = None, canonical: str | None = None) -> str:
+               town_page: str | None = None, canonical: str | None = None,
+               repeats: list[dict] | None = None) -> str:
     root = "../../"
     emoji, label, color = category(event)
     url = f"{BASE_URL}/{event_path(event)}"
@@ -895,7 +901,11 @@ def event_page(event: dict, neighbours: list[dict], series: dict[str, list[dict]
     if (event.get("website_url") or "").startswith("http"):
         actions.append(f'<a class="btn btn-ghost" href="{e(event["website_url"])}" rel="nofollow noopener" target="_blank" data-goatcounter-click="clic-site-organisateur">🌐 Site de l\'organisateur</a>')
 
-    other_dates = [ev for ev in series.get(series_key(event) or "", [])
+    # Marchés : toutes les dates du même marché ; autres événements qui
+    # reviennent (atelier, séance, stage…, même titre, lieu et description) :
+    # leurs autres dates aussi (Paul, 22/10/2026).
+    same = series.get(series_key(event) or "") or repeats or []
+    other_dates = [ev for ev in same
                    if ev["id"] != event["id"] and end_of(ev) >= datetime.now()][:10]
     dates_html = ""
     if other_dates:
@@ -1432,8 +1442,13 @@ def faq_page(upcoming: list[dict], communes: dict[str, list[dict]], theme_counts
          "Oui, le site et l'appli sont gratuits et sans compte. Wavents ne vend pas de billets : "
          "chaque fiche renvoie vers l'organisateur."),
         ("L'appli est-elle disponible sur iPhone et Android ?",
-         "L'appli Wavents arrive bientôt sur l'App Store et le Play Store. En attendant, toutes les "
-         "sorties sont consultables sur ce site, depuis n'importe quel téléphone."),
+         ("L'appli Wavents est disponible gratuitement sur Android (Google Play) et arrive bientôt sur "
+          "iPhone (App Store). Toutes les sorties sont aussi sur ce site, depuis n'importe quel téléphone."
+          if PLAY_STORE_PUBLISHED and not APP_STORE_URL else
+          "L'appli Wavents est disponible gratuitement sur Android (Google Play) et sur iPhone (App Store)."
+          if PLAY_STORE_PUBLISHED else
+          "L'appli Wavents arrive bientôt sur l'App Store et le Play Store. En attendant, toutes les "
+          "sorties sont consultables sur ce site, depuis n'importe quel téléphone.")),
         ("Comment être prévenu des nouvelles sorties ?",
          "Dans l'appli, fais une recherche (par exemple « loto » autour de ta ville) et enregistre-la : "
          "tu reçois chaque soir une notification quand de nouveaux événements correspondent. L'appli "
@@ -1492,7 +1507,9 @@ def llms_txt(upcoming: list[dict], now: datetime, communes: dict[str, list[dict]
         "",
         f"Site : {BASE_URL}/ (mis à jour chaque jour). Une page par événement,",
         f"avec date, lieu, prix et données schema.org Event. Liste complète : {BASE_URL}/sitemap.xml.",
-        "Appli Android Wavents (carte, favoris, rappels, alertes) : bientôt sur Google Play.",
+        (f"Appli Wavents (carte, favoris, rappels, alertes), gratuite : Android {PLAY_STORE_URL}"
+         + (f" ; iPhone {APP_STORE_URL}." if APP_STORE_URL else " ; iPhone bientôt sur l'App Store.")
+         if PLAY_STORE_PUBLISHED else "Appli Android Wavents (carte, favoris, rappels, alertes) : bientôt sur Google Play."),
         f"Contact : hello@wavents.fr. Confidentialité : {BASE_URL}/confidentialite.html.",
         f"À propos : {BASE_URL}/a-propos/. Questions fréquentes : {BASE_URL}/faq/.",
         "",
@@ -1721,7 +1738,8 @@ def main() -> int:
         by_day.setdefault(wall_time(ev["start_date"]).date(), []).append(ev)
 
     communes = group_by_commune(upcoming)
-    canonical_ids = repeat_canonicals(events, now)
+    repeats = repeat_groups(events)
+    canonical_ids = repeat_canonicals(repeats, now)
     for ev in events:
         folder = out / event_path(ev)
         folder.mkdir(parents=True, exist_ok=True)
@@ -1729,8 +1747,8 @@ def main() -> int:
         town_page = commune_path(town) if town in communes else None
         main_id = canonical_ids[ev["id"]]
         canonical = None if main_id == ev["id"] else f"{BASE_URL}/e/{main_id}/"
-        (folder / "index.html").write_text(event_page(ev, neighbours_of(ev, by_day), series, town_page, canonical),
-                                           encoding="utf-8")
+        (folder / "index.html").write_text(event_page(ev, neighbours_of(ev, by_day), series, town_page, canonical,
+                                                      repeats.get(repeat_key(ev))), encoding="utf-8")
         (folder / "event.ics").write_text(ics(ev), encoding="utf-8")
     (out / "index.html").write_text(home_page(events, upcoming, now), encoding="utf-8")
 
