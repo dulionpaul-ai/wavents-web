@@ -725,3 +725,6 @@ main h2 { font-size: 1.35rem; margin: 1.6em 0 .5em; color: var(--deep); }
 .fest-story p { margin: 0 0 16px; line-height: 1.6; color: var(--ink); }
 .fest-story .fest-source { margin: 0; font-size: .9rem; color: var(--ink-soft); }
 .fest-story .fest-source a { color: var(--blue); font-weight: 700; }
+a.fest-related { display: flex; flex-direction: column; gap: 4px; text-decoration: none; color: var(--ink); background: color-mix(in srgb, var(--sun) 22%, var(--card)); }
+a.fest-related b { font-family: var(--display); font-weight: 800; font-size: 1.15rem; }
+a.fest-related .fest-more { color: var(--deep); font-weight: 700; margin-top: 4px; }

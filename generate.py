@@ -1398,6 +1398,14 @@ FESTIVALS = [
         "first": date(2026, 11, 18),
         "last": date(2026, 11, 22),
         "match": r"sarmentelle",
+        "where": "Beaujeu (Rhône)",
+        "teaser": "À Beaujeu, la grande fête du Beaujolais nouveau : cinq jours, mise en perce à minuit.",
+        "program_q": "Quel est le programme des Sarmentelles {year} ?",
+        "faq": [("Quand ont lieu les Sarmentelles de Beaujeu {year} ?",
+                 "Les Sarmentelles de Beaujeu {year} ont lieu du mercredi 18 au dimanche 22 novembre {year}, "
+                 "à Beaujeu (Rhône). La mise en perce du Beaujolais nouveau a lieu à minuit, dans la nuit du "
+                 "mercredi au jeudi.")],
+        "related": ["beaujolais-nouveau"],
         "lead": "Le programme complet de la fête du Beaujolais nouveau à Beaujeu, jour par jour.",
         # Encart « C'est quoi ? » : sources vérifiées le 22/10/2026 (site
         # officiel sarmentelles.fr, agenda de la Ville de Lyon). L'année de la
@@ -1424,6 +1432,57 @@ FESTIVALS = [
         "nearby_title": "Le Beaujolais nouveau ailleurs",
         "nearby_match": r"beaujolais[- ]nouveaux?|beaujolais primeurs?|primeurs? du beaujolais",
     },
+    {
+        "slug": "beaujolais-nouveau",
+        "name": "Le Beaujolais nouveau",
+        "short": "Beaujolais nouveau",
+        "town": None,
+        # Sortie le 3e jeudi de novembre (19/11/2026) ; soirées du week-end
+        # d'avant à celui d'après.
+        "first": date(2026, 11, 13),
+        "last": date(2026, 11, 29),
+        "match": r"beaujolais[- ]nouveaux?|beaujolais primeurs?|primeurs? du beaujolais",
+        "exclude": r"sarmentelle",
+        "when": "Jeudi 19 novembre 2026, à minuit",
+        "where": "Tout le Beaujolais",
+        "teaser": "Toutes les soirées du Beaujolais nouveau dans les villages autour, jour par jour.",
+        "unit": "soirées et fêtes",
+        "unit1": "soirée ou fête",
+        "lead": "Toutes les soirées du Beaujolais nouveau autour de chez toi : mises en perce, repas, bals, "
+                "portes ouvertes, jour par jour.",
+        # Sources vérifiées le 22/10/2026 : idealwine.net, europe1.fr,
+        # icalendrier.fr (arrêté de 1951, décret du 29/10/1985, date 2026).
+        "story": [
+            ("C'est quoi ?",
+             "Le Beaujolais nouveau, ou Beaujolais primeur, est le premier vin de l'année : un vin rouge de "
+             "gamay, vendangé à la fin de l'été et mis en bouteille quelques semaines plus tard, à boire jeune. "
+             "Il sort chaque année le troisième jeudi de novembre, à minuit : en 2026, dans la nuit du "
+             "mercredi 18 au jeudi 19 novembre."),
+            ("Un peu d'histoire",
+             "En 1951, un arrêté interdit de vendre les vins d'appellation avant le 15 décembre. Les vignerons "
+             "du Beaujolais obtiennent de pouvoir vendre le leur dès le 15 novembre, à condition d'écrire "
+             "« nouveau » sur l'étiquette. Depuis un décret de 1985, la sortie est fixée au troisième jeudi "
+             "de novembre. La fête a fait le tour du monde, mais c'est dans le Beaujolais qu'on la vit au plus "
+             "près des vignerons."),
+            ("Où le fêter ?",
+             "Partout dans le Beaujolais et autour : la grande mise en perce des Sarmentelles à Beaujeu, et des "
+             "dizaines de soirées dans les villages, caveaux et salles des fêtes, souvent avec repas, musique "
+             "ou feu d'artifice. Ci-dessous, toutes celles que Wavents connaît à moins de 40 km de "
+             "Belleville-en-Beaujolais."),
+        ],
+        "program_q": "Où fêter le Beaujolais nouveau {year} dans le Beaujolais ?",
+        "faq": [("Quelle est la date du Beaujolais nouveau {year} ?",
+                 "Le jeudi 19 novembre {year}. Comme chaque année, le troisième jeudi de novembre, il est mis en "
+                 "vente à minuit, dans la nuit du mercredi 18 au jeudi 19."),
+                ("Pourquoi le troisième jeudi de novembre ?",
+                 "Depuis 1951, le Beaujolais nouveau peut être vendu avant les autres vins d'appellation. Sa "
+                 "date de sortie, d'abord le 15 novembre, est fixée au troisième jeudi de novembre depuis un "
+                 "décret de 1985."),
+                ("Où est la plus grande fête du Beaujolais nouveau ?",
+                 "À Beaujeu, capitale historique du Beaujolais, avec les Sarmentelles : cinq jours de fête et "
+                 "la mise en perce à minuit. Programme complet : wavents.fr/sarmentelles-beaujeu/.")],
+        "related": ["sarmentelles-beaujeu"],
+    },
 ]
 
 
@@ -1437,23 +1496,35 @@ def festival_page(fest: dict, upcoming: list[dict], series: dict[str, list[dict]
     def text_of(ev: dict) -> str:
         return fold(f"{ev['title']} {ev.get('description') or ''} {ev.get('location_name') or ''}")
 
-    items = sorted((ev for ev in in_window if re.search(fest["match"], text_of(ev))),
-                   key=lambda ev: wall_time(ev["start_date"]))
-    nearby = sorted((ev for ev in collapse_series(in_window) if ev not in items
-                     and distance_km(ev["latitude"], ev["longitude"]) <= THEME_RADIUS_KM
-                     and re.search(fest["nearby_match"], text_of(ev))),
-                    key=lambda ev: wall_time(ev["start_date"]))
-    # Même titre le même jour (fiche en double pas encore fusionnée) : une seule ligne.
-    nearby = list({(fold(ev["title"]), ev["start_date"][:10]): ev for ev in reversed(nearby)}.values())[::-1]
+    def one_per_day(evs: list[dict]) -> list[dict]:
+        # Même titre le même jour (fiche en double pas encore fusionnée) : une seule ligne.
+        return list({(fold(ev["title"]), ev["start_date"][:10]): ev for ev in reversed(evs)}.values())[::-1]
+
+    def near(ev: dict) -> bool:
+        return distance_km(ev["latitude"], ev["longitude"]) <= THEME_RADIUS_KM
+
+    # Fête d'une commune (town) : toutes ses fiches ; fête de toute la région :
+    # celles à moins de THEME_RADIUS_KM, sans celles d'une autre page (exclude).
+    items = [ev for ev in in_window if re.search(fest["match"], text_of(ev))
+             and (fest.get("town") or near(ev))
+             and not (fest.get("exclude") and re.search(fest["exclude"], text_of(ev)))]
+    if not fest.get("town"):
+        items = one_per_day(collapse_series(items))
+    items.sort(key=lambda ev: wall_time(ev["start_date"]))
+    nearby = []
+    if fest.get("nearby_match"):
+        nearby = one_per_day(sorted((ev for ev in collapse_series(in_window) if ev not in items and near(ev)
+                                     and re.search(fest["nearby_match"], text_of(ev))),
+                                    key=lambda ev: wall_time(ev["start_date"])))
 
     span = (f"du {DAYS[first.weekday()]} {first.day} au {DAYS[last.weekday()]} {last.day} "
             f"{MONTHS[last.month - 1]} {year}")
     amounts = sorted(ev["price_amount"] for ev in items
                      if ev.get("price_type") == "paid" and ev.get("price_amount"))
-    facts = [("Quand", cap(span)), ("Où", f"{fest['town']} (Rhône)")]
+    facts = [("Quand", fest.get("when") or cap(span)), ("Où", fest["where"])]
     if items:
-        facts.append(("Au programme", f"{len(items)} rendez-vous sur Wavents"))
-    if len(amounts) > 1:
+        facts.append(("Au programme", f"{len(items)} {fest.get('unit', 'rendez-vous')} sur Wavents"))
+    if fest.get("town") and len(amounts) > 1:
         facts.append(("Tarifs", f"de {amounts[0]:g} € à {amounts[-1]:g} € selon les rendez-vous"))
     facts_html = "".join(f"<div><dt>{e(k)}</dt><dd>{e(v)}</dd></div>" for k, v in facts)
 
@@ -1462,48 +1533,64 @@ def festival_page(fest: dict, upcoming: list[dict], series: dict[str, list[dict]
         by_day.setdefault(wall_time(ev["start_date"]).date(), []).append(ev)
     days_html = "".join(
         f'<section class="section"><div class="section-head"><div><p class="kicker">{e(cap(day_label(d)))}</p>'
-        f'<h2>{len(evs)} rendez-vous</h2></div></div>'
+        f'<h2>{len(evs)} {fest.get("unit", "rendez-vous") if len(evs) > 1 else fest.get("unit1", "rendez-vous")}</h2></div></div>'
         f'<div class="rows">{"".join(row_card(ev, series, root) for ev in evs)}</div></section>'
         for d, evs in sorted(by_day.items()))
     if not items:
         days_html = ('<section class="section"><p class="lead">Le programme n\'est pas encore publié : '
                      'reviens bientôt, cette page est mise à jour chaque jour.</p></section>')
+    related = [f for f in FESTIVALS if f["slug"] in fest.get("related", [])]
+    related_html = "".join(
+        f'<a class="panel fest-related" href="{root}{f["slug"]}/"><b>{e(f["name"])} {f["first"].year}</b>'
+        f'<span>{e(f["teaser"])}</span><span class="fest-more">Voir le programme →</span></a>' for f in related)
+    if related_html:
+        related_html = f'<section class="section">{related_html}</section>'
     nearby_html = ""
     if nearby:
         nearby_html = (f'<section class="section"><div class="section-head"><div><p class="kicker">Même semaine, '
                        f'à moins de {THEME_RADIUS_KM} km</p><h2>{e(fest["nearby_title"])}</h2></div></div>'
                        f'<div class="rows">{"".join(row_card(ev, series, root) for ev in nearby)}</div></section>')
 
-    qa = [(f"Quand ont lieu {fest['name'].replace('Les ', 'les ', 1)} {year} ?",
-           f"{fest['name']} {year} ont lieu {span}, à {fest['town']}.")]
+    def towns(evs: list[dict], n: int) -> str:
+        return ", ".join(list(dict.fromkeys(commune_of(ev) for ev in evs if commune_of(ev)))[:n])
+
+    qa = [(q.format(year=year), a.format(year=year)) for q, a in fest.get("faq", [])]
     if items:
-        qa.append((f"Quel est le programme des {fest['short']} {year} ?",
+        listed = items[:20]
+        qa.append((fest["program_q"].format(year=year),
                    "Au programme : " + " ; ".join(
                        f"{day_label(wall_time(ev['start_date']))}"
                        + (f" à {hour_label(wall_time(ev['start_date']))}" if ev.get("start_time_known")
                           and (wall_time(ev['start_date']).hour or wall_time(ev['start_date']).minute) else "")
-                       + f", {ev['title']}" for ev in items) + "."))
-    if len(amounts) > 1:
+                       + f", {ev['title']}" + ("" if fest.get("town") else f" ({commune_of(ev)})")
+                       for ev in listed)
+                   + (f", et {len(items) - len(listed)} autres sur cette page." if len(items) > len(listed) else ".")))
+    if fest.get("town") and len(amounts) > 1:
         qa.append((f"Combien coûtent les {fest['short']} ?",
                    f"Les tarifs relevés vont de {amounts[0]:g} € à {amounts[-1]:g} € selon les soirées et "
                    "les repas. Le détail est sur chaque fiche, avec le lien vers l'organisateur."))
     if nearby:
         qa.append(("Où fêter le Beaujolais nouveau ailleurs dans le Beaujolais ?",
                    f"Wavents liste {len(nearby)} autres soirées et animations la même semaine, à moins de "
-                   f"{THEME_RADIUS_KM} km de Belleville-en-Beaujolais, par exemple à "
-                   + ", ".join(list(dict.fromkeys(commune_of(ev) for ev in nearby if commune_of(ev)))[:6]) + "."))
+                   f"{THEME_RADIUS_KM} km de Belleville-en-Beaujolais, par exemple à {towns(nearby, 6)}."))
     story_html = "".join(f"<h2>{e(t)}</h2><p>{e(p)}</p>" for t, p in fest["story"])
-    story_html += (f'<p class="fest-source">Site officiel : <a href="{e(fest["official"])}" rel="noopener">'
-                   f'{e(fest["official"].split("//")[1].strip("/").removeprefix("www."))}</a></p>')
+    if fest.get("official"):
+        story_html += (f'<p class="fest-source">Site officiel : <a href="{e(fest["official"])}" rel="noopener">'
+                       f'{e(fest["official"].split("//")[1].strip("/").removeprefix("www."))}</a></p>')
     faq_html = "".join(f"<h3>{e(q)}</h3><p>{e(a)}</p>" for q, a in qa)
+    links = [(f"{root}{commune_path(fest['town'])}", f"Que faire à {fest['town']}")] if fest.get("town") else []
+    links += [(f"{root}{f['slug']}/", f["name"]) for f in FESTIVALS
+              if f["slug"] != fest["slug"] and f not in related]
+    links.append((f"{root}ce-week-end/", "Ce week-end dans le Beaujolais"))
+    links_html = "".join(f'<a class="town-link" href="{h}">{e(t)}</a>' for h, t in links)
 
     url = f"{BASE_URL}/{fest['slug']}/"
     schema = {
         "@context": "https://schema.org",
         "@graph": [
-            {"@type": "ItemList", "name": f"Programme des {fest['short']} {year}", "itemListElement": [
+            {"@type": "ItemList", "name": f"{fest['name']} {year} : programme", "itemListElement": [
                 {"@type": "ListItem", "position": i + 1, "url": f"{BASE_URL}/{event_path(ev)}"}
-                for i, ev in enumerate(items)
+                for i, ev in enumerate(items[:50])
             ]},
             {"@type": "FAQPage", "mainEntity": [
                 {"@type": "Question", "name": q, "acceptedAnswer": {"@type": "Answer", "text": a}} for q, a in qa
@@ -1511,8 +1598,8 @@ def festival_page(fest: dict, upcoming: list[dict], series: dict[str, list[dict]
         ],
     }
     image = next((real_image(ev) for ev in items if real_image(ev)), None)
-    intro = (f"{fest['name']} {year}, {span} : c'est quoi, où, et tout le programme jour par jour, "
-             "mis à jour chaque jour.")
+    intro = (f"{fest['name']} {year}, {fest.get('when', span).lower() if fest.get('when') else span} : "
+             "c'est quoi, où, et tout le programme jour par jour, mis à jour chaque jour.")
     body = f"""  <section class="ev-hero town-hero"><div class="ev-hero-inner">
     <a class="back" href="{root}">← Accueil</a>
     <p class="kicker">Grand rendez-vous</p>
@@ -1522,10 +1609,11 @@ def festival_page(fest: dict, upcoming: list[dict], series: dict[str, list[dict]
   </div></section>
   <section class="section"><div class="panel soft fest-story">{story_html}</div>
     <dl class="fest-facts">{facts_html}</dl></section>
+  {related_html}
   {days_html}
   {nearby_html}
   <section class="section prose"><h2>Questions fréquentes</h2>{faq_html}</section>
-  <section class="section"><div class="town-links"><a class="town-link" href="{root}{commune_path(fest['town'])}">Que faire à {e(fest['town'])}</a><a class="town-link" href="{root}ce-week-end/">Ce week-end dans le Beaujolais</a></div></section>"""
+  <section class="section"><div class="town-links">{links_html}</div></section>"""
     return layout(
         f"{fest['name']} {year} : programme et dates – Wavents",
         body,
