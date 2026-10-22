@@ -847,7 +847,8 @@ def home_page(events: list[dict], all_upcoming: list[dict], now: datetime) -> st
         url=f"{BASE_URL}/",
         image=f"{BASE_URL}/img/og.png?v=3",
         extra_head=(f'<script type="application/ld+json">{json.dumps(ORGANIZATION, ensure_ascii=False)}</script>'
-                    f'<script type="application/ld+json">{json.dumps(WEBSITE, ensure_ascii=False)}</script>'),
+                    f'<script type="application/ld+json">{json.dumps(WEBSITE, ensure_ascii=False)}</script>'
+                    + app_ld()),
         page_class="home",
     )
 
@@ -1154,9 +1155,39 @@ WEBSITE = {
     "@context": "https://schema.org",
     "@type": "WebSite",
     "name": "Wavents",
+    "alternateName": "Wavents, les sorties près de toi",
     "url": f"{BASE_URL}/",
     "inLanguage": "fr-FR",
+    "description": ("Agenda gratuit des sorties locales, mis à jour chaque jour : que faire ce week-end dans "
+                    "le Beaujolais, le Val de Saône et le nord de Lyon, commune par commune."),
+    "publisher": {"@type": "Organization", "name": "Wavents", "url": f"{BASE_URL}/"},
 }
+
+def app_ld() -> str:
+    """L'appli décrite aux moteurs et aux assistants IA (22/10/2026, Paul :
+    « l'appli et le site ») : schema.org MobileApplication, avec les stores
+    où elle est publiée. Vide tant qu'aucun store ne la propose."""
+    stores = [u for u in (PLAY_STORE_URL if PLAY_STORE_PUBLISHED else None, APP_STORE_URL) if u]
+    if not stores:
+        return ""
+    systems = (["Android"] if PLAY_STORE_PUBLISHED else []) + (["iOS"] if APP_STORE_URL else [])
+    data = {
+        "@context": "https://schema.org",
+        "@type": "MobileApplication",
+        "name": "Wavents : sorties près de toi",
+        "operatingSystem": ", ".join(systems),
+        "applicationCategory": "LifestyleApplication",
+        "inLanguage": "fr-FR",
+        "description": ("L'appli gratuite des sorties locales du Beaujolais, du Val de Saône et du nord de "
+                        "Lyon : carte des événements, filtres (gratuit, en famille, ce week-end), alertes et "
+                        "rappels. Sans compte."),
+        "url": f"{BASE_URL}/app/",
+        "installUrl": stores,
+        "offers": {"@type": "Offer", "price": "0", "priceCurrency": "EUR"},
+        "publisher": {"@type": "Organization", "name": "Wavents", "url": f"{BASE_URL}/"},
+    }
+    return f'<script type="application/ld+json">{json.dumps(data, ensure_ascii=False)}</script>'
+
 
 THEMES = [
     # slug, titre de page, h1, accroche, filtre, horizon (jours)
@@ -1663,7 +1694,7 @@ def app_page(upcoming: list[dict], communes: dict[str, list[dict]]) -> str:
         description="L'appli gratuite des sorties autour de Belleville-en-Beaujolais, Villefranche et Mâcon : "
                     "carte, alertes et rappels. Sans compte.",
         url=f"{BASE_URL}/app/",
-        extra_head=redirect,
+        extra_head=redirect + app_ld(),
         depth=1,
         page_class="town-page",
     )
