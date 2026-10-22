@@ -285,6 +285,35 @@ def series_label(items: list[dict]) -> str | None:
     return f"+ {len(items) - 1} dates"
 
 
+# --- Pages répétées (Search Console, 22/10/2026) --------------------------------
+#
+# Un même événement qui revient (marché, séance, atelier, stage : même titre,
+# même lieu, autre date) a une page par date, presque identique : Google en
+# gardait une à sa guise (« Google n'a pas choisi la même URL canonique »).
+# Chaque date pointe désormais vers la page de la prochaine date, seule
+# présente dans le sitemap ; les autres pages restent en ligne (liens
+# partagés, appli).
+
+def repeat_key(event: dict) -> str:
+    # Description comprise : deux événements différents au même titre (deux
+    # « Halloween » dans le même bourg) gardent chacun leur page.
+    text = fold(event.get("description") or "")[:300]
+    return f"{fold(event['title']).strip()}|{event['latitude']:.3f}|{event['longitude']:.3f}|{text}"
+
+
+def repeat_canonicals(events: list[dict], now: datetime) -> dict[str, str]:
+    groups: dict[str, list[dict]] = {}
+    for ev in events:
+        groups.setdefault(repeat_key(ev), []).append(ev)
+    canonical: dict[str, str] = {}
+    for items in groups.values():
+        items.sort(key=lambda ev: (ev["start_date"], ev["id"]))
+        main = next((ev for ev in items if end_of(ev) >= now), items[0])
+        for ev in items:
+            canonical[ev["id"]] = main["id"]
+    return canonical
+
+
 def collapse_series(events: list[dict]) -> list[dict]:
     seen: set[str] = set()
     out = []
@@ -384,7 +413,7 @@ def app_store_soon(extra_class: str = "") -> str:
 
 
 def layout(title: str, body: str, *, description: str, url: str, image: str | None = None,
-           extra_head: str = "", depth: int = 0, page_class: str = "") -> str:
+           extra_head: str = "", depth: int = 0, page_class: str = "", canonical: str | None = None) -> str:
     root = "../" * depth
     og_image = (f'<meta property="og:image" content="{e(image)}">\n  '
                 f'<meta property="og:image:width" content="1200">\n  '
@@ -397,7 +426,7 @@ def layout(title: str, body: str, *, description: str, url: str, image: str | No
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>{e(title)}</title>
   <meta name="description" content="{e(description)}">
-  <link rel="canonical" href="{e(url)}">
+  <link rel="canonical" href="{e(canonical or url)}">
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="Wavents">
   <meta property="og:locale" content="fr_FR">
@@ -846,7 +875,7 @@ NO_DESCRIPTION = ('<div class="panel soft"><h2>À propos</h2><p class="descripti
 
 
 def event_page(event: dict, neighbours: list[dict], series: dict[str, list[dict]],
-               town_page: str | None = None) -> str:
+               town_page: str | None = None, canonical: str | None = None) -> str:
     root = "../../"
     emoji, label, color = category(event)
     url = f"{BASE_URL}/{event_path(event)}"
@@ -926,6 +955,7 @@ def event_page(event: dict, neighbours: list[dict], series: dict[str, list[dict]
         extra_head=f'<script type="application/ld+json">{json_ld(event)}</script>',
         depth=2,
         page_class="event-page",
+        canonical=canonical,
     )
 
 
@@ -1660,12 +1690,16 @@ def main() -> int:
         by_day.setdefault(wall_time(ev["start_date"]).date(), []).append(ev)
 
     communes = group_by_commune(upcoming)
+    canonical_ids = repeat_canonicals(events, now)
     for ev in events:
         folder = out / event_path(ev)
         folder.mkdir(parents=True, exist_ok=True)
         town = commune_page_name(ev)
         town_page = commune_path(town) if town in communes else None
-        (folder / "index.html").write_text(event_page(ev, neighbours_of(ev, by_day), series, town_page), encoding="utf-8")
+        main_id = canonical_ids[ev["id"]]
+        canonical = None if main_id == ev["id"] else f"{BASE_URL}/e/{main_id}/"
+        (folder / "index.html").write_text(event_page(ev, neighbours_of(ev, by_day), series, town_page, canonical),
+                                           encoding="utf-8")
         (folder / "event.ics").write_text(ics(ev), encoding="utf-8")
     (out / "index.html").write_text(home_page(events, upcoming, now), encoding="utf-8")
 
@@ -1695,7 +1729,7 @@ def main() -> int:
 
     urls = ([f"{BASE_URL}/", f"{BASE_URL}/ville/"] + extra_pages
             + [f"{BASE_URL}/{commune_path(name)}" for name in communes]
-            + [f"{BASE_URL}/{event_path(ev)}" for ev in events])
+            + [f"{BASE_URL}/{event_path(ev)}" for ev in events if canonical_ids[ev["id"]] == ev["id"]])
     sitemap = "\n".join(f"  <url><loc>{html.escape(quote(u, safe=':/'))}</loc></url>" for u in urls)
     (out / "sitemap.xml").write_text(
         f'<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n{sitemap}\n</urlset>\n',
