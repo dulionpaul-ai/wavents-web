@@ -117,6 +117,31 @@ def fetch_events() -> list[dict]:
         offset += page
 
 
+def fetch_gone_events(days: int = 180) -> list[dict]:
+    """Fiches publiées ces derniers mois et plus en ligne (passées, ou
+    doublons retirés avec la fiche gardée) : fonction site_gone_events
+    (script 198 du dépôt Wavents, 25/10/2026, 404 signalées par la Search
+    Console). En cas d'échec, rien : le site part quand même."""
+    rows: list[dict] = []
+    offset, page = 0, 1000
+    try:
+        while True:
+            request = urllib.request.Request(
+                f"{SUPABASE_URL}/rest/v1/rpc/site_gone_events?limit={page}&offset={offset}",
+                data=json.dumps({"p_days": days}).encode(),
+                headers={"apikey": SUPABASE_ANON_KEY, "Authorization": f"Bearer {SUPABASE_ANON_KEY}",
+                         "Content-Type": "application/json"})
+            with urllib.request.urlopen(request, timeout=60) as response:
+                batch = json.load(response)
+            rows.extend(batch)
+            if len(batch) < page:
+                return rows
+            offset += page
+    except Exception as exc:  # noqa: BLE001 — le site ne doit pas tomber pour ça
+        print(f"site_gone_events : {exc}", file=sys.stderr)
+        return rows
+
+
 def wall_time(raw: str | None) -> datetime | None:
     """Heure murale de Paris (naïve) depuis la convention de stockage."""
     if not raw:
@@ -893,6 +918,36 @@ def neighbours_of(event: dict, pool_by_day: dict[date, list[dict]]) -> list[dict
 
 NO_DESCRIPTION = ('<div class="panel soft"><h2>À propos</h2><p class="description">L\'organisateur n\'a pas '
                   'encore donné plus de détails. Toutes les infos pratiques sont juste à côté 👉</p></div>')
+
+
+def gone_page(event: dict, town_page: str | None) -> str:
+    """Page d'une fiche plus en ligne. Doublon retiré : redirection vers la
+    fiche gardée (même sortie). Sortie passée ou retirée : page courte, non
+    indexée (Google la retire sans erreur 404), avec un lien vers les
+    sorties de la commune."""
+    url = f"{BASE_URL}/{event_path(event)}"
+    title = event.get("title") or "Sortie"
+    kept = event.get("kept_id")
+    if kept:
+        target = f"{BASE_URL}/e/{kept}/"
+        head = (f'<meta name="robots" content="noindex">\n  '
+                f'<meta http-equiv="refresh" content="0; url={e(target)}">')
+        body = (f'<section class="section prose"><h1>{e(title)}</h1>'
+                f'<p>Cette fiche a été regroupée avec une autre. '
+                f'<a href="{e(target)}">Voir la fiche à jour</a>.</p></section>')
+        return layout(f"{title} — Wavents", body, description=f"{title} : fiche regroupée sur Wavents.",
+                      url=url, canonical=target, extra_head=head, depth=2)
+    start = wall_time(event.get("start_date"))
+    when = f" du {day_label(start)} {start.year}" if start else ""
+    past = event.get("status") == "expired"
+    message = (f"Cette sortie{when} est terminée." if past
+               else "Cette fiche n'est plus en ligne (annulée, ou retirée après vérification).")
+    links = (f'<a href="../../{town_page}">Les prochaines sorties à {e(commune_page_name(event) or "")}</a> · '
+             if town_page else "")
+    body = (f'<section class="section prose"><h1>{e(title)}</h1><p>{e(message)}</p>'
+            f'<p>{links}<a href="../../">Toutes les sorties près de chez toi</a></p></section>')
+    return layout(f"{title} — Wavents", body, description=message, url=url,
+                  extra_head='<meta name="robots" content="noindex">', depth=2)
 
 
 def event_page(event: dict, neighbours: list[dict], series: dict[str, list[dict]],
@@ -2178,6 +2233,21 @@ def main() -> int:
                                                       repeats.get(repeat_key(ev))), encoding="utf-8")
         (folder / "event.ics").write_text(ics(ev), encoding="utf-8")
     (out / "index.html").write_text(home_page(events, upcoming, now), encoding="utf-8")
+
+    # Fiches plus en ligne : une page plutôt qu'une 404 (25/10/2026).
+    live_ids = {ev["id"] for ev in events}
+    communes_now = group_by_commune(upcoming)
+    gone = 0
+    for ev in fetch_gone_events():
+        folder = out / event_path(ev)
+        if ev["id"] in live_ids or folder.exists():
+            continue
+        town = commune_page_name(ev)
+        folder.mkdir(parents=True, exist_ok=True)
+        (folder / "index.html").write_text(
+            gone_page(ev, commune_path(town) if town in communes_now else None), encoding="utf-8")
+        gone += 1
+    print(f"{gone} pages de fiches plus en ligne")
 
     for name, evs in communes.items():
         folder = out / commune_path(name)
