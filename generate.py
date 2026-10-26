@@ -2506,8 +2506,9 @@ def main() -> int:
     # communes changent chaque jour ; les événements, les 2 000 plus proches.
     soonest = sorted(upcoming, key=lambda ev: ev["start_date"])[:2000]
     (out / "indexnow.json").write_text(json.dumps(
-        [f"{BASE_URL}/", f"{BASE_URL}/ville/"] + extra_pages
+        [f"{BASE_URL}/", f"{BASE_URL}/ville/", f"{BASE_URL}/marche/"] + extra_pages
         + [f"{BASE_URL}/{commune_path(name)}" for name in communes]
+        + [f"{BASE_URL}/{market_path(town)}" for town in markets]
         + [f"{BASE_URL}/{event_path(ev)}" for ev in soonest]), encoding="utf-8")
     print(f"{len(events)} pages d'événements et {len(communes)} pages communes générées dans {out}/")
     return 0
