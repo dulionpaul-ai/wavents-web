@@ -60,7 +60,7 @@ AGENDA_DAY_PREVIEW = 12  # cartes affichées par jour avant « Voir les autres s
 FIELDS = (
     "id,title,description,category_id,location_name,address,latitude,longitude,"
     "start_date,end_date,start_time_known,end_time_known,price_type,price_amount,price_confirmed,"
-    "image_url,website_url,for_kids,source"
+    "image_url,website_url,for_kids,source,published_at,recurring_weekdays,opening_hours"
 )
 # id -> (icône, libellé, couleur) : mêmes icônes Material et mêmes couleurs
 # que l'appli (lib/models/category.dart), pour qu'on se sente au même endroit.
@@ -359,6 +359,38 @@ def collapse_series(events: list[dict]) -> list[dict]:
 
 # --- Balisage ------------------------------------------------------------------
 
+STREET = re.compile(r"\b(rue|place|avenue|av|chemin|route|allee|boulevard|bd|quai|impasse|montee|cours|square|lieu-dit|hameau)\b")
+
+
+def postal_address(event: dict) -> dict:
+    """Adresse structurée (26/10/2026) : Google demande une PostalAddress
+    (commune, code postal, pays) pour les résultats enrichis « Événements »."""
+    raw = event.get("address") or ""
+    address = {"@type": "PostalAddress", "addressCountry": "FR"}
+    town = commune_page_name(event) or commune_of(event)
+    if town:
+        address["addressLocality"] = town
+    postcode = re.search(r"\b(\d{5})\b", raw)
+    if postcode:
+        address["postalCode"] = postcode.group(1)
+    street = next((p.strip() for p in raw.split(",") if STREET.search(fold(p)) and not re.search(r"\b\d{5}\b", p)), "")
+    if street:
+        address["streetAddress"] = street
+    return address
+
+
+def breadcrumb_ld(event: dict, town_page: str | None) -> str:
+    """Fil d'Ariane (Accueil › commune › sortie), lu par Google et les IA."""
+    items = [{"@type": "ListItem", "position": 1, "name": "Wavents", "item": f"{BASE_URL}/"}]
+    if town_page:
+        items.append({"@type": "ListItem", "position": 2, "name": f"Que faire à {commune_page_name(event)}",
+                      "item": f"{BASE_URL}/{town_page}"})
+    items.append({"@type": "ListItem", "position": len(items) + 1, "name": event["title"],
+                  "item": f"{BASE_URL}/{event_path(event)}"})
+    data = {"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": items}
+    return json.dumps(data, ensure_ascii=False).replace("</", "<\\/")
+
+
 def json_ld(event: dict) -> str:
     start, end = wall_time(event["start_date"]), wall_time(event.get("end_date"))
     data = {
@@ -370,8 +402,8 @@ def json_ld(event: dict) -> str:
         "eventAttendanceMode": "https://schema.org/OfflineEventAttendanceMode",
         "location": {
             "@type": "Place",
-            "name": event.get("location_name") or "",
-            "address": event.get("address") or "",
+            "name": event.get("location_name") or commune_of(event) or "",
+            "address": postal_address(event),
             "geo": {"@type": "GeoCoordinates", "latitude": event["latitude"], "longitude": event["longitude"]},
         },
         "image": [absolute_image(event)],
@@ -675,6 +707,9 @@ def phone_mockup(events: list[dict]) -> str:
 </div>"""
 
 
+HOME_MAP_POINTS: list[dict] = []  # rempli par home_page, écrit dans data/carte.json
+
+
 def home_page(events: list[dict], all_upcoming: list[dict], now: datetime) -> str:
     today = now.date()
     horizon = now + timedelta(days=HOME_DAYS)
@@ -746,8 +781,12 @@ def home_page(events: list[dict], all_upcoming: list[dict], now: datetime) -> st
         for ev in shown
     ]
     categories_js = {cid: {"e": emoji, "l": label, "c": color} for cid, (emoji, label, color) in CATEGORIES.items()}
-    payload = json.dumps({"points": map_points, "cats": categories_js, "home": HOME}, ensure_ascii=False)
-    data_script = f'<script id="wv-data" type="application/json">{payload.replace("</", "<" + chr(92) + "/")}</script>'
+    # Points de la carte à part (data/carte.json, écrit par main) : 218 Ko de
+    # moins dans la page d'accueil (26/10/2026, vitesse = référencement).
+    payload = json.dumps({"cats": categories_js, "home": HOME}, ensure_ascii=False)
+    data_script = (f'<script id="wv-data" type="application/json" data-src="data/carte.json?v={today:%Y%m%d}">'
+                   f'{payload.replace("</", "<" + chr(92) + "/")}</script>')
+    HOME_MAP_POINTS[:] = map_points
 
     # Intro de la première visite (styles « Intro » de style.css) : retirée
     # avant d'être peinte si elle a déjà été vue, si le stockage local est
@@ -886,9 +925,9 @@ def home_page(events: list[dict], all_upcoming: list[dict], now: datetime) -> st
   </section>
   {data_script}"""
     return layout(
-        "Wavents – Que faire autour de toi ?",
+        "Wavents : agenda des sorties dans le Beaujolais et le nord de Lyon (concerts, marchés, brocantes)",
         body,
-        description="Concerts, marchés, fêtes de village, spectacles… Des dizaines de sorties chaque jour dans le Beaujolais et le nord de Lyon (pour l'instant !), près de chez toi.",
+        description=f"Que faire ce week-end ou ce soir près de chez toi ? {len(all_upcoming)} sorties à venir dans le Beaujolais, le Val de Saône et le nord de Lyon : concerts, marchés, brocantes, fêtes de village, spectacles. Mis à jour chaque jour, gratuit.",
         url=f"{BASE_URL}/",
         image=f"{BASE_URL}/img/og.png?v=3",
         extra_head=(f'<script type="application/ld+json">{json.dumps(ORGANIZATION, ensure_ascii=False)}</script>'
@@ -961,6 +1000,13 @@ def event_page(event: dict, neighbours: list[dict], series: dict[str, list[dict]
     town = commune_of(event)
     summary = f"{when} · {town or event.get('location_name') or ''}".strip(" ·")
     description = event.get("description") or ""
+    # Description pour Google et les IA (26/10/2026) : quand, où, et le début
+    # du texte, plutôt que la seule date.
+    excerpt = re.sub(r"\s+", " ", re.sub(r"^D'après l'affiche\s*:\s*", "", description)).strip()
+    meta_description = summary + (f" — {excerpt[:150].rsplit(' ', 1)[0]}…" if len(excerpt) > 150 else f" — {excerpt}" if excerpt else "")
+    start_day = wall_time(event["start_date"]).date()
+    title_where = commune_page_name(event) or town or ""
+    page_title = f"{event['title']} – {title_where}, {day_label(start_day)} {start_day.year}" if title_where else f"{event['title']} – {day_label(start_day)} {start_day.year}"
     lat, lon = event["latitude"], event["longitude"]
     maps = f"https://www.google.com/maps/dir/?api=1&destination={lat},{lon}"
     image = image_for(event, root)
@@ -1028,16 +1074,133 @@ def event_page(event: dict, neighbours: list[dict], series: dict[str, list[dict]
   </section>
   {near_html}"""
     return layout(
-        f"{event['title']} – Wavents",
+        f"{page_title} | Wavents",
         body,
-        description=summary,
+        description=meta_description,
         url=url,
         image=share_card(event),
-        extra_head=f'<script type="application/ld+json">{json_ld(event)}</script>',
+        extra_head=(f'<script type="application/ld+json">{json_ld(event)}</script>\n  '
+                    f'<script type="application/ld+json">{breadcrumb_ld(event, town_page)}</script>'),
         depth=2,
         page_class="event-page",
         canonical=canonical,
     )
+
+
+
+# --- Marchés : jours et horaires par commune (26/10/2026) ----------------------
+# « Marché de Tassin : quel jour, quelle heure ? » est une recherche très
+# fréquente (Google comme assistants IA), et la réponse tient en une ligne :
+# une page par commune qui a un marché hebdomadaire, avec FAQ balisée.
+
+def market_path(town: str) -> str:
+    return f"marche/{slugify(town)}/"
+
+
+def _hour(text: str) -> str:
+    h, m = text.split(":")[:2]
+    return f"{int(h)}h{m if m != '00' else ''}"
+
+
+def market_hours(ev: dict, weekday: int) -> str:
+    slots = (ev.get("opening_hours") or {}).get(str(weekday)) or []
+    return " et ".join(f"{_hour(a)} à {_hour(b)}" for a, b in slots)
+
+
+def of_town(town: str) -> str:
+    """« de Tassin », « d'Albigny » (élision devant une voyelle)."""
+    return f"d'{town}" if fold(town[:1]) in "aeiouyh" and town[:1] else f"de {town}"
+
+
+def market_sentence(town: str, ev: dict) -> str:
+    days = sorted(ev.get("recurring_weekdays") or [])
+    parts = []
+    for d in days:
+        hours = market_hours(ev, d)
+        parts.append(f"le {DAYS[d - 1]}" + (f" de {hours}" if hours else ""))
+    where = ev.get("location_name") or ""
+    where = f", {where}" if where and fold(where) != fold(town) else ""
+    return f"{' et '.join(parts)}{where}"
+
+
+def market_groups(events: list[dict]) -> dict[str, list[dict]]:
+    groups: dict[str, list[dict]] = {}
+    for ev in events:
+        if ev.get("category_id") != "marche" or not ev.get("recurring_weekdays"):
+            continue
+        town = commune_page_name(ev)
+        if town:
+            groups.setdefault(town, []).append(ev)
+    return groups
+
+
+def market_page(town: str, markets: list[dict], groups: dict[str, list[dict]], town_page: str | None) -> str:
+    root = "../../"
+    url = f"{BASE_URL}/{market_path(town)}"
+    lines = [market_sentence(town, ev) for ev in markets]
+    answer = (f"Le marché {of_town(town)} a lieu {lines[0]}." if len(lines) == 1
+              else f"Il y a {len(lines)} marchés à {town} : " + " ; ".join(lines) + ".")
+    known = all(market_hours(ev, d) for ev in markets for d in ev.get("recurring_weekdays") or [])
+    if not known:
+        answer += " Horaires non publiés par la commune pour l'instant."
+    center = commune_center(markets)
+    near = sorted(((other, distance_km(*commune_center(evs), center)) for other, evs in groups.items() if other != town),
+                  key=lambda item: item[1])[:10]
+    near_links = "".join(f'<a class="town-link" href="{root}{market_path(other)}">{e(other)} <span>{km:.0f} km</span></a>'
+                         for other, km in near)
+    rows = "".join(
+        f'<li><a href="{root}{event_path(ev)}"><b>{e(ev["title"])}</b></a> : {e(market_sentence(town, ev))}</li>'
+        for ev in markets)
+    faq = {
+        "@context": "https://schema.org",
+        "@graph": [
+            {"@type": "BreadcrumbList", "itemListElement": [
+                {"@type": "ListItem", "position": 1, "name": "Wavents", "item": f"{BASE_URL}/"},
+                {"@type": "ListItem", "position": 2, "name": "Marchés", "item": f"{BASE_URL}/marches/"},
+                {"@type": "ListItem", "position": 3, "name": f"Marché {of_town(town)}", "item": url},
+            ]},
+            {"@type": "FAQPage", "mainEntity": [
+                {"@type": "Question", "name": f"Quel jour a lieu le marché {of_town(town)} ?",
+                 "acceptedAnswer": {"@type": "Answer", "text": answer}},
+            ]},
+        ],
+    }
+    body = f"""  <section class="ev-hero town-hero"><div class="ev-hero-inner">
+    <a class="back" href="{root}marches/">← Tous les marchés</a>
+    <p class="kicker">Jours et horaires</p>
+    <h1>Marché {e(of_town(town))}</h1>
+    <p class="lead">{e(answer)}</p>
+    <div class="hero-actions">{play_cta()}</div>
+  </div></section>
+  <section class="section prose"><h2>Les marchés {e(of_town(town))}</h2><ul>{rows}</ul>
+    <p>Horaires relevés sur les sites de la commune et des offices de tourisme, vérifiés chaque jour par Wavents.
+    {f'<a href="{root}{town_page}">Toutes les sorties à {e(town)} →</a>' if town_page else ''}</p></section>
+  {f'<section class="section"><div class="section-head"><div><p class="kicker">Pas loin</p><h2>Autres marchés autour de {e(town)}</h2></div></div><div class="town-links">{near_links}</div></section>' if near_links else ''}"""
+    return layout(
+        f"Marché {of_town(town)} : jours et horaires – Wavents",
+        body,
+        description=answer[:300],
+        url=url,
+        extra_head=f'<script type="application/ld+json">{json.dumps(faq, ensure_ascii=False)}</script>',
+        depth=2,
+        page_class="town-page",
+    )
+
+
+def markets_index(groups: dict[str, list[dict]]) -> str:
+    root = "../"
+    links = "".join(f'<a class="town-link" href="{root}{market_path(t)}">{e(t)} <span>{len(evs)}</span></a>'
+                    for t, evs in sorted(groups.items(), key=lambda item: fold(item[0])))
+    body = f"""  <section class="ev-hero town-hero"><div class="ev-hero-inner">
+    <a class="back" href="{root}marches/">← Les marchés à venir</a>
+    <p class="kicker">Jours et horaires</p>
+    <h1>Les marchés par commune</h1>
+    <p class="lead">Quel jour, à quelle heure, où : les {len(groups)} marchés hebdomadaires du Beaujolais, du Val de Saône et du nord de Lyon.</p>
+  </div></section>
+  <section class="section"><div class="town-links">{links}</div></section>"""
+    return layout("Marchés du Beaujolais et du nord de Lyon : jours et horaires par commune – Wavents", body,
+                  description=f"Jours et horaires des {len(groups)} marchés hebdomadaires du Beaujolais, du Val de Saône et du nord de Lyon, commune par commune.",
+                  url=f"{BASE_URL}/marche/", depth=1, page_class="town-page")
 
 
 # --- Pages par commune (référencement, 01/10/2026) -----------------------------
@@ -1080,7 +1243,27 @@ def commune_page_name(event: dict) -> str | None:
         return None
     if fold(name.split(" ")[0].split("-")[0]) in NOT_A_COMMUNE_START:
         return None
-    return name
+    # Même commune écrite de deux façons (« Belleville en Beaujolais » /
+    # « Belleville-en-Beaujolais ») : même adresse de page, la petite
+    # écrasait la grande (26/10/2026). Une seule orthographe par adresse.
+    return COMMUNE_CANON.get(slugify(name), name)
+
+
+COMMUNE_CANON: dict[str, str] = {}  # adresse de page -> orthographe retenue (canon_communes)
+
+
+def canon_communes(events: list[dict]) -> None:
+    """Retient, pour chaque adresse de page commune, l'orthographe la plus
+    fréquente (à égalité, celle avec des traits d'union, la forme officielle)."""
+    COMMUNE_CANON.clear()
+    counts: dict[str, dict[str, int]] = {}
+    for ev in events:
+        name = commune_page_name(ev)
+        if name:
+            variants = counts.setdefault(slugify(name), {})
+            variants[name] = variants.get(name, 0) + 1
+    for slug, variants in counts.items():
+        COMMUNE_CANON[slug] = max(variants, key=lambda v: (variants[v], v.count("-")))
 
 
 def group_by_commune(upcoming: list[dict]) -> dict[str, list[dict]]:
@@ -1144,6 +1327,9 @@ def commune_page(name: str, events: list[dict], communes: dict[str, list[dict]],
     intro = (f"Concerts, marchés, spectacles, expositions, fêtes… Toutes les sorties à {name} "
              f"et autour, mises à jour chaque jour : {', '.join(facts)}.")
     url = f"{BASE_URL}/{commune_path(name)}"
+    market_link = (f'<section class="section"><div class="town-links"><a class="town-link" href="{root}{market_path(name)}">'
+                   f'🧺 Marché {e(of_town(name))} : jours et horaires</a></div></section>'
+                   if name in market_groups(events) else "")
     item_list = {
         "@context": "https://schema.org",
         "@graph": [
@@ -1165,6 +1351,7 @@ def commune_page(name: str, events: list[dict], communes: dict[str, list[dict]],
     <p class="lead">{e(intro)}</p>
     <div class="hero-actions">{play_cta()}</div>
   </div></section>
+  {market_link}
   {block("Aujourd'hui", f"Aujourd'hui à {name}", today_list)}
   {block("Du vendredi au dimanche", f"Ce week-end à {name}", weekend_list)}
   {block("Les 7 prochains jours", "Cette semaine", week_list)}
@@ -1172,7 +1359,7 @@ def commune_page(name: str, events: list[dict], communes: dict[str, list[dict]],
   {block("Et ensuite", "Plus tard", later)}
   {near_html}"""
     return layout(
-        f"Que faire à {name} ? Sorties, marchés, concerts – Wavents",
+        f"Que faire à {name} ce week-end ? Sorties, marchés, concerts – Wavents",
         body,
         description=intro,
         url=url,
@@ -1228,7 +1415,9 @@ ORGANIZATION = {
     ),
     "areaServed": ["Beaujolais", "Val de Saône", "Villefranche-sur-Saône", "Mâcon", "Lyon"],
     "foundingLocation": "Belleville-en-Beaujolais",
-    "sameAs": [PLAY_STORE_URL],
+    # Comptes officiels (26/10/2026) : relient le site, l'appli et les réseaux
+    # pour Google et les IA (graphe de connaissance).
+    "sameAs": [PLAY_STORE_URL, "https://www.instagram.com/wavents_app/", "https://www.facebook.com/wavents_app"],
 }
 
 WEBSITE = {
@@ -1967,7 +2156,8 @@ def faq_page(upcoming: list[dict], communes: dict[str, list[dict]], theme_counts
 
 # --- Main --------------------------------------------------------------------------
 
-def llms_txt(upcoming: list[dict], now: datetime, communes: dict[str, list[dict]] | None = None) -> str:
+def llms_txt(upcoming: list[dict], now: datetime, communes: dict[str, list[dict]] | None = None,
+             markets: dict[str, list[dict]] | None = None) -> str:
     """Présentation du site pour les assistants IA (convention llms.txt) :
     ce qu'est Wavents, puis les sorties des 7 prochains jours avec leur lien."""
     # Sorties qui COMMENCENT dans la semaine, autour de Belleville (même
@@ -2018,6 +2208,12 @@ def llms_txt(upcoming: list[dict], now: datetime, communes: dict[str, list[dict]
         lines += ["", "## Que faire dans chaque commune (pages mises à jour chaque jour)", ""]
         for name, evs in sorted(communes.items(), key=lambda item: -len(item[1]))[:150]:
             lines.append(f"- [Que faire à {name}]({BASE_URL}/{commune_path(name)}): {len(evs)} sorties à venir")
+    if markets:
+        # La réponse directe (jour, heure, lieu) : ce que les assistants citent.
+        lines += ["", "## Marchés hebdomadaires : jours et horaires", ""]
+        for town, evs in sorted(markets.items(), key=lambda item: fold(item[0])):
+            lines.append(f"- [Marché {of_town(town)}]({BASE_URL}/{market_path(town)}): "
+                         + " ; ".join(market_sentence(town, ev) for ev in evs))
     return "\n".join(lines) + "\n"
 
 
@@ -2214,6 +2410,7 @@ def main() -> int:
         and end_of(ev) >= now - timedelta(days=1)
     ]
     upcoming = [ev for ev in events if end_of(ev).date() >= now.date()]
+    canon_communes(events)
     series = build_series(events)
     by_day: dict[date, list[dict]] = {}
     for ev in events:
@@ -2233,6 +2430,8 @@ def main() -> int:
                                                       repeats.get(repeat_key(ev))), encoding="utf-8")
         (folder / "event.ics").write_text(ics(ev), encoding="utf-8")
     (out / "index.html").write_text(home_page(events, upcoming, now), encoding="utf-8")
+    (out / "data").mkdir(exist_ok=True)
+    (out / "data" / "carte.json").write_text(json.dumps(HOME_MAP_POINTS, ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
 
     # Fiches plus en ligne : une page plutôt qu'une 404 (25/10/2026).
     live_ids = {ev["id"] for ev in events}
@@ -2256,6 +2455,15 @@ def main() -> int:
     (out / "ville").mkdir(exist_ok=True)
     (out / "ville" / "index.html").write_text(communes_index(communes), encoding="utf-8")
 
+    markets = market_groups(events)
+    for town, evs in markets.items():
+        folder = out / market_path(town)
+        folder.mkdir(parents=True, exist_ok=True)
+        (folder / "index.html").write_text(
+            market_page(town, evs, markets, commune_path(town) if town in communes else None), encoding="utf-8")
+    (out / "marche").mkdir(exist_ok=True)
+    (out / "marche" / "index.html").write_text(markets_index(markets), encoding="utf-8")
+
     theme_counts: dict[str, int] = {}
     for slug, page_title, h1, kicker, keep, days in THEMES:
         page, count = theme_page(slug, page_title, h1, kicker, keep, days, upcoming, series, now)
@@ -2276,15 +2484,22 @@ def main() -> int:
     extra_pages = ([f"{BASE_URL}/{t[0]}/" for t in THEMES] + [f"{BASE_URL}/{f['slug']}/" for f in FESTIVALS]
                    + [f"{BASE_URL}/a-propos/", f"{BASE_URL}/faq/", f"{BASE_URL}/app/", f"{BASE_URL}/ajouter/"])
 
-    urls = ([f"{BASE_URL}/", f"{BASE_URL}/ville/"] + extra_pages
+    urls = ([f"{BASE_URL}/", f"{BASE_URL}/ville/", f"{BASE_URL}/marche/"] + extra_pages
+            + [f"{BASE_URL}/{market_path(town)}" for town in markets]
             + [f"{BASE_URL}/{commune_path(name)}" for name in communes]
             + [f"{BASE_URL}/{event_path(ev)}" for ev in events if canonical_ids[ev["id"]] == ev["id"]])
-    sitemap = "\n".join(f"  <url><loc>{html.escape(quote(u, safe=':/'))}</loc></url>" for u in urls)
+    # Date de mise à jour (26/10/2026) : les pages de listes changent chaque
+    # jour ; une fiche, à sa publication.
+    published = {f"{BASE_URL}/{event_path(ev)}": (ev.get("published_at") or "")[:10] for ev in events}
+    today_iso = now.date().isoformat()
+    sitemap = "\n".join(
+        f"  <url><loc>{html.escape(quote(u, safe=':/'))}</loc><lastmod>{published.get(u) or today_iso}</lastmod></url>"
+        for u in urls)
     (out / "sitemap.xml").write_text(
         f'<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n{sitemap}\n</urlset>\n',
         encoding="utf-8",
     )
-    (out / "llms.txt").write_text(llms_txt(upcoming, now, communes), encoding="utf-8")
+    (out / "llms.txt").write_text(llms_txt(upcoming, now, communes, markets), encoding="utf-8")
     (out / "robots.txt").write_text(f"User-agent: *\nAllow: /\nSitemap: {BASE_URL}/sitemap.xml\n", encoding="utf-8")
     # IndexNow (Bing, et par lui ChatGPT/Copilot) : liste des pages à
     # signaler après la publication (étape du workflow pages.yml). Les pages

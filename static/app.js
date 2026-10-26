@@ -359,8 +359,12 @@
   const dataEl = $("#wv-data");
   if (mapEl && dataEl) {
     const data = JSON.parse(dataEl.textContent);
+    // Points de la carte dans un fichier à part (26/10/2026 : 218 Ko de
+    // moins dans la page d'accueil), chargés quand la carte approche.
+    const ready = data.points ? Promise.resolve() : fetch(dataEl.dataset.src)
+      .then((r) => r.json()).then((points) => { data.points = points; });
     let started = false;
-    const start = () => whenLeaflet(() => {
+    const start = () => ready.then(() => whenLeaflet(() => {
       if (started) return;
       started = true;
       const L = window.L;
@@ -469,7 +473,7 @@
         });
         document.addEventListener("click", (ev) => { if (!ev.target.closest(".map-search")) sugg.hidden = true; });
       }
-    });
+    }));
     if ("IntersectionObserver" in window) {
       const io = new IntersectionObserver(([entry]) => { if (entry.isIntersecting) { io.disconnect(); start(); } }, { rootMargin: "300px" });
       io.observe(mapEl);
