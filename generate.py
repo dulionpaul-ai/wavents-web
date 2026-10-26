@@ -2484,19 +2484,30 @@ def main() -> int:
     extra_pages = ([f"{BASE_URL}/{t[0]}/" for t in THEMES] + [f"{BASE_URL}/{f['slug']}/" for f in FESTIVALS]
                    + [f"{BASE_URL}/a-propos/", f"{BASE_URL}/faq/", f"{BASE_URL}/app/", f"{BASE_URL}/ajouter/"])
 
-    urls = ([f"{BASE_URL}/", f"{BASE_URL}/ville/", f"{BASE_URL}/marche/"] + extra_pages
-            + [f"{BASE_URL}/{market_path(town)}" for town in markets]
-            + [f"{BASE_URL}/{commune_path(name)}" for name in communes]
-            + [f"{BASE_URL}/{event_path(ev)}" for ev in events if canonical_ids[ev["id"]] == ev["id"]])
+    # Plan du site en quatre parties (26/10/2026) : la Search Console donne
+    # alors le nombre de pages indexées par type (pages, communes, marchés,
+    # sorties), et sitemap.xml devient l'index des quatre.
+    parts = {
+        "pages": [f"{BASE_URL}/", f"{BASE_URL}/ville/", f"{BASE_URL}/marche/"] + extra_pages,
+        "communes": [f"{BASE_URL}/{commune_path(name)}" for name in communes],
+        "marches": [f"{BASE_URL}/{market_path(town)}" for town in markets],
+        "sorties": [f"{BASE_URL}/{event_path(ev)}" for ev in events if canonical_ids[ev["id"]] == ev["id"]],
+    }
     # Date de mise à jour (26/10/2026) : les pages de listes changent chaque
     # jour ; une fiche, à sa publication.
     published = {f"{BASE_URL}/{event_path(ev)}": (ev.get("published_at") or "")[:10] for ev in events}
     today_iso = now.date().isoformat()
-    sitemap = "\n".join(
-        f"  <url><loc>{html.escape(quote(u, safe=':/'))}</loc><lastmod>{published.get(u) or today_iso}</lastmod></url>"
-        for u in urls)
+    for part, part_urls in parts.items():
+        entries = "\n".join(
+            f"  <url><loc>{html.escape(quote(u, safe=':/'))}</loc><lastmod>{published.get(u) or today_iso}</lastmod></url>"
+            for u in part_urls)
+        (out / f"sitemap-{part}.xml").write_text(
+            f'<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n{entries}\n</urlset>\n',
+            encoding="utf-8")
+    index = "\n".join(f"  <sitemap><loc>{BASE_URL}/sitemap-{part}.xml</loc><lastmod>{today_iso}</lastmod></sitemap>"
+                      for part in parts)
     (out / "sitemap.xml").write_text(
-        f'<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n{sitemap}\n</urlset>\n',
+        f'<?xml version="1.0" encoding="UTF-8"?>\n<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n{index}\n</sitemapindex>\n',
         encoding="utf-8",
     )
     (out / "llms.txt").write_text(llms_txt(upcoming, now, communes, markets), encoding="utf-8")
