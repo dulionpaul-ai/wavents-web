@@ -1119,7 +1119,7 @@ def market_sentence(town: str, ev: dict) -> str:
         hours = market_hours(ev, d)
         parts.append(f"le {DAYS[d - 1]}" + (f" de {hours}" if hours else ""))
     where = ev.get("location_name") or ""
-    where = f", {where}" if where and fold(where) != fold(town) else ""
+    where = f", {where}" if where and fold(where) not in fold(town) and fold(town) not in fold(where) else ""
     return f"{' et '.join(parts)}{where}"
 
 
