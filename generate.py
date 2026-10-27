@@ -305,9 +305,14 @@ def series_label(items: list[dict]) -> str | None:
     if len(items) < 2:
         return None
     weekdays = {wall_time(ev["start_date"]).weekday() for ev in items}
-    if len(weekdays) == 1:
+    # « tous les … » seulement de semaine en semaine (signalement de Paul du
+    # 27/10/2026 : deux vendredis à un mois d'écart affichés « tous les
+    # vendredis », comme dans l'appli).
+    days = [wall_time(ev["start_date"]).date() for ev in items]
+    weekly = all((b - a).days == 7 for a, b in zip(days, days[1:]))
+    if len(weekdays) == 1 and weekly:
         return f"tous les {DAYS[weekdays.pop()]}s"
-    return f"+ {len(items) - 1} dates"
+    return f"+ {len(items) - 1} date{'s' if len(items) > 2 else ''}"
 
 
 # --- Pages répétées (Search Console, 22/10/2026) --------------------------------
