@@ -47,9 +47,8 @@ PLAY_STORE_URL = "https://play.google.com/store/apps/details?id=com.wavents.wave
 # Passer à True le jour où l'appli est publiée sur le Play Store (test
 # ouvert ou production) : avant, la fiche renvoie une erreur 404.
 PLAY_STORE_PUBLISHED = True  # en production depuis le 21/10/2026 (Paul, 22/10 : « c'est officiel »)
-# Adresse de la fiche App Store (https://apps.apple.com/fr/app/wavents/id…)
-# à renseigner le jour où Apple publie l'appli.
-APP_STORE_URL: str | None = None
+# Fiche App Store : Wavents validé par Apple le 28/10/2026 (1.5.0).
+APP_STORE_URL: str | None = "https://apps.apple.com/fr/app/wavents/id6820224748"
 
 PARIS = ZoneInfo("Europe/Paris")
 HOME = (46.1075, 4.7536)  # centre de Belleville-en-Beaujolais, comme l'appli
