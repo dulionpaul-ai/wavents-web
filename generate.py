@@ -47,9 +47,8 @@ PLAY_STORE_URL = "https://play.google.com/store/apps/details?id=com.wavents.wave
 # Passer à True le jour où l'appli est publiée sur le Play Store (test
 # ouvert ou production) : avant, la fiche renvoie une erreur 404.
 PLAY_STORE_PUBLISHED = True  # en production depuis le 21/10/2026 (Paul, 22/10 : « c'est officiel »)
-# Adresse de la fiche App Store (https://apps.apple.com/fr/app/wavents/id…)
-# à renseigner le jour où Apple publie l'appli.
-APP_STORE_URL: str | None = None
+# Fiche App Store : Wavents validé par Apple le 28/10/2026 (1.5.0).
+APP_STORE_URL: str | None = "https://apps.apple.com/fr/app/wavents/id6820224748"
 
 PARIS = ZoneInfo("Europe/Paris")
 HOME = (46.1075, 4.7536)  # centre de Belleville-en-Beaujolais, comme l'appli
@@ -305,9 +304,14 @@ def series_label(items: list[dict]) -> str | None:
     if len(items) < 2:
         return None
     weekdays = {wall_time(ev["start_date"]).weekday() for ev in items}
-    if len(weekdays) == 1:
+    # « tous les … » seulement de semaine en semaine (signalement de Paul du
+    # 27/10/2026 : deux vendredis à un mois d'écart affichés « tous les
+    # vendredis », comme dans l'appli).
+    days = [wall_time(ev["start_date"]).date() for ev in items]
+    weekly = all((b - a).days == 7 for a, b in zip(days, days[1:]))
+    if len(weekdays) == 1 and weekly:
         return f"tous les {DAYS[weekdays.pop()]}s"
-    return f"+ {len(items) - 1} dates"
+    return f"+ {len(items) - 1} date{'s' if len(items) > 2 else ''}"
 
 
 # --- Pages répétées (Search Console, 22/10/2026) --------------------------------
@@ -2426,6 +2430,10 @@ def app_page(upcoming: list[dict], communes: dict[str, list[dict]]) -> str:
   if (dest) {{
     new Image().src = "https://wavents.goatcounter.com/count?p=" + encodeURIComponent("/app/" + (ref ? "?ref=" + ref : ""))
       + "&r=" + encodeURIComponent(document.referrer) + (ref ? "&q=" + encodeURIComponent("ref=" + ref) : "") + "&rnd=" + Math.random();
+    // Redirection vers le store comptée comme événement (29/10 : sans clic
+    // sur un badge, le mail affichait « aucun clic vers les stores »).
+    new Image().src = "https://wavents.goatcounter.com/count?e=true&p=" + (dest === t.android ? "redir-google-play" : "redir-app-store")
+      + "&rnd=" + Math.random();
     if (ref && dest === t.android) dest += "&referrer=" + encodeURIComponent("utm_source=" + ref);
     setTimeout(function () {{ location.replace(dest); }}, 350);
   }}
