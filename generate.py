@@ -625,7 +625,7 @@ def row_card(event: dict, series: dict[str, list[dict]], root: str = "") -> str:
     emoji, label, color = category(event)
     start = wall_time(event["start_date"])
     recurring = series_label(series.get(series_key(event) or "", []))
-    if is_long(event) and start.date() < datetime.now(PARIS).date():
+    if start.date() < datetime.now(PARIS).date() < end_of(event).date() or (is_long(event) and start.date() < datetime.now(PARIS).date()):
         end = end_of(event)
         when = f"jusqu'au {end.day} {MONTHS_SHORT[end.month - 1]}"
     else:
@@ -641,7 +641,7 @@ def row_card(event: dict, series: dict[str, list[dict]], root: str = "") -> str:
     if event.get("for_kids"):
         badges.append('<span class="badge kids">En famille</span>')
     search = fold(f"{event['title']} {commune_of(event)} {event.get('location_name') or ''} {label}")
-    return f"""<a class="row-card" href="{root}{event_path(event)}" data-cat="{e(event.get('category_id') or '')}" data-free="{1 if is_free(event) else 0}" data-kids="{1 if event.get('for_kids') else 0}" data-q="{e(search)}" style="--cat:{color}">
+    return f"""<a class="row-card" href="{root}{event_path(event)}" data-cat="{e(event.get('category_id') or '')}" data-free="{1 if is_free(event) else 0}" data-kids="{1 if event.get('for_kids') else 0}" data-q="{e(search)}" data-lat="{event['latitude']:.3f}" data-lon="{event['longitude']:.3f}" style="--cat:{color}">
   <span class="row-media">{media(event, root)}</span>
   <span class="row-body"><span class="cat-chip">{emoji} {e(label)}</span><b>{e(event['title'])}</b><span class="row-date">{e(meta)}</span>{f'<span class="badges">{"".join(badges)}</span>' if badges else ''}</span>
 </a>"""
@@ -1734,8 +1734,20 @@ FESTIVALS = [
         "town": None,
         "first": date(2026, 10, 22),
         "last": date(2026, 11, 1),
-        "match": r"halloween",
+        # 29/10 : aussi les fêtes qui ne disent pas « Halloween » (bal des petits
+        # monstres, marche hantée, fête des morts mexicaine…).
+        "match": r"halloween|citrouille|sorciere|hantee|petits monstres|dia de los muertos|fete des morts",
         "when": "Samedi 31 octobre 2026",
+        # Page partagée dans les groupes Facebook et aux sous des écoles (Paul,
+        # 29/10) : le ton de Paul en tête, le programme avant l'histoire, le
+        # grand soir coupé en deux (journée / soirée).
+        "hook": "Pas encore d'idée pour Halloween ? Nous non plus, alors on a tout rassemblé : {n} animations "
+                "autour de Belleville, de Villefranche et du Val de Saône. Il n'y a plus qu'à piocher.",
+        "title": "Halloween {year} dans le Beaujolais : {n} animations, le programme",
+        "story_after": True,
+        # Avis de mairie qui citent la fête (rue barrée pour le défilé…).
+        "exclude_title": r"rue barree|route barree|stationnement|deviation|circulation",
+        "split_day": date(2026, 10, 31),
         "where": "Autour de Belleville",
         "unit": "animations",
         "unit1": "animation",
@@ -1913,7 +1925,8 @@ def festival_page(fest: dict, upcoming: list[dict], series: dict[str, list[dict]
     # celles à moins de THEME_RADIUS_KM, sans celles d'une autre page (exclude).
     items = [ev for ev in in_window if re.search(fest["match"], text_of(ev))
              and (fest.get("town") or near(ev))
-             and not (fest.get("exclude") and re.search(fest["exclude"], text_of(ev)))]
+             and not (fest.get("exclude") and re.search(fest["exclude"], text_of(ev)))
+             and not (fest.get("exclude_title") and re.search(fest["exclude_title"], fold(ev["title"])))]
     if not fest.get("town"):
         items = one_per_day(collapse_series(items))
     items.sort(key=lambda ev: wall_time(ev["start_date"]))
@@ -1934,15 +1947,55 @@ def festival_page(fest: dict, upcoming: list[dict], series: dict[str, list[dict]
         facts.append(("Tarifs", f"de {amounts[0]:g} € à {amounts[-1]:g} € selon les rendez-vous"))
     facts_html = "".join(f"<div><dt>{e(k)}</dt><dd>{e(v)}</dd></div>" for k, v in facts)
 
-    by_day: dict[date, list[dict]] = {}
+    # Rangement par jour (et, le grand soir, journée puis soirée) ; les
+    # animations déjà commencées (stages, expos des vacances) à part, en fin.
+    today, split = now.date(), fest.get("split_day")
+
+    def evening(ev: dict) -> bool:
+        start = wall_time(ev["start_date"])
+        if ev.get("start_time_known") and (start.hour or start.minute):
+            return start.hour >= 17
+        return bool(re.search(r"\b(soiree|soir|bal|nocturne|veillee)\b", fold(ev["title"])))
+
+    by_slot: dict[tuple, list[dict]] = {}
+    ongoing = []
     for ev in items:
-        # Déjà commencé (animation sur toutes les vacances…) : rangé à aujourd'hui.
-        by_day.setdefault(max(wall_time(ev["start_date"]).date(), now.date()), []).append(ev)
-    days_html = "".join(
-        f'<section class="section"><div class="section-head"><div><p class="kicker">{e(cap(day_label(d)))}</p>'
-        f'<h2>{len(evs)} {fest.get("unit", "rendez-vous") if len(evs) > 1 else fest.get("unit1", "rendez-vous")}</h2></div></div>'
-        f'<div class="rows">{"".join(row_card(ev, series, root) for ev in evs)}</div></section>'
-        for d, evs in sorted(by_day.items()))
+        d = wall_time(ev["start_date"]).date()
+        if d < today:
+            ongoing.append(ev)
+            continue
+        by_slot.setdefault((d, 1 if d == split and evening(ev) else 0), []).append(ev)
+
+    def unit(n: int) -> str:
+        return fest.get("unit", "rendez-vous") if n > 1 else fest.get("unit1", "rendez-vous")
+
+    blocks, day_links = [], []
+    for (d, part), evs in sorted(by_slot.items()):
+        label = "Aujourd'hui" if d == today else ("Demain" if d == today + timedelta(days=1) else cap(day_label(d)))
+        short = "Aujourd'hui" if d == today else ("Demain" if d == today + timedelta(days=1)
+                                                    else f"{cap(DAYS_SHORT[d.weekday()])} {d.day}")
+        if part:
+            label, short = f"{label}, le soir", f"{short} soir"
+        anchor = f"j{d:%Y%m%d}{'s' if part else ''}"
+        day_links.append(f'<a class="chip day-link" href="#{anchor}">{e(short)}</a>')
+        blocks.append(
+            f'<section class="section theme-day" id="{anchor}"><div class="section-head"><div><p class="kicker">{e(label)}</p>'
+            f'<h2><span class="t-count">{len(evs)}</span> {unit(len(evs))}</h2></div></div>'
+            f'<div class="rows">{"".join(row_card(ev, series, root) for ev in evs)}</div></section>')
+    if ongoing:
+        day_links.append('<a class="chip day-link" href="#jlong">Déjà commencé</a>')
+        blocks.append(
+            '<section class="section theme-day" id="jlong"><div class="section-head"><div><p class="kicker">'
+            f'Sur plusieurs jours</p><h2><span class="t-count">{len(ongoing)}</span> {unit(len(ongoing))} '
+            f'en ce moment</h2></div></div><div class="rows">{"".join(row_card(ev, series, root) for ev in ongoing)}'
+            '</div></section>')
+    chips = ['<button class="chip toggle" data-ttoggle="near">📍 Près de moi</button>',
+             '<button class="chip toggle" data-ttoggle="kids">En famille</button>',
+             '<button class="chip toggle" data-ttoggle="free">Gratuit</button>']
+    days_row = f'<div class="chips day-links">{"".join(day_links)}</div>' if len(day_links) > 1 else ""
+    bar = (f'<div class="filters theme-filters">{days_row}<div class="chips">{"".join(chips)}</div>'
+           f'<p class="t-empty" hidden>Aucune animation avec ces filtres.</p></div>')
+    days_html = f'<div class="theme-list">{bar}{"".join(blocks)}</div>'
     if not items:
         days_html = ('<section class="section"><p class="lead">Le programme n\'est pas encore publié : '
                      'reviens bientôt, cette page est mise à jour chaque jour.</p></section>')
@@ -2014,22 +2067,31 @@ def festival_page(fest: dict, upcoming: list[dict], series: dict[str, list[dict]
     image = next((real_image(ev) for ev in items if real_image(ev)), None)
     intro = (f"{fest['name']} {year}, {fest.get('when', span).lower() if fest.get('when') else span} : "
              "c'est quoi, où, et tout le programme jour par jour, mis à jour chaque jour.")
+    lead = fest["lead"]
+    if fest.get("hook") and items:
+        lead = fest["hook"].format(n=len(items))
+        intro = f"{lead} Programme jour par jour, mis à jour chaque jour."
+    story_block = (f'<section class="section"><div class="panel soft fest-story">{story_html}</div>'
+                   + ("" if fest.get("story_after") else f'<dl class="fest-facts">{facts_html}</dl>') + '</section>')
+    facts_block = f'<section class="section"><dl class="fest-facts">{facts_html}</dl></section>'
+    title = (fest["title"].format(year=year, n=len(items)) if fest.get("title") and items
+             else f"{fest['name']} {year} : programme et dates")
     body = f"""  <section class="ev-hero town-hero"><div class="ev-hero-inner">
     <a class="back" href="{root}">← Accueil</a>
     <p class="kicker">Grand rendez-vous</p>
     <h1>{e(fest['name'])} {year}</h1>
-    <p class="lead">{e(fest['lead'])}</p>
+    <p class="lead">{e(lead)}</p>
     <div class="hero-actions">{play_cta()}</div>
   </div></section>
-  <section class="section"><div class="panel soft fest-story">{story_html}</div>
-    <dl class="fest-facts">{facts_html}</dl></section>
+  {facts_block if fest.get("story_after") else story_block}
   {related_html}
   {days_html}
   {nearby_html}
+  {story_block if fest.get("story_after") else ""}
   <section class="section prose"><h2>Questions fréquentes</h2>{faq_html}</section>
   <section class="section"><div class="town-links">{links_html}</div></section>"""
     return layout(
-        f"{fest['name']} {year} : programme et dates – Wavents",
+        f"{title} – Wavents",
         body,
         description=intro,
         url=url,

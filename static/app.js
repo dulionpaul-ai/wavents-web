@@ -336,7 +336,40 @@
       $$(".chip[data-tcat]", themeList).forEach((c) => c.classList.toggle("is-on", c === chip));
       apply();
     }));
-    $$(".chip[data-ttoggle]", themeList).forEach((chip) => chip.addEventListener("click", () => {
+    /* « Près de moi » (pages de fête, 29/10) : chaque jour trié par distance,
+       les kilomètres ajoutés à la ligne ; un second appui remet l'ordre horaire. */
+    const sortNear = (chip, pos) => {
+      $$(".theme-day .rows", themeList).forEach((list) => {
+        const cards = $$(".row-card", list);
+        cards.forEach((c, i) => { if (!c.dataset.order) c.dataset.order = i; });
+        const km = (c) => {
+          const r = Math.PI / 180, la = c.dataset.lat * r, lo = c.dataset.lon * r;
+          const la0 = pos.latitude * r, lo0 = pos.longitude * r;
+          const h = Math.sin((la - la0) / 2) ** 2 + Math.cos(la0) * Math.cos(la) * Math.sin((lo - lo0) / 2) ** 2;
+          return 2 * 6371 * Math.asin(Math.sqrt(h));
+        };
+        cards.forEach((c) => {
+          const d = $(".row-date", c);
+          if (!d.dataset.base) d.dataset.base = d.textContent;
+          if (pos) c.dataset.km = km(c);
+          d.textContent = pos ? `${d.dataset.base} · à ${Math.max(1, Math.round(c.dataset.km))} km` : d.dataset.base;
+        });
+        cards.sort((a, b) => pos ? a.dataset.km - b.dataset.km : a.dataset.order - b.dataset.order)
+          .forEach((c) => list.appendChild(c));
+      });
+      chip.classList.toggle("is-on", !!pos);
+    };
+    $$('.chip[data-ttoggle="near"]', themeList).forEach((chip) => chip.addEventListener("click", () => {
+      if (chip.classList.contains("is-on")) { sortNear(chip, null); return; }
+      if (!navigator.geolocation) return;
+      const label = chip.textContent;
+      chip.textContent = "📍 Je cherche…";
+      navigator.geolocation.getCurrentPosition(
+        (p) => { chip.textContent = label; sortNear(chip, p.coords); },
+        () => { chip.textContent = label; window.alert("Position non disponible : autorise la localisation pour trier par distance."); },
+        { maximumAge: 600000, timeout: 10000 });
+    }));
+    $$('.chip[data-ttoggle]:not([data-ttoggle="near"])', themeList).forEach((chip) => chip.addEventListener("click", () => {
       const key = chip.dataset.ttoggle;
       st[key] = !st[key];
       chip.classList.toggle("is-on", st[key]);
