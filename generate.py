@@ -2368,6 +2368,10 @@ def app_page(upcoming: list[dict], communes: dict[str, list[dict]]) -> str:
   if (dest) {{
     new Image().src = "https://wavents.goatcounter.com/count?p=" + encodeURIComponent("/app/" + (ref ? "?ref=" + ref : ""))
       + "&r=" + encodeURIComponent(document.referrer) + (ref ? "&q=" + encodeURIComponent("ref=" + ref) : "") + "&rnd=" + Math.random();
+    // Redirection vers le store comptée comme événement (29/10 : sans clic
+    // sur un badge, le mail affichait « aucun clic vers les stores »).
+    new Image().src = "https://wavents.goatcounter.com/count?e=true&p=" + (dest === t.android ? "redir-google-play" : "redir-app-store")
+      + "&rnd=" + Math.random();
     if (ref && dest === t.android) dest += "&referrer=" + encodeURIComponent("utm_source=" + ref);
     setTimeout(function () {{ location.replace(dest); }}, 350);
   }}
