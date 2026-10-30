@@ -59,7 +59,9 @@ AGENDA_DAY_PREVIEW = 12  # cartes affichées par jour avant « Voir les autres s
 FIELDS = (
     "id,title,description,category_id,location_name,address,latitude,longitude,"
     "start_date,end_date,start_time_known,end_time_known,price_type,price_amount,price_confirmed,"
-    "image_url,website_url,for_kids,source,published_at,recurring_weekdays,opening_hours"
+    "image_url,website_url,for_kids,source,published_at,recurring_weekdays,opening_hours,"
+    # Intérieur / extérieur (script 211 du dépôt Wavents, 30/10/2026).
+    "setting,setting_sure"
 )
 # id -> (icône, libellé, couleur) : mêmes icônes Material et mêmes couleurs
 # que l'appli (lib/models/category.dart), pour qu'on se sente au même endroit.
@@ -993,6 +995,25 @@ def gone_page(event: dict, town_page: str | None) -> str:
                   extra_head='<meta name="robots" content="noindex">', depth=2)
 
 
+def setting_label(event: dict) -> str | None:
+    """« En intérieur », « Probablement en extérieur »… comme l'appli
+    (lib/utils/event_setting.dart) ; rien si inconnu."""
+    sure = bool(event.get("setting_sure"))
+    return {
+        "interieur": "En intérieur" if sure else "Probablement en intérieur",
+        "exterieur": "En extérieur" if sure else "Probablement en extérieur",
+        "les_deux": "Intérieur et extérieur",
+    }.get(event.get("setting") or "")
+
+
+def setting_fact(event: dict) -> str:
+    label = setting_label(event)
+    if not label:
+        return ""
+    icon = "🌳" if event.get("setting") == "exterieur" else ("🏠" if event.get("setting") == "interieur" else "🏡")
+    return f'<div><span>{icon}</span><p><b>Intérieur / extérieur</b>{e(label)}</p></div>'
+
+
 def event_page(event: dict, neighbours: list[dict], series: dict[str, list[dict]],
                town_page: str | None = None, canonical: str | None = None,
                repeats: list[dict] | None = None) -> str:
@@ -1070,6 +1091,7 @@ def event_page(event: dict, neighbours: list[dict], series: dict[str, list[dict]
       <div class="panel facts">
         <div><span>📅</span><p><b>Quand</b>{e(when)}</p></div>
         <div><span>📍</span><p><b>Où</b>{e(place)}</p></div>
+        {setting_fact(event)}
         <div><span>💶</span><p><b>Prix</b>{e(price_label(event))}</p></div>
       </div>
       <div class="panel mini-map-panel"><div id="mini-map" data-lat="{lat}" data-lon="{lon}" data-color="{color}" data-icon="{re.sub(r"<[^>]+>", "", emoji)}"></div></div>
