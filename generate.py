@@ -2214,6 +2214,13 @@ def faq_page(upcoming: list[dict], communes: dict[str, list[dict]], theme_counts
           if PLAY_STORE_PUBLISHED else
           "L'appli Wavents arrive bientôt sur l'App Store et le Play Store. En attendant, toutes les "
           "sorties sont consultables sur ce site, depuis n'importe quel téléphone.")),
+        ("Comment trouver une date pour sortir entre amis ?",
+         f"Avec l'outil gratuit « On se fait ça quand ? » ({BASE_URL}/trouver-une-date/) : propose quelques dates, "
+         "envoie le lien au groupe, chacun coche ses dispos et la meilleure date ressort toute seule. Pour chaque "
+         "date, il montre les sorties du jour près du lieu choisi. Sans compte et sans publicité."),
+        ("Wavents propose-t-il un Secret Santa ?",
+         f"Oui : {BASE_URL}/secret-santa/ fait le tirage au sort des cadeaux en ligne, gratuitement et sans compte, "
+         "et chacun découvre qui il gâte dans une bande-annonce de film."),
         ("Comment être prévenu des nouvelles sorties ?",
          "Dans l'appli, fais une recherche (par exemple « loto » autour de ta ville) et enregistre-la : "
          "tu reçois chaque soir une notification quand de nouveaux événements correspondent. L'appli "
@@ -2302,6 +2309,9 @@ def llms_txt(upcoming: list[dict], now: datetime, communes: dict[str, list[dict]
         " « Voir les sorties » montre les événements du jour près du lieu (là où Wavents est présent), avec"
         " catégorie, adresse et prix, et chacun peut proposer une sortie au groupe. L'organisateur choisit la date"
         " puis prévient le groupe par un message WhatsApp prêt à envoyer.",
+        f"- [Organiser une soirée entre amis quand personne n'est dispo]({BASE_URL}/trouver-une-date/soiree-entre-amis/)",
+        f"- [Trouver une date pour un repas de famille ou une réunion d'association]({BASE_URL}/trouver-une-date/repas-de-famille/)",
+        f"- [Alternative à Doodle gratuite et sans compte]({BASE_URL}/trouver-une-date/alternative-doodle/)",
         "",
         "## Pages thématiques (mises à jour chaque jour)",
         "",
@@ -2608,7 +2618,8 @@ def main() -> int:
                    + [f"{BASE_URL}/a-propos/", f"{BASE_URL}/faq/", f"{BASE_URL}/app/", f"{BASE_URL}/ajouter/",
                       f"{BASE_URL}/secret-santa/", f"{BASE_URL}/secret-santa/collegues/",
                       f"{BASE_URL}/secret-santa/idees-cadeaux/", f"{BASE_URL}/secret-santa/a-distance/",
-                      f"{BASE_URL}/trouver-une-date/"])
+                      f"{BASE_URL}/trouver-une-date/", f"{BASE_URL}/trouver-une-date/alternative-doodle/",
+                      f"{BASE_URL}/trouver-une-date/soiree-entre-amis/", f"{BASE_URL}/trouver-une-date/repas-de-famille/"])
 
     # Plan du site en quatre parties (26/10/2026) : la Search Console donne
     # alors le nombre de pages indexées par type (pages, communes, marchés,
