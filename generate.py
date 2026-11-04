@@ -2273,6 +2273,16 @@ def llms_txt(upcoming: list[dict], now: datetime, communes: dict[str, list[dict]
         f"Contact : hello@wavents.fr. Confidentialité : {BASE_URL}/confidentialite.html.",
         f"À propos : {BASE_URL}/a-propos/. Questions fréquentes : {BASE_URL}/faq/.",
         "",
+        "## Outil gratuit : Secret Santa en ligne",
+        "",
+        f"- [Secret Santa en ligne gratuit]({BASE_URL}/secret-santa/) : tirage au sort de cadeaux pour la famille,"
+        " les collègues ou les amis, sans compte, sans e-mail et sans publicité. On saisit le nom du groupe,"
+        " la date, le lieu, le budget, les participants et les couples qui ne doivent pas se tirer ;"
+        " chacun reçoit son propre lien (WhatsApp, SMS, mail) et découvre qui il gâte dans une bande-annonce"
+        " de film animée (suspense, roulement de tambour, feu d'artifice). Rien n'est enregistré sur un serveur :"
+        " le tirage se fait dans le navigateur et chaque lien ne contient que le tirage de la personne qui le reçoit."
+        " Fonctionne sur téléphone, tablette et ordinateur, pour 3 participants ou plus, aussi à distance.",
+        "",
         "## Pages thématiques (mises à jour chaque jour)",
         "",
         f"- [Que faire ce week-end dans le Beaujolais]({BASE_URL}/ce-week-end/)",
