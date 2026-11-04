@@ -228,7 +228,9 @@
 (function () {
   var SUPA = "https://mzbxnwvrvrhlucjzbzls.supabase.co";
   var KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im16Ynhud3ZydnJobHVjanpiemxzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQ2NDMwMzQsImV4cCI6MjEwMDIxOTAzNH0.wqoOLgNM92KmwZfbh4c56dVN13DDlCxJhuOOoqlH1is";
-  var GEO = "https://api-adresse.data.gouv.fr/search/";
+  var GEO = "https://data.geopf.fr/geocodage/search";
+  // Priorité aux communes proches de la zone Wavents (homonymes : Belleville…).
+  var NEAR = "&lat=46.05&lon=4.72";
   var RADIUS_KM = 20;
   var CATS = { concert: ["Concert", "#E91E63", "concert"], fete: ["Fête", "#FF5252", "fete"], marche: ["Marché", "#FF9800", "marche"],
     brocante: ["Brocante", "#D4A017", "brocante"], spectacle: ["Spectacle", "#8E24AA", "spectacle"], sport: ["Sport", "#43A047", "sport"],
@@ -291,7 +293,7 @@
     geo = null; clearTimeout(sugTimer); var q = this.value.trim();
     if (q.length < 3) { $("placeSug").hidden = true; return; }
     sugTimer = setTimeout(function () {
-      fetch(GEO + "?type=municipality&limit=5&q=" + encodeURIComponent(q)).then(function (r) { return r.json(); }).then(function (j) {
+      fetch(GEO + "?type=municipality&limit=5" + NEAR + "&q=" + encodeURIComponent(q)).then(function (r) { return r.json(); }).then(function (j) {
         sugItems = (j.features || []).map(function (f) { return { name: f.properties.city || f.properties.name, ctx: f.properties.context, lng: f.geometry.coordinates[0], lat: f.geometry.coordinates[1] }; });
         var ul = $("placeSug"); ul.innerHTML = "";
         sugItems.forEach(function (s) {
@@ -306,7 +308,7 @@
   $("place").addEventListener("blur", function () { setTimeout(function () { $("placeSug").hidden = true; }, 150); });
   function locate(q) {
     if (geo || !q) return Promise.resolve(geo);
-    return fetch(GEO + "?limit=1&q=" + encodeURIComponent(q)).then(function (r) { return r.json(); })
+    return fetch(GEO + "?type=municipality&limit=1" + NEAR + "&q=" + encodeURIComponent(q)).then(function (r) { return r.json(); })
       .then(function (j) { var f = (j.features || [])[0]; return f ? { lng: f.geometry.coordinates[0], lat: f.geometry.coordinates[1] } : null; })
       .catch(function () { return null; });
   }
