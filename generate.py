@@ -2030,6 +2030,11 @@ def festival_page(fest: dict, upcoming: list[dict], series: dict[str, list[dict]
     related_html = "".join(
         f'<a class="panel fest-related" href="{root}{f["slug"]}/"><b>{e(f["name"])} {f["first"].year}</b>'
         f'<span>{e(f["teaser"])}</span><span class="fest-more">Voir le programme →</span></a>' for f in related)
+    # Pages de Noël : lien vers le Secret Santa en ligne (04/11/2026).
+    if fest["slug"] in ("marches-de-noel", "fete-des-lumieres"):
+        related_html += (f'<a class="panel fest-related" href="{root}secret-santa/" data-goatcounter-click="clic-fete-secret-santa">'
+                         '<b>🎅 Secret Santa en ligne</b><span>Tirage au sort gratuit des cadeaux, révélé dans une '
+                         'bande-annonce de film : famille, collègues, amis.</span><span class="fest-more">Organiser le mien →</span></a>')
     if related_html:
         related_html = f'<section class="section">{related_html}</section>'
     nearby_html = ""
@@ -2282,6 +2287,9 @@ def llms_txt(upcoming: list[dict], now: datetime, communes: dict[str, list[dict]
         " de film animée (suspense, roulement de tambour, feu d'artifice). Rien n'est enregistré sur un serveur :"
         " le tirage se fait dans le navigateur et chaque lien ne contient que le tirage de la personne qui le reçoit."
         " Fonctionne sur téléphone, tablette et ordinateur, pour 3 participants ou plus, aussi à distance.",
+        f"- [Secret Santa entre collègues : règles et conseils]({BASE_URL}/secret-santa/collegues/)",
+        f"- [Idées de cadeaux Secret Santa à 10, 20 et 30 €]({BASE_URL}/secret-santa/idees-cadeaux/)",
+        f"- [Organiser un Secret Santa à distance]({BASE_URL}/secret-santa/a-distance/)",
         "",
         "## Pages thématiques (mises à jour chaque jour)",
         "",
@@ -2586,7 +2594,8 @@ def main() -> int:
     (out / "app" / "index.html").write_text(app_page(upcoming, communes), encoding="utf-8")
     extra_pages = ([f"{BASE_URL}/{t[0]}/" for t in THEMES] + [f"{BASE_URL}/{f['slug']}/" for f in FESTIVALS]
                    + [f"{BASE_URL}/a-propos/", f"{BASE_URL}/faq/", f"{BASE_URL}/app/", f"{BASE_URL}/ajouter/",
-                      f"{BASE_URL}/secret-santa/"])
+                      f"{BASE_URL}/secret-santa/", f"{BASE_URL}/secret-santa/collegues/",
+                      f"{BASE_URL}/secret-santa/idees-cadeaux/", f"{BASE_URL}/secret-santa/a-distance/"])
 
     # Plan du site en quatre parties (26/10/2026) : la Search Console donne
     # alors le nombre de pages indexées par type (pages, communes, marchés,
