@@ -461,8 +461,7 @@
       rpc("date_poll_unpropose", { p_id: pollId, p_prop_id: id, p_token: m[id] || null, p_admin: admin }).then(function () { delete m[id]; store("date-props-" + pollId, m); return load(); }); }; });
 
     $("voteBtn").textContent = myVote ? "Mettre à jour mes dispos" : "Valider mes dispos";
-    $("lock").innerHTML = myVote ? "🔒 Seul ce téléphone peut modifier les réponses " + (/^[aeiouyhâéèêîïôûAEIOUYHÂÉÈÊÎÏÔÛ]/.test(myVote.name) ? "d'" : "de ") + esc(myVote.name) + " · <button id='unvote'>Retirer ma réponse</button>" : "🔒 Seul ce téléphone pourra modifier tes réponses";
-    if ($("unvote")) $("unvote").onclick = unvote;
+    $("lock").innerHTML = myVote ? "🔒 Seul ce téléphone peut modifier les réponses " + (/^[aeiouyhâéèêîïôûAEIOUYHÂÉÈÊÎÏÔÛ]/.test(myVote.name) ? "d'" : "de ") + esc(myVote.name) : "🔒 Seul ce téléphone pourra modifier tes réponses";
 
     // Organisateur
     $("orgBar").hidden = !admin;
@@ -597,12 +596,7 @@
       .then(function () { btn.disabled = false; })
       .catch(function (e) { btn.disabled = false; err.textContent = e.message; });
   };
-  function unvote() {
-    if (!mine || !confirm("Retirer ta réponse ?")) return;
-    rpc("date_poll_unvote", { p_id: pollId, p_vote_id: mine.id, p_token: mine.token, p_admin: null }).then(function () {
-      store("date-vote-" + pollId, null); mine = null; choice = []; stat("date-vote-retire"); return load();
-    });
-  }
+
 
   function initPoll() {
     var m = document.createElement("meta"); m.name = "robots"; m.content = "noindex"; document.head.appendChild(m);
