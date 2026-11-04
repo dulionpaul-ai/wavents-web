@@ -31,6 +31,8 @@
   .btn { font: 900 18px Nunito, sans-serif; color: #2a1b00; border: 0; border-radius: 999px; padding: 18px 34px;
     background: linear-gradient(180deg, var(--gold2), var(--gold)); box-shadow: 0 0 0 0 rgba(247,211,106,.7);
     animation: pulse 1.8s infinite; cursor: pointer; }
+  @media (max-width: 360px) { .btn { font-size: 16px; padding: 16px 22px; } }
+  .btn { white-space: nowrap; }
   .btn.ghost { background: transparent; color: var(--gold); border: 2px solid rgba(247,211,106,.6); animation: none; font-size: 16px; padding: 13px 24px; }
   @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(247,211,106,.6); } 70% { box-shadow: 0 0 0 26px rgba(247,211,106,0); } 100% { box-shadow: 0 0 0 0 rgba(247,211,106,0); } }
   #studio .pin { width: 92px; margin-bottom: 18px; transform: translateY(-40px) scale(.7); opacity: 0;
@@ -298,7 +300,8 @@ async function film() {
   await line("SECRET", "big gold", 900, boom);
   await line("SANTA.", "big gold", 2600, () => { boom(); chime(); burst(W / 2, H / 2, 160, ["#f7d36a", "#fff"], 10, .08, 2.6, 90); });
   // 3. Le bouton du tirage (Paul, 04/11), puis la machine à sous des prénoms.
-  show("launch"); tone(220, 2.5, "sine", .08); 
+  l.classList.remove("show"); await wait(700);
+  show("launch"); tone(220, 2.5, "sine", .08);
   await new Promise((res) => { $("draw").onclick = () => { $("draw").onclick = null; res(); }; });
   boom(); vibrate(100);
   show("reel"); const strip = $("strip"); const others = data.names.filter((n) => n !== data.giver);
