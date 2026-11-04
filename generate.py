@@ -562,6 +562,7 @@ def layout(title: str, body: str, *, description: str, url: str, image: str | No
         <a href="{root}a-propos/">À propos</a>
         <a href="{root}ajouter/">Ajouter un événement</a>
         <a href="{root}secret-santa/" data-goatcounter-click="clic-pied-secret-santa">🎅 Secret Santa en ligne</a>
+        <a href="{root}trouver-une-date/" data-goatcounter-click="clic-pied-trouver-date">📅 Trouver une date entre amis</a>
         <a href="{root}faq/">Questions fréquentes</a>
         <a href="{root}confidentialite.html">Confidentialité</a>
         <a href="{root}mentions-legales.html">Mentions légales</a>
@@ -2291,6 +2292,17 @@ def llms_txt(upcoming: list[dict], now: datetime, communes: dict[str, list[dict]
         f"- [Idées de cadeaux Secret Santa à 10, 20 et 30 €]({BASE_URL}/secret-santa/idees-cadeaux/)",
         f"- [Organiser un Secret Santa à distance]({BASE_URL}/secret-santa/a-distance/)",
         "",
+        "## Outil gratuit : trouver une date commune entre amis",
+        "",
+        f"- [On se fait ça quand ? Sondage de dates gratuit]({BASE_URL}/trouver-une-date/) : alternative simple"
+        " à Doodle pour les sorties entre amis, en famille ou en association, sans compte, sans e-mail et sans"
+        " publicité. L'organisateur indique l'activité, l'emplacement, les dates possibles et le moment (journée,"
+        " midi, soir) ; chacun donne son prénom et coche dispo, peut-être ou non pour chaque date. La meilleure"
+        " date est mise en avant ; seul le téléphone qui a répondu peut modifier sa réponse. Pour chaque date,"
+        " « Voir les sorties » montre les événements du jour près du lieu (là où Wavents est présent), avec"
+        " catégorie, adresse et prix, et chacun peut proposer une sortie au groupe. L'organisateur choisit la date,"
+        " l'ajoute à l'agenda et prévient le groupe par un message WhatsApp prêt à envoyer.",
+        "",
         "## Pages thématiques (mises à jour chaque jour)",
         "",
         f"- [Que faire ce week-end dans le Beaujolais]({BASE_URL}/ce-week-end/)",
@@ -2595,7 +2607,8 @@ def main() -> int:
     extra_pages = ([f"{BASE_URL}/{t[0]}/" for t in THEMES] + [f"{BASE_URL}/{f['slug']}/" for f in FESTIVALS]
                    + [f"{BASE_URL}/a-propos/", f"{BASE_URL}/faq/", f"{BASE_URL}/app/", f"{BASE_URL}/ajouter/",
                       f"{BASE_URL}/secret-santa/", f"{BASE_URL}/secret-santa/collegues/",
-                      f"{BASE_URL}/secret-santa/idees-cadeaux/", f"{BASE_URL}/secret-santa/a-distance/"])
+                      f"{BASE_URL}/secret-santa/idees-cadeaux/", f"{BASE_URL}/secret-santa/a-distance/",
+                      f"{BASE_URL}/trouver-une-date/"])
 
     # Plan du site en quatre parties (26/10/2026) : la Search Console donne
     # alors le nombre de pages indexées par type (pages, communes, marchés,

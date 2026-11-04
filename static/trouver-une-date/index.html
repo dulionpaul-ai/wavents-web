@@ -1,0 +1,628 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Trouver une date commune entre amis : sondage gratuit, sans compte | Wavents</title>
+<meta name="description" content="Personne n'est dispo en même temps ? Propose quelques dates, envoie le lien sur WhatsApp, chacun coche ses dispos et la meilleure date ressort toute seule. Avec les sorties du jour près de chez vous. Gratuit, sans compte.">
+<link rel="canonical" href="https://wavents.fr/trouver-une-date/">
+<link rel="icon" href="/img/favicon.svg">
+<meta property="og:title" content="On se fait ça quand ? 📅">
+<meta property="og:description" content="Coche tes dispos en 10 secondes : la meilleure date ressort toute seule.">
+<meta property="og:image" content="https://wavents.fr/img/og.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;700;800;900&display=swap" rel="stylesheet">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"WebApplication","name":"On se fait ça quand ? Trouver une date commune","url":"https://wavents.fr/trouver-une-date/","applicationCategory":"UtilitiesApplication","operatingSystem":"Tous","offers":{"@type":"Offer","price":"0","priceCurrency":"EUR"},"inLanguage":"fr","description":"Sondage de dates gratuit et sans compte pour trouver un jour où tout le monde est disponible, avec les sorties du jour près du lieu choisi.","publisher":{"@type":"Organization","name":"Wavents","url":"https://wavents.fr/"}}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[
+{"@type":"Question","name":"Comment trouver une date commune avec ses amis ?","acceptedAnswer":{"@type":"Answer","text":"Sur wavents.fr/trouver-une-date : choisis quelques dates possibles dans le calendrier, crée le sondage et envoie le lien dans le groupe WhatsApp. Chacun indique son prénom et coche « dispo », « peut-être » ou « non » pour chaque date. La date où le plus de monde est disponible est mise en avant. Gratuit et sans compte."}},
+{"@type":"Question","name":"Faut-il créer un compte pour répondre ?","acceptedAnswer":{"@type":"Answer","text":"Non. Ni l'organisateur ni les participants n'ont besoin de compte ou d'e-mail : il suffit du lien et d'un prénom."}},
+{"@type":"Question","name":"Quelqu'un d'autre peut-il modifier mes réponses ?","acceptedAnswer":{"@type":"Answer","text":"Non. Seul le téléphone qui a répondu peut modifier ou retirer la réponse. L'organisateur peut seulement retirer une réponse (doublon, erreur)."}},
+{"@type":"Question","name":"Quelle est la différence avec un Doodle ?","acceptedAnswer":{"@type":"Answer","text":"Même principe, en plus simple et pensé pour les sorties entre amis : pas de compte, pas de publicité, trois choix par date, la meilleure date affichée d'un coup d'œil, et pour chaque date les sorties près du lieu (concerts, spectacles, marchés…) que chacun peut proposer au groupe."}},
+{"@type":"Question","name":"Peut-on proposer une activité pour la date ?","acceptedAnswer":{"@type":"Answer","text":"Oui : sous chaque date, « Voir les sorties » affiche les événements de ce jour-là près du lieu choisi (là où Wavents est présent). Chacun peut en proposer un au groupe ; il s'affiche sous la date, avec le prénom de celui qui l'a proposé."}},
+{"@type":"Question","name":"Comment annoncer la date retenue ?","acceptedAnswer":{"@type":"Answer","text":"L'organisateur choisit la date ; le bouton « Prévenir le groupe » prépare un message avec la date, le lieu, les participants, la sortie proposée et le lien, à coller dans WhatsApp. Chacun peut aussi ajouter la date à son agenda."}}]}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"HowTo","name":"Trouver une date commune entre amis","totalTime":"PT1M","step":[{"@type":"HowToStep","text":"Indiquer ce que c'est (par exemple « Soirée entre copains ») et l'emplacement."},{"@type":"HowToStep","text":"Choisir les dates possibles dans le calendrier, et le moment (journée, midi ou soir)."},{"@type":"HowToStep","text":"Envoyer le lien du sondage dans le groupe (WhatsApp, SMS, mail)."},{"@type":"HowToStep","text":"Chacun donne son prénom et coche ses dispos : la meilleure date ressort automatiquement."},{"@type":"HowToStep","text":"L'organisateur choisit la date et prévient le groupe en un message."}]}</script>
+<style>
+  :root { --deep: #065FBB; --bright: #0B81E1; --ink: #0A2A3D; --soft: #4B6475; --line: #d9e6f2; --bg: #f3f8fd; --card: #fff;
+    --yes: #1f9d55; --yes-bg: #e3f6eb; --maybe: #e08a00; --maybe-bg: #fff3dc; --no: #8a99a6; --no-bg: #eef2f5; --red: #c62828;
+    --pro: #8e44ad; --pro-bg: #f5eefa; }
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body { margin: 0; font-family: Nunito, system-ui, sans-serif; color: var(--ink); background: var(--bg); }
+  button { font-family: inherit; }
+  .hd { background: linear-gradient(160deg, #065FBB, #0B81E1 70%, #29a3ff); color: #fff; padding: 10px 16px 12px; }
+  .hd .in-hd { max-width: 620px; margin: 0 auto; }
+  .hd .l { font-size: 12px; font-weight: 800; color: #dcecff; text-decoration: none; }
+  .hd h1 { font-size: 21px; font-weight: 900; line-height: 1.15; margin: 3px 0 2px; }
+  .hd p { margin: 0; font-size: 13px; font-weight: 700; color: #e6f1ff; }
+  main { max-width: 620px; margin: 0 auto; padding: 9px 10px 96px; }
+  .card { background: var(--card); border-radius: 16px; padding: 10px 11px; margin-bottom: 8px; box-shadow: 0 4px 16px rgba(6,95,187,.07); }
+  .lab { display: block; font-size: 13px; font-weight: 900; margin: 0 2px 4px; }
+  input[type=text] { width: 100%; font: 800 16px Nunito, sans-serif; color: var(--ink); padding: 8px 11px; border: 2px solid var(--line); border-radius: 12px; background: #fff; }
+  input[type=text]:focus { outline: none; border-color: var(--bright); }
+  .chk { display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 800; color: var(--deep); margin: 8px 2px 0; cursor: pointer; }
+  .chk input { width: 20px; height: 20px; accent-color: var(--deep); margin: 0; flex: none; }
+  .sug { position: relative; }
+  .sug ul { position: absolute; z-index: 4; left: 0; right: 0; top: 100%; margin: 3px 0 0; padding: 4px; list-style: none; background: #fff; border-radius: 12px; box-shadow: 0 8px 24px rgba(10,42,61,.18); }
+  .sug li { padding: 9px 10px; font-weight: 800; font-size: 14px; border-radius: 8px; cursor: pointer; }
+  .sug li small { color: var(--soft); font-weight: 700; }
+  .sug li:hover, .sug li.on { background: #e8f2fc; }
+  .mn { display: flex; justify-content: space-between; align-items: center; font-weight: 900; font-size: 14px; margin: 0 0 4px; text-transform: capitalize; }
+  .nav { width: 40px; height: 32px; border: 0; border-radius: 10px; background: #e8f2fc; color: var(--deep); font: 900 18px Nunito; cursor: pointer; }
+  .nav:disabled { opacity: .3; cursor: default; }
+  .grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 3px; text-align: center; }
+  .grid .w { font-size: 11px; font-weight: 800; color: var(--soft); }
+  .day { height: 34px; border: 0; border-radius: 9px; background: #f5f9fd; font: 800 14px Nunito; color: var(--ink); cursor: pointer; padding: 0; }
+  .day.past { background: transparent; color: #c3ced8; cursor: default; }
+  .day.on { background: var(--deep); color: #fff; }
+  .day.today { box-shadow: inset 0 0 0 2px var(--bright); }
+  .mom { display: flex; align-items: center; gap: 5px; margin-top: 8px; font-size: 13px; font-weight: 900; flex-wrap: wrap; }
+  .mom button { font: 900 12.5px Nunito; padding: 6px 11px; border-radius: 99px; background: #eef3f8; color: var(--soft); border: 0; cursor: pointer; }
+  .mom button.on { background: var(--deep); color: #fff; }
+  .go { display: block; width: 100%; border: 0; text-align: center; text-decoration: none; background: linear-gradient(180deg, #1b8ef0, #065FBB); color: #fff; font: 900 16px Nunito; padding: 13px; border-radius: 99px; box-shadow: 0 8px 18px rgba(6,95,187,.3); cursor: pointer; }
+  .go:disabled { opacity: .55; }
+  .err { color: var(--red); font-weight: 800; font-size: 14px; margin: 6px 4px 0; min-height: 0; }
+  .err:empty { display: none; }
+  /* Partage */
+  .share { background: linear-gradient(180deg, #fffbe9, #fff3c4); box-shadow: inset 0 0 0 2px #f7d36a; }
+  .share b { font-size: 14px; } .share .url { font-size: 12px; font-weight: 700; color: var(--soft); word-break: break-all; margin: 2px 0 7px; }
+  .btn2 { display: flex; gap: 6px; }
+  .btn2 > * { flex: 1; text-align: center; text-decoration: none; font: 900 13.5px Nunito; padding: 10px 4px; border-radius: 12px; border: 0; cursor: pointer; }
+  .lt { background: #e8f2fc; color: var(--deep); } .wa { background: #25D366; color: #fff; } .wh { background: #fff; color: var(--deep); box-shadow: inset 0 0 0 2px var(--line); }
+  .orgnote { font-size: 11.5px; font-weight: 700; color: #6b4f00; margin-top: 7px; }
+  .orgnote a { color: #6b4f00; font-weight: 900; }
+  /* Tableau */
+  .best { display: flex; align-items: center; gap: 8px; background: var(--yes-bg); box-shadow: inset 0 0 0 2px var(--yes); border-radius: 13px; padding: 7px 11px; margin-bottom: 8px; font-size: 13px; font-weight: 800; }
+  .best b { color: var(--yes); }
+  .who { display: flex; align-items: center; gap: 9px; }
+  .who .lab { margin: 0; white-space: nowrap; }
+  .tbl { padding: 6px 9px; }
+  .colh { display: flex; align-items: flex-end; font-size: 10.5px; font-weight: 900; color: var(--soft); padding-bottom: 3px; }
+  .colh .a { width: 98px; flex: none; } .colh .b { flex: 1; } .colh .c { width: 120px; flex: none; display: flex; justify-content: space-around; text-align: center; }
+  .dr { padding: 7px 0; border-bottom: 1px solid var(--line); }
+  .dr:last-child { border-bottom: 0; }
+  .dr.win { background: linear-gradient(90deg, rgba(31,157,85,.08), transparent); margin: 0 -9px; padding-left: 9px; padding-right: 9px; }
+  .dl { display: flex; align-items: center; gap: 6px; }
+  .dr .d { width: 98px; flex: none; }
+  .dr .d b { display: block; font-size: 13.5px; }
+  .dr .d button { background: none; border: 0; padding: 2px 0; font: 900 11.5px Nunito; color: var(--deep); cursor: pointer; text-align: left; }
+  .dr .d button.crown { color: #8a6500; }
+  .dr .p { flex: 1; min-width: 0; }
+  .dr .p .c { font-size: 11.5px; font-weight: 900; color: var(--yes); }
+  .dr .p .c.z { color: var(--soft); }
+  .av { display: flex; flex-wrap: wrap; gap: 2px; margin-top: 1px; }
+  .av span { font-size: 10.5px; font-weight: 800; padding: 1px 6px; border-radius: 99px; }
+  .av .y { background: var(--yes-bg); color: var(--yes); } .av .m { background: var(--maybe-bg); color: var(--maybe); } .av .n { background: var(--no-bg); color: var(--no); text-decoration: line-through; }
+  .av button { font: 900 10px Nunito; border: 0; background: #fdecea; color: var(--red); border-radius: 99px; padding: 1px 5px; cursor: pointer; }
+  .tri { display: flex; gap: 3px; width: 120px; flex: none; }
+  .tri button { flex: 1; height: 38px; border: 2px solid var(--line); border-radius: 10px; background: #fff; display: flex; align-items: center; justify-content: center; font: 900 16px Nunito; color: #b8c6d3; cursor: pointer; padding: 0; }
+  .tri button[data-v="2"], .tri button[data-v="0"] { filter: grayscale(1); opacity: .45; }
+  .tri button[data-v="1"] { font-size: 19px; }
+  .tri button.on[data-v="2"] { filter: none; opacity: 1; background: var(--yes-bg); border-color: var(--yes); }
+  .tri button.on[data-v="1"] { background: var(--maybe-bg); border-color: #f2b33d; color: var(--maybe); }
+  .tri button.on[data-v="0"] { filter: none; opacity: 1; background: var(--no-bg); border-color: var(--no); }
+  .prop { margin-top: 5px; background: var(--pro-bg); border-radius: 9px; padding: 4px 7px; font-size: 12px; font-weight: 800; color: var(--pro); display: flex; gap: 6px; align-items: center; }
+  .prop img { width: 24px; height: 24px; border-radius: 5px; object-fit: cover; flex: none; }
+  .prop a { color: inherit; text-decoration: none; flex: 1; min-width: 0; }
+  .prop button { border: 0; background: none; color: var(--pro); font: 900 15px Nunito; cursor: pointer; padding: 0 3px; }
+  .bot { position: fixed; left: 0; right: 0; bottom: 0; background: #fff; padding: 9px 12px calc(10px + env(safe-area-inset-bottom)); box-shadow: 0 -6px 20px rgba(6,95,187,.12); z-index: 3; }
+  .bot .in-b { max-width: 600px; margin: 0 auto; }
+  .lock { font-size: 11px; font-weight: 700; color: var(--soft); margin-top: 4px; text-align: center; }
+  .lock button { background: none; border: 0; color: var(--red); font: 800 11px Nunito; text-decoration: underline; cursor: pointer; padding: 0 0 0 4px; }
+  /* Décidé */
+  .big { text-align: center; } .big .e { font-size: 30px; line-height: 1; } .big small { display: block; color: var(--soft); font-weight: 800; font-size: 12.5px; }
+  .big b { display: block; font-size: 21px; margin: 2px 0; }
+  .org { font-size: 12px; font-weight: 800; color: #6b4f00; background: #fffbe9; border: 2px dashed #f7d36a; border-radius: 11px; padding: 7px 9px; text-align: center; }
+  .org button { background: none; border: 0; color: #6b4f00; font: 900 12px Nunito; text-decoration: underline; cursor: pointer; padding: 0 3px; }
+  /* Sorties */
+  .ev { display: flex; gap: 10px; padding: 9px 0; border-bottom: 1px solid var(--line); }
+  .ev:last-child { border-bottom: 0; }
+  .ev img { width: 60px; height: 60px; border-radius: 10px; object-fit: cover; flex: none; background: #e8f2fc; }
+  .ev .t { flex: 1; min-width: 0; }
+  .ev .cat { font-size: 10.5px; font-weight: 900; text-transform: uppercase; letter-spacing: .03em; }
+  .ev b { display: block; font-size: 14px; line-height: 1.2; }
+  .ev small { display: block; font-size: 12px; color: var(--soft); font-weight: 700; line-height: 1.3; }
+  .ev .acts { display: flex; gap: 5px; margin-top: 5px; flex-wrap: wrap; }
+  .ev .acts > * { font: 900 12px Nunito; padding: 5px 9px; border-radius: 8px; border: 0; cursor: pointer; text-decoration: none; }
+  .pp { background: var(--pro); color: #fff; } .pp.done { background: var(--pro-bg); color: var(--pro); cursor: default; }
+  .vw { background: #e8f2fc; color: var(--deep); }
+  .more { display: block; text-align: center; font: 900 13px Nunito; color: var(--deep); padding: 8px 0 4px; background: none; border: 0; width: 100%; cursor: pointer; }
+  #evView { position: fixed; inset: 0; background: var(--bg); z-index: 6; overflow-y: auto; }
+  #evView .hd { position: sticky; top: 0; z-index: 2; }
+  .back { display: flex; align-items: center; gap: 10px; }
+  .back button { background: rgba(255,255,255,.18); border: 0; color: #fff; width: 38px; height: 38px; border-radius: 12px; font: 900 22px Nunito; cursor: pointer; flex: none; }
+  .fil { display: flex; gap: 5px; flex-wrap: wrap; padding: 9px 0 3px; }
+  .fil button { font: 900 12px Nunito; padding: 5px 10px; border-radius: 99px; background: #fff; color: var(--soft); border: 0; box-shadow: inset 0 0 0 1.5px var(--line); cursor: pointer; }
+  .fil button.on { background: var(--deep); color: #fff; box-shadow: none; }
+  .empty { text-align: center; color: var(--soft); font-weight: 700; padding: 18px 8px; }
+  /* Pied */
+  .seo { max-width: 620px; margin: 0 auto 10px; padding: 0 16px; color: var(--soft); font-weight: 600; line-height: 1.55; font-size: 15px; }
+  .seo h2 { color: var(--ink); font-size: 16px; margin: 16px 0 3px; } .seo a { color: var(--deep); }
+  footer { text-align: center; color: var(--soft); font-weight: 700; font-size: 13px; padding: 8px 16px 30px; line-height: 1.6; }
+  footer a { color: var(--deep); }
+  .toast { position: fixed; left: 50%; bottom: 90px; transform: translateX(-50%); background: var(--ink); color: #fff; font-weight: 800; padding: 11px 18px; border-radius: 999px; opacity: 0; transition: opacity .3s; pointer-events: none; z-index: 9; white-space: nowrap; }
+  .toast.on { opacity: 1; }
+  .frozen .tri { pointer-events: none; opacity: .7; }
+  [hidden] { display: none !important; }
+</style>
+</head>
+<body>
+<div class="hd"><div class="in-hd">
+  <a class="l" href="/">📍 Wavents</a>
+  <h1 id="h1">On se fait ça quand ?</h1>
+  <p id="sub">Propose des dates, chacun coche ses dispos.</p>
+</div></div>
+
+<main>
+  <!-- ===== Création ===== -->
+  <section id="create">
+    <div class="card">
+      <label class="lab" for="title">C'est pour quoi ?</label>
+      <input type="text" id="title" maxlength="80" placeholder="Soirée entre copains, anniv de Léa…">
+      <label class="lab" for="place" style="margin-top:8px">Emplacement</label>
+      <div class="sug"><input type="text" id="place" maxlength="120" placeholder="📍 Ville ou village" autocomplete="off"><ul id="placeSug" hidden></ul></div>
+      <label class="chk"><input type="checkbox" id="help" checked>M'aider à trouver des activités sur place ce jour-là</label>
+    </div>
+    <div class="card">
+      <div class="mn"><button class="nav" id="prev" aria-label="Mois précédent">‹</button><span id="month"></span><button class="nav" id="next" aria-label="Mois suivant">›</button></div>
+      <div class="grid" id="grid"></div>
+      <div class="mom" id="moments">Quand ?<button data-m="">Journée</button><button data-m="midi">Midi</button><button data-m="soir" class="on">Soir</button></div>
+    </div>
+    <button class="go" id="createBtn">📅 Créer le sondage</button>
+    <p class="err" id="createErr"></p>
+  </section>
+
+  <!-- ===== Sondage ===== -->
+  <section id="poll" hidden>
+    <div id="decidedBox"></div>
+    <div class="best" id="best" hidden></div>
+    <div class="card share" id="shareCard" hidden>
+      <b id="shareTitle">Envoie ce lien au groupe 👇</b>
+      <div class="url" id="url"></div>
+      <div class="btn2"><button class="wh" id="copy">Copier le lien</button><a class="wa" id="wa" target="_blank" rel="noopener">WhatsApp</a></div>
+      <div class="orgnote" id="orgNote" hidden>👑 Tu es l'organisateur sur ce téléphone : tu pourras choisir la date. <a href="#" id="adminLink">Garder mon lien organisateur</a></div>
+    </div>
+    <div class="card who" id="whoCard"><label class="lab" for="name">Je suis</label><input type="text" id="name" maxlength="40" placeholder="Ton prénom" autocomplete="given-name"></div>
+    <div class="card tbl" id="tbl"></div>
+    <p class="err" id="voteErr"></p>
+    <div class="org" id="orgBar" hidden></div>
+    <a class="card" href="/" style="display:block;text-decoration:none;color:var(--ink);text-align:center;font-weight:800;font-size:13.5px;margin-top:8px" data-goatcounter-click="date-cta-wavents">📲 Toutes les sorties près de chez toi : <span style="color:var(--deep);font-weight:900">l'appli Wavents, gratuite</span></a>
+    <p style="text-align:center;margin:4px 0"><a href="/trouver-une-date/" style="color:var(--deep);font-weight:800;font-size:13px">Créer un autre sondage</a></p>
+  </section>
+</main>
+
+<div class="bot" id="bot" hidden><div class="in-b">
+  <button class="go" id="voteBtn">Valider mes dispos</button>
+  <div class="lock" id="lock">🔒 Seul ce téléphone pourra modifier tes réponses</div>
+</div></div>
+
+<!-- ===== Sorties d'une date ===== -->
+<div id="evView" hidden>
+  <div class="hd"><div class="in-hd back"><button id="evBack" aria-label="Retour">‹</button><div><h1 id="evTitle" style="font-size:18px;margin:0"></h1><p id="evSub"></p></div></div></div>
+  <main style="padding-bottom:30px"><div class="fil" id="evFil"></div><div class="card" id="evList" style="padding:2px 11px"></div>
+    <a class="card" href="/" style="display:block;text-decoration:none;color:var(--ink);text-align:center;font-weight:800;font-size:13.5px" data-goatcounter-click="date-cta-wavents-sorties">📲 Toutes les sorties, la carte et les alertes : <span style="color:var(--deep);font-weight:900">l'appli Wavents</span></a></main>
+</div>
+
+<section class="seo" id="seo">
+  <h2>Comment trouver une date commune avec ses amis ?</h2>
+  <p>Indique ce que c'est et l'emplacement, choisis quelques dates possibles dans le calendrier, puis envoie le lien dans le groupe WhatsApp. Chacun donne son prénom et coche « dispo », « peut-être » ou « non ». La date où le plus de monde est disponible est mise en avant, sans avoir à compter.</p>
+  <h2>Et on fait quoi ce jour-là ?</h2>
+  <p>Sous chaque date, « Voir les sorties » montre les concerts, spectacles, marchés et fêtes de ce jour-là près du lieu choisi, avec le prix et l'adresse. Chacun peut en proposer une au groupe. Ces sorties viennent de <a href="/">Wavents</a>, l'appli gratuite des sorties près de chez toi (disponible pour l'instant autour de Villefranche-sur-Saône et du Beaujolais).</p>
+  <h2>Gratuit, sans compte, sans pub</h2>
+  <p>Un lien et un prénom suffisent. Seul ton téléphone peut modifier tes réponses. L'organisateur choisit la date et prévient le groupe en un message, que chacun peut ajouter à son agenda.</p>
+  <h2>Pour quelles occasions ?</h2>
+  <p>Soirée entre copains, repas de famille, anniversaire, week-end entre amis, réunion d'association, match à cinq, répétition… Et pour Noël, organise aussi ton <a href="/secret-santa/">Secret Santa en ligne</a>.</p>
+</section>
+<footer>Fait avec ❤️ par <a href="/">Wavents</a>, l'appli gratuite des sorties près de chez toi. <a href="/app/">Télécharger l'appli</a></footer>
+<div class="toast" id="toast"></div>
+
+<script>
+(function () {
+  var SUPA = "https://mzbxnwvrvrhlucjzbzls.supabase.co";
+  var KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im16Ynhud3ZydnJobHVjanpiemxzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQ2NDMwMzQsImV4cCI6MjEwMDIxOTAzNH0.wqoOLgNM92KmwZfbh4c56dVN13DDlCxJhuOOoqlH1is";
+  var GEO = "https://api-adresse.data.gouv.fr/search/";
+  var RADIUS_KM = 20;
+  var CATS = { concert: ["Concert", "#E91E63", "concert"], fete: ["Fête", "#FF5252", "fete"], marche: ["Marché", "#FF9800", "marche"],
+    brocante: ["Brocante", "#D4A017", "brocante"], spectacle: ["Spectacle", "#8E24AA", "spectacle"], sport: ["Sport", "#43A047", "sport"],
+    culture: ["Culture", "#7C4DFF", "culture"], atelier: ["Atelier", "#8D6E63", "atelier"], visite: ["Visite", "#1E88E5", "visite"],
+    associatif_autre: ["Associatif", "#00BFA5", "associatif"] };
+  var MOMENT_TXT = { "": "", midi: "le midi", soir: "le soir" };
+  var $ = function (id) { return document.getElementById(id); };
+  var fmtLong = new Intl.DateTimeFormat("fr-FR", { weekday: "long", day: "numeric", month: "long" });
+  var fmtShort = new Intl.DateTimeFormat("fr-FR", { weekday: "short", day: "numeric", month: "short" });
+  var fmtMonth = new Intl.DateTimeFormat("fr-FR", { month: "long", year: "numeric" });
+
+  function stat(name) { try { if (window.goatcounter && goatcounter.count) goatcounter.count({ path: name, title: name, event: true }); } catch (e) {} }
+  function toast(t) { var el = $("toast"); el.textContent = t; el.classList.add("on"); clearTimeout(toast.t); toast.t = setTimeout(function () { el.classList.remove("on"); }, 2200); }
+  function store(k, v) { try { if (v === undefined) return JSON.parse(localStorage.getItem(k)); if (v === null) localStorage.removeItem(k); else localStorage.setItem(k, JSON.stringify(v)); } catch (e) { return null; } }
+  function rpc(fn, args) {
+    return fetch(SUPA + "/rest/v1/rpc/" + fn, { method: "POST", headers: { apikey: KEY, Authorization: "Bearer " + KEY, "Content-Type": "application/json" }, body: JSON.stringify(args) })
+      .then(function (r) { return r.text().then(function (t) { var j = t ? JSON.parse(t) : null; if (!r.ok) throw new Error(j && j.message || "Erreur réseau"); return j; }); });
+  }
+  function iso(d) { return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0"); }
+  function parse(s) { var p = s.split("-"); return new Date(+p[0], +p[1] - 1, +p[2]); }
+  function cap(s) { return s.charAt(0).toUpperCase() + s.slice(1); }
+  function shortLabel(s) { return cap(fmtShort.format(parse(s))); }
+  function longLabel(s) { return cap(fmtLong.format(parse(s))); }
+  function esc(s) { return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]; }); }
+  function town(place) { return (place || "").split(",")[0].replace(/\s*\(\d+\)$/, ""); }
+
+  var pollId = new URLSearchParams(location.search).get("s");
+
+  /* ================= Création ================= */
+  var today = new Date(); today.setHours(0, 0, 0, 0);
+  var view = new Date(today.getFullYear(), today.getMonth(), 1);
+  var picked = {}, moment = "soir", geo = null;
+
+  function drawCal() {
+    $("month").textContent = fmtMonth.format(view);
+    $("prev").disabled = view <= new Date(today.getFullYear(), today.getMonth(), 1);
+    var g = $("grid"); g.innerHTML = "";
+    ["L", "M", "M", "J", "V", "S", "D"].forEach(function (d) { var e = document.createElement("span"); e.className = "w"; e.textContent = d; g.appendChild(e); });
+    for (var i = 0, f = (view.getDay() + 6) % 7; i < f; i++) g.appendChild(document.createElement("span"));
+    var n = new Date(view.getFullYear(), view.getMonth() + 1, 0).getDate();
+    for (var day = 1; day <= n; day++) {
+      var d = new Date(view.getFullYear(), view.getMonth(), day), k = iso(d), b = document.createElement("button");
+      b.className = "day" + (d < today ? " past" : "") + (picked[k] ? " on" : "") + (+d === +today ? " today" : "");
+      b.textContent = day; b.disabled = d < today; b.dataset.k = k; b.setAttribute("aria-label", fmtLong.format(d));
+      b.onclick = function () { var k = this.dataset.k; if (picked[k]) delete picked[k]; else picked[k] = 1; drawCal(); };
+      g.appendChild(b);
+    }
+    var c = Object.keys(picked).length;
+    $("createBtn").textContent = c ? "📅 Créer avec " + c + " date" + (c > 1 ? "s" : "") : "📅 Choisis des dates";
+  }
+  $("prev").onclick = function () { view.setMonth(view.getMonth() - 1); drawCal(); };
+  $("next").onclick = function () { view.setMonth(view.getMonth() + 1); drawCal(); };
+  $("moments").querySelectorAll("button").forEach(function (b) {
+    b.onclick = function () { moment = b.dataset.m; $("moments").querySelectorAll("button").forEach(function (o) { o.classList.toggle("on", o === b); }); };
+  });
+
+  // Suggestions de communes (Base Adresse Nationale), pour situer le lieu.
+  var sugTimer, sugItems = [];
+  $("place").addEventListener("input", function () {
+    geo = null; clearTimeout(sugTimer); var q = this.value.trim();
+    if (q.length < 3) { $("placeSug").hidden = true; return; }
+    sugTimer = setTimeout(function () {
+      fetch(GEO + "?type=municipality&limit=5&q=" + encodeURIComponent(q)).then(function (r) { return r.json(); }).then(function (j) {
+        sugItems = (j.features || []).map(function (f) { return { name: f.properties.city || f.properties.name, ctx: f.properties.context, lng: f.geometry.coordinates[0], lat: f.geometry.coordinates[1] }; });
+        var ul = $("placeSug"); ul.innerHTML = "";
+        sugItems.forEach(function (s) {
+          var li = document.createElement("li"); li.innerHTML = esc(s.name) + " <small>" + esc((s.ctx || "").split(",").slice(0, 2).join(",")) + "</small>";
+          li.onmousedown = function (e) { e.preventDefault(); $("place").value = s.name; geo = s; ul.hidden = true; };
+          ul.appendChild(li);
+        });
+        ul.hidden = !sugItems.length;
+      }).catch(function () {});
+    }, 250);
+  });
+  $("place").addEventListener("blur", function () { setTimeout(function () { $("placeSug").hidden = true; }, 150); });
+  function locate(q) {
+    if (geo || !q) return Promise.resolve(geo);
+    return fetch(GEO + "?limit=1&q=" + encodeURIComponent(q)).then(function (r) { return r.json(); })
+      .then(function (j) { var f = (j.features || [])[0]; return f ? { lng: f.geometry.coordinates[0], lat: f.geometry.coordinates[1] } : null; })
+      .catch(function () { return null; });
+  }
+
+  $("createBtn").onclick = function () {
+    var title = $("title").value.trim(), keys = Object.keys(picked).sort(), err = $("createErr"), btn = this;
+    if (!title) { err.textContent = "Dis en deux mots ce que c'est (ex. « Soirée entre copains »)."; $("title").focus(); return; }
+    if (!keys.length) { err.textContent = "Touche au moins une date dans le calendrier."; return; }
+    err.textContent = ""; btn.disabled = true;
+    var place = $("place").value.trim();
+    locate(place).then(function (g) {
+      return rpc("date_poll_create", { p_title: title, p_place: place || null, p_lat: g ? g.lat : null, p_lng: g ? g.lng : null,
+        p_moment: moment, p_help: $("help").checked, p_options: keys.map(function (k) { return { d: k }; }) });
+    }).then(function (res) {
+      stat("date-cree"); stat("date-options-" + Math.min(keys.length, 10)); if (!$("help").checked) stat("date-cree-sans-aide");
+      store("date-admin-" + res.id, res.admin); store("date-new-" + res.id, 1);
+      location.href = "/trouver-une-date/?s=" + encodeURIComponent(res.id);
+    }).catch(function (e) { btn.disabled = false; err.textContent = "Oups : " + e.message; });
+  };
+
+  /* ================= Sondage ================= */
+  var poll = null, mine = null, choice = [], admin = null, isNew = false, events = null, byOpt = [];
+
+  function shareUrl() { return "https://wavents.fr/trouver-une-date/?s=" + encodeURIComponent(pollId); }
+  function myProps() { return store("date-props-" + pollId) || {}; }
+
+  function load() {
+    return rpc("date_poll_get", { p_id: pollId }).then(function (p) {
+      if (!p) {
+        $("poll").innerHTML = "<div class='card'><b>Sondage introuvable</b><p style='color:var(--soft);font-weight:700'>Le lien est peut-être incomplet, ou le sondage est trop ancien.</p><a class='go' href='/trouver-une-date/'>Créer un sondage</a></div>";
+        $("bot").hidden = true; return;
+      }
+      poll = p; render();
+      if (events === null && p.help && p.lat != null) loadEvents();
+    });
+  }
+
+  /* --- Sorties Wavents des dates du sondage --- */
+  function loadEvents() {
+    events = [];
+    var days = poll.options.map(function (o) { return o.d; }).sort(), lat = poll.lat, lng = poll.lng;
+    var dLat = RADIUS_KM / 111, dLng = RADIUS_KM / (111 * Math.cos(lat * Math.PI / 180));
+    var q = "select=id,title,category_id,location_name,address,latitude,longitude,start_date,end_date,start_time_known,price_type,price_amount,image_url,recurring_weekdays" +
+      "&status=eq.active&latitude=gte." + (lat - dLat) + "&latitude=lte." + (lat + dLat) + "&longitude=gte." + (lng - dLng) + "&longitude=lte." + (lng + dLng) +
+      "&start_date=lte." + days[days.length - 1] + "T23:59:59&or=(end_date.gte." + days[0] + ",start_date.gte." + days[0] + ")&order=start_date&limit=1500";
+    fetch(SUPA + "/rest/v1/events?" + q, { headers: { apikey: KEY, Authorization: "Bearer " + KEY } }).then(function (r) { return r.json(); }).then(function (rows) {
+      events = (rows || []).filter(function (e) { return dist(lat, lng, e.latitude, e.longitude) <= RADIUS_KM; });
+      byOpt = poll.options.map(function (o) { return eventsOf(o.d); });
+      render();
+    }).catch(function () { events = []; });
+  }
+  function dist(a, b, c, d) { var r = Math.PI / 180, x = (d - b) * r * Math.cos((a + c) / 2 * r), y = (c - a) * r; return 6371 * Math.sqrt(x * x + y * y); }
+  function dayOf(s) { return s ? s.slice(0, 10) : null; }
+  function hourOf(e) { return e.start_time_known === false ? null : +e.start_date.slice(11, 13) + +e.start_date.slice(14, 16) / 60; }
+  function eventsOf(day) {
+    var wd = ((parse(day).getDay() + 6) % 7) + 1;
+    return events.filter(function (e) {
+      var s = dayOf(e.start_date), en = dayOf(e.end_date) || s;
+      if (s > day || en < day) return false;
+      var multi = en !== s;
+      if (multi && e.recurring_weekdays && e.recurring_weekdays.length && e.recurring_weekdays.indexOf(wd) < 0) return false;
+      if (multi || s !== day) return true;
+      var h = hourOf(e); if (h === null || h === 0) return true;
+      if (poll.moment === "soir") return h >= 17;
+      if (poll.moment === "midi") return h < 15;
+      return true;
+    }).sort(function (a, b) {
+      var ma = dayOf(a.start_date) !== dayOf(a.end_date || a.start_date), mb = dayOf(b.start_date) !== dayOf(b.end_date || b.start_date);
+      if (ma !== mb) return ma ? 1 : -1;
+      var ha = hourOf(a), hb = hourOf(b); ha = ha === null || ha === 0 ? 99 : ha; hb = hb === null || hb === 0 ? 99 : hb;
+      return ha - hb || (b.image_url ? 1 : 0) - (a.image_url ? 1 : 0);
+    });
+  }
+  function timeTxt(e, day) {
+    var s = dayOf(e.start_date), en = dayOf(e.end_date) || s;
+    if (en !== s) return en === day ? "dernier jour" : "jusqu'au " + new Intl.DateTimeFormat("fr-FR", { day: "numeric", month: "long" }).format(parse(en));
+    var h = hourOf(e); if (h === null || h === 0) return "";
+    var hh = e.start_date.slice(11, 13).replace(/^0/, ""), mm = e.start_date.slice(14, 16);
+    return hh + " h" + (mm !== "00" ? " " + mm : "");
+  }
+  function priceTxt(e) {
+    if (e.price_type === "free") return "Gratuit";
+    if (e.price_type === "paid") return e.price_amount ? String(+e.price_amount).replace(".", ",").replace(/,(\d)$/, ",$10") + " €" : "Payant";
+    return "";
+  }
+  function imgOf(e) { return e.image_url || "/categories/" + (CATS[e.category_id] || CATS.associatif_autre)[2] + ".jpg"; }
+  function placeTxt(e) {
+    var a = e.location_name || "", m = /\d{5}\s+([^,]+)/.exec(e.address || ""), t = m ? m[1].trim() : "";
+    return a && t && a.toLowerCase().indexOf(t.toLowerCase().split(/[- ]/)[0]) < 0 ? a + ", " + t : a || t || town(e.address);
+  }
+  function snapshot(e, day) { return { id: e.id, title: e.title.slice(0, 120), time: timeTxt(e, day), place: placeTxt(e).slice(0, 120), price: priceTxt(e), img: e.image_url && e.image_url.length < 600 ? e.image_url : "", cat: e.category_id }; }
+
+  /* --- Rendu du sondage --- */
+  function render() {
+    var opts = poll.options, votes = poll.votes, props = poll.proposals || [];
+    $("h1").textContent = poll.title;
+    $("sub").textContent = [poll.place ? "📍 " + poll.place : "", MOMENT_TXT[poll.moment], votes.length + " réponse" + (votes.length > 1 ? "s" : "")].filter(Boolean).join(" · ");
+    document.title = poll.title + " : on se fait ça quand ? | Wavents";
+
+    mine = store("date-vote-" + pollId);
+    var myVote = mine && votes.filter(function (v) { return v.id === mine.id; })[0];
+    if (mine && !myVote) { mine = null; store("date-vote-" + pollId, null); }
+    if (!choice.length || choice.length !== opts.length) choice = myVote ? myVote.answers.slice() : opts.map(function () { return null; });
+    if (!$("name").value) $("name").value = myVote ? myVote.name : (store("date-name") || "");
+
+    // Meilleure date
+    var score = opts.map(function (o, i) { var y = 0, m = 0; votes.forEach(function (v) { if (v.answers[i] === 2) y++; else if (v.answers[i] === 1) m++; }); return { i: i, y: y, m: m }; });
+    var best = votes.length ? score.slice().sort(function (a, b) { return b.y - a.y || b.m - a.m || a.i - b.i; })[0] : null;
+    if (best && !best.y) best = null;
+    var decided = poll.decided;
+    $("best").hidden = !best || decided != null;
+    if (best) $("best").innerHTML = "🏆 <span>Pour l'instant : <b>" + esc(shortLabel(opts[best.i].d)) + "</b> (" + best.y + "/" + votes.length + " dispo)</span>";
+
+    // Partage
+    $("shareCard").hidden = !(isNew || admin) || decided != null;
+    $("shareTitle").textContent = isNew && !votes.length ? "Envoie ce lien au groupe 👇" : "Inviter d'autres personnes";
+
+    // Tableau
+    var t = $("tbl"), mp = myProps();
+    t.innerHTML = "<div class='colh'><span class='a'>Date</span><span class='b'>Les autres</span><span class='c'><span>Dispo</span><span>Peut-<br>être</span><span>Non</span></span></div>";
+    opts.forEach(function (o, i) {
+      var others = votes.filter(function (v) { return !myVote || v.id !== myVote.id; });
+      var y = others.filter(function (v) { return v.answers[i] === 2; }), m = others.filter(function (v) { return v.answers[i] === 1; }), n = others.filter(function (v) { return v.answers[i] === 0; });
+      var nb = byOpt[i] ? byOpt[i].length : 0;
+      var row = document.createElement("div"); row.className = "dr" + (decided === i ? " win" : "");
+      var chip = function (v, cls, suf) { return "<span class='" + cls + "'>" + esc(v.name) + suf + "</span>" + (admin ? "<button data-del='" + v.id + "' aria-label='Retirer la réponse de " + esc(v.name) + "'>×</button>" : ""); };
+      row.innerHTML = "<div class='dl'><div class='d'><b>" + esc(shortLabel(o.d)) + "</b>" +
+        (nb ? "<button data-ev='" + i + "'>Voir les sorties ›</button>" : "") +
+        (admin && decided == null ? "<button class='crown' data-pick='" + i + "'>👑 Choisir</button>" : "") + "</div>" +
+        "<div class='p'><div class='c" + (y.length || m.length ? "" : " z") + "'>" + (others.length ? y.length + " dispo" + (m.length ? " · " + m.length + " ?" : "") : "—") + "</div>" +
+        "<div class='av'>" + y.map(function (v) { return chip(v, "y", ""); }).join("") + m.map(function (v) { return chip(v, "m", " ?"); }).join("") + n.map(function (v) { return chip(v, "n", ""); }).join("") + "</div></div>" +
+        "<div class='tri'>" + [[2, "✅", "Dispo"], [1, "?", "Peut-être"], [0, "❌", "Pas dispo"]].map(function (x) {
+          return "<button data-i='" + i + "' data-v='" + x[0] + "' aria-label='" + x[2] + " le " + esc(fmtLong.format(parse(o.d))) + "'" + (choice[i] === x[0] ? " class='on'" : "") + ">" + x[1] + "</button>"; }).join("") + "</div></div>";
+      props.filter(function (p) { return p.opt === i; }).forEach(function (p) {
+        var ev = p.event || {}, canDel = admin || mp[p.id];
+        row.insertAdjacentHTML("beforeend", "<div class='prop'>" + (ev.img ? "<img src='" + esc(ev.img) + "' alt='' loading='lazy'>" : "💡") +
+          "<a href='/e/" + encodeURIComponent(ev.id) + "/' target='_blank' rel='noopener' data-goatcounter-click='date-fiche-proposee'>" + esc(ev.title) + (ev.time ? ", " + esc(ev.time) : "") + " · proposé par " + esc(p.name) + "</a>" +
+          (canDel ? "<button data-unprop='" + p.id + "' aria-label='Retirer la proposition'>×</button>" : "") + "</div>");
+      });
+      t.appendChild(row);
+    });
+    t.querySelectorAll(".tri button").forEach(function (b) {
+      b.onclick = function () { var i = +b.dataset.i; choice[i] = +b.dataset.v; b.parentNode.querySelectorAll("button").forEach(function (o) { o.classList.toggle("on", o === b); }); };
+    });
+    t.querySelectorAll("[data-ev]").forEach(function (b) { b.onclick = function () { openEvents(+b.dataset.ev); }; });
+    t.querySelectorAll("[data-pick]").forEach(function (b) { b.onclick = function () { decide(+b.dataset.pick); }; });
+    t.querySelectorAll("[data-del]").forEach(function (b) { b.onclick = function () {
+      if (!confirm("Retirer cette réponse du sondage ?")) return;
+      rpc("date_poll_unvote", { p_id: pollId, p_vote_id: +b.dataset.del, p_token: null, p_admin: admin }).then(load); }; });
+    t.querySelectorAll("[data-unprop]").forEach(function (b) { b.onclick = function () {
+      var id = +b.dataset.unprop, m = myProps();
+      rpc("date_poll_unpropose", { p_id: pollId, p_prop_id: id, p_token: m[id] || null, p_admin: admin }).then(function () { delete m[id]; store("date-props-" + pollId, m); return load(); }); }; });
+
+    $("voteBtn").textContent = myVote ? "Mettre à jour mes dispos" : "Valider mes dispos";
+    $("lock").innerHTML = myVote ? "🔒 Seul ce téléphone peut modifier les réponses de " + esc(myVote.name) + "<button id='unvote'>Retirer</button>" : "🔒 Seul ce téléphone pourra modifier tes réponses";
+    if ($("unvote")) $("unvote").onclick = unvote;
+
+    // Organisateur
+    $("orgBar").hidden = !admin;
+    if (admin) $("orgBar").innerHTML = decided == null ? "👑 Organisateur : touche « Choisir » sous la date retenue. Tu peux aussi retirer une réponse (×)."
+      : "👑 Organisateur : <button id='reopen'>changer la date</button>";
+    if ($("reopen")) $("reopen").onclick = function () { decide(null); };
+
+    $("bot").hidden = decided != null;
+    t.classList.toggle("frozen", decided != null);
+    renderDecided();
+  }
+
+  function renderDecided() {
+    var box = $("decidedBox"), d = poll.decided;
+    if (d == null) { box.innerHTML = ""; return; }
+    var o = poll.options[d], votes = poll.votes, props = (poll.proposals || []).filter(function (p) { return p.opt === d; });
+    var dispo = votes.filter(function (v) { return v.answers[d] === 2; }).map(function (v) { return v.name; });
+    var maybe = votes.filter(function (v) { return v.answers[d] === 1; }).map(function (v) { return v.name + " ?"; });
+    var html = "<div class='card'><div class='big'><div class='e'>🎉</div><small>C'est décidé !</small><b>" + esc(longLabel(o.d)) + (poll.moment ? ", " + MOMENT_TXT[poll.moment] : "") + "</b><small>" +
+      esc(dispo.concat(maybe).join(", ") || "") + "</small></div>" +
+      props.map(function (p) { return "<div class='prop' style='margin-top:7px'>" + (p.event.img ? "<img src='" + esc(p.event.img) + "' alt=''>" : "💡") + "<a href='/e/" + encodeURIComponent(p.event.id) + "/' target='_blank' rel='noopener'>" + esc(p.event.title) + (p.event.time ? ", " + esc(p.event.time) : "") + " · proposé par " + esc(p.name) + "</a></div>"; }).join("") +
+      "<div class='btn2' style='margin-top:9px'><button class='lt' id='ics'>📅 Mon agenda</button><button class='wa' id='tell'>📣 Prévenir le groupe</button></div></div>";
+    var list = byOpt[d] || [];
+    if (list.length) {
+      html += "<div class='card' style='padding:2px 11px'><div style='font-weight:900;font-size:14px;padding-top:8px'>" + (poll.moment === "soir" ? "Ce soir-là" : poll.moment === "midi" ? "Ce midi-là" : "Ce jour-là") + " près de " + esc(town(poll.place)) + "</div>" +
+        list.slice(0, 2).map(function (e) { return evHtml(e, o.d, d, false); }).join("") +
+        "<button class='more' id='moreEv'>Voir les " + list.length + " sorties ›</button></div>";
+    }
+    box.innerHTML = html;
+    $("ics").onclick = ics; $("tell").onclick = tell;
+    if ($("moreEv")) $("moreEv").onclick = function () { openEvents(d); };
+    bindEv(box, d);
+  }
+
+  function decide(i) {
+    if (i != null && !confirm("Choisir le " + fmtLong.format(parse(poll.options[i].d)) + " ? Tout le monde verra « C'est décidé ! ».")) return;
+    rpc("date_poll_decide", { p_id: pollId, p_admin: admin, p_opt: i }).then(function (ok) {
+      if (!ok) { toast("Action réservée à l'organisateur"); return; }
+      stat(i == null ? "date-rouvert" : "date-decide"); return load().then(function () { if (i != null) window.scrollTo({ top: 0, behavior: "smooth" }); });
+    });
+  }
+
+  function message() {
+    var d = poll.decided, o = poll.options[d];
+    var who = poll.votes.filter(function (v) { return v.answers[d] === 2; }).map(function (v) { return v.name; });
+    var props = (poll.proposals || []).filter(function (p) { return p.opt === d; });
+    var lines = ["🎉 " + poll.title + " : c'est décidé !", "📅 " + longLabel(o.d) + (poll.moment ? ", " + MOMENT_TXT[poll.moment] : "")];
+    if (poll.place) lines.push("📍 " + poll.place);
+    if (who.length) lines.push("🙋 " + who.join(", "));
+    props.forEach(function (p) { lines.push("💡 Idée de " + p.name + " : " + p.event.title + [p.event.time, p.event.place, p.event.price].filter(Boolean).map(function (x) { return ", " + x; }).join("")); });
+    lines.push("", (byOpt[d] && byOpt[d].length ? "Tous les détails et les sorties du jour 👉 " : "Tous les détails 👉 ") + shareUrl());
+    return lines.join("\n");
+  }
+  function tell() {
+    var txt = message(); stat("date-prevenir");
+    if (navigator.share && /Mobi|Android|iPhone|iPad/i.test(navigator.userAgent)) { navigator.share({ text: txt }).catch(function () {}); return; }
+    copy(txt, "Message copié : colle-le dans le groupe ✔");
+  }
+  function copy(txt, ok) {
+    (navigator.clipboard ? navigator.clipboard.writeText(txt) : Promise.reject()).then(function () { toast(ok); }, function () { window.prompt("Copie ce texte :", txt); });
+  }
+  function ics() {
+    var o = poll.options[poll.decided], d = o.d.replace(/-/g, ""), nd = iso(new Date(parse(o.d).getTime() + 86400000)).replace(/-/g, "");
+    var when = poll.moment === "soir" ? ["DTSTART:" + d + "T190000", "DTEND:" + d + "T230000"] : poll.moment === "midi" ? ["DTSTART:" + d + "T120000", "DTEND:" + d + "T140000"] : ["DTSTART;VALUE=DATE:" + d, "DTEND;VALUE=DATE:" + nd];
+    var clean = function (s) { return String(s || "").replace(/[\\;,]/g, function (c) { return "\\" + c; }).replace(/\n/g, "\\n"); };
+    var body = ["BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//Wavents//Trouver une date//FR", "BEGIN:VEVENT", "UID:" + pollId + "@wavents.fr",
+      "DTSTAMP:" + new Date().toISOString().replace(/[-:]/g, "").slice(0, 15) + "Z"].concat(when, ["SUMMARY:" + clean(poll.title), poll.place ? "LOCATION:" + clean(poll.place) : "", "DESCRIPTION:" + clean(shareUrl()), "END:VEVENT", "END:VCALENDAR"]).filter(Boolean).join("\r\n");
+    var a = document.createElement("a"); a.href = URL.createObjectURL(new Blob([body], { type: "text/calendar" })); a.download = "date.ics"; document.body.appendChild(a); a.click(); a.remove();
+    stat("date-agenda");
+  }
+
+  /* --- Vue « Voir les sorties » --- */
+  var evFilter = "tout", evOpt = 0;
+  function evHtml(e, day, i, withActs) {
+    var c = CATS[e.category_id] || CATS.associatif_autre, proposed = (poll.proposals || []).filter(function (p) { return p.opt === i && p.event.id === e.id; })[0];
+    return "<div class='ev'><img src='" + esc(imgOf(e)) + "' alt='' loading='lazy'><div class='t'><span class='cat' style='color:" + c[1] + "'>" + c[0] + "</span><b>" + esc(e.title) + "</b><small>" +
+      esc([timeTxt(e, day), placeTxt(e), priceTxt(e)].filter(Boolean).join(" · ")) + "</small>" +
+      "<div class='acts'>" + (withActs ? (proposed ? "<span class='pp done'>✓ Proposé par " + esc(proposed.name) + "</span>" : "<button class='pp' data-prop='" + esc(e.id) + "'>💡 Proposer au groupe</button>") : "") +
+      "<a class='vw' href='/e/" + encodeURIComponent(e.id) + "/' target='_blank' rel='noopener' data-goatcounter-click='date-voir-fiche'>Voir ›</a></div></div></div>";
+  }
+  function bindEv(root, i) {
+    root.querySelectorAll("[data-prop]").forEach(function (b) { b.onclick = function () { propose(i, b.dataset.prop); }; });
+  }
+  function openEvents(i) {
+    evOpt = i; evFilter = "tout"; drawEvents();
+    $("evView").hidden = false; $("evView").scrollTop = 0; document.body.style.overflow = "hidden";
+    if (location.hash !== "#sorties") history.pushState({ ev: 1 }, "", "#sorties");
+    stat("date-sorties-ouvert");
+  }
+  function closeEvents() { $("evView").hidden = true; document.body.style.overflow = ""; }
+  $("evBack").onclick = function () { if (location.hash === "#sorties") history.back(); else closeEvents(); };
+  window.addEventListener("popstate", function () { if (location.hash !== "#sorties") closeEvents(); });
+  function drawEvents() {
+    var o = poll.options[evOpt], all = byOpt[evOpt] || [];
+    $("evTitle").textContent = longLabel(o.d);
+    $("evSub").textContent = "Sorties près de " + town(poll.place) + (poll.moment ? " · " + MOMENT_TXT[poll.moment] : "");
+    var cats = {}; all.forEach(function (e) { cats[e.category_id] = (cats[e.category_id] || 0) + 1; });
+    var filters = [["tout", "Tout (" + all.length + ")"]].concat(Object.keys(cats).sort(function (a, b) { return cats[b] - cats[a]; }).map(function (k) { return [k, (CATS[k] || CATS.associatif_autre)[0]]; }));
+    if (all.some(function (e) { return e.price_type === "free"; })) filters.push(["free", "Gratuit"]);
+    if (all.some(function (e) { return e.price_type === "paid"; })) filters.push(["paid", "Payant"]);
+    $("evFil").innerHTML = filters.map(function (f) { return "<button data-f='" + f[0] + "'" + (f[0] === evFilter ? " class='on'" : "") + ">" + esc(f[1]) + "</button>"; }).join("");
+    $("evFil").querySelectorAll("button").forEach(function (b) { b.onclick = function () { evFilter = b.dataset.f; drawEvents(); stat("date-sorties-filtre"); }; });
+    var list = all.filter(function (e) { return evFilter === "tout" || e.category_id === evFilter || e.price_type === evFilter; });
+    $("evList").innerHTML = list.length ? list.map(function (e) { return evHtml(e, o.d, evOpt, true); }).join("") : "<div class='empty'>Rien pour ce filtre.</div>";
+    bindEv($("evList"), evOpt);
+  }
+  function propose(i, id) {
+    var name = $("name").value.trim() || (window.prompt("Ton prénom, pour que le groupe sache qui propose :") || "").trim();
+    if (!name) return;
+    $("name").value = name; store("date-name", name);
+    var e = byOpt[i].filter(function (x) { return String(x.id) === String(id); })[0]; if (!e) return;
+    rpc("date_poll_propose", { p_id: pollId, p_opt: i, p_event: snapshot(e, poll.options[i].d), p_name: name }).then(function (res) {
+      var m = myProps(); m[res.id] = res.token; store("date-props-" + pollId, m);
+      stat("date-proposition"); toast("Proposé au groupe ✔");
+      return load().then(function () { if (!$("evView").hidden) drawEvents(); });
+    }).catch(function (er) { toast(er.message); });
+  }
+
+  /* --- Réponses --- */
+  $("voteBtn").onclick = function () {
+    var name = $("name").value.trim(), err = $("voteErr"), btn = this;
+    if (!name) { err.textContent = "Indique ton prénom en haut (« Je suis »)."; $("name").focus(); window.scrollTo({ top: 0, behavior: "smooth" }); return; }
+    if (choice.some(function (c) { return c === null; })) { err.textContent = "Réponds pour chaque date : ✅ dispo, ? peut-être ou ❌ non."; return; }
+    err.textContent = ""; btn.disabled = true;
+    var wasMine = !!mine;
+    rpc("date_poll_vote", { p_id: pollId, p_name: name, p_answers: choice, p_vote_id: mine ? mine.id : null, p_token: mine ? mine.token : null })
+      .then(function (res) {
+        store("date-vote-" + pollId, res); store("date-name", name);
+        stat(wasMine ? "date-vote-modifie" : admin ? "date-vote-organisateur" : "date-vote");
+        toast(wasMine ? "Réponse mise à jour ✔" : "Merci " + name + ", c'est noté ✔");
+        return load();
+      })
+      .then(function () { btn.disabled = false; })
+      .catch(function (e) { btn.disabled = false; err.textContent = e.message; });
+  };
+  function unvote() {
+    if (!mine || !confirm("Retirer ta réponse ?")) return;
+    rpc("date_poll_unvote", { p_id: pollId, p_vote_id: mine.id, p_token: mine.token, p_admin: null }).then(function () {
+      store("date-vote-" + pollId, null); mine = null; choice = []; stat("date-vote-retire"); return load();
+    });
+  }
+
+  function initPoll() {
+    var m = document.createElement("meta"); m.name = "robots"; m.content = "noindex"; document.head.appendChild(m);
+    $("create").hidden = true; $("seo").hidden = true; $("poll").hidden = false; $("bot").hidden = false;
+    // Lien organisateur (#a=…) : redonne la main sur un autre téléphone.
+    var h = /[#&]a=([\w-]+)/.exec(location.hash);
+    if (h) { store("date-admin-" + pollId, h[1]); history.replaceState(null, "", location.pathname + location.search); }
+    admin = store("date-admin-" + pollId); isNew = !!store("date-new-" + pollId);
+    var url = shareUrl(); $("url").textContent = url.replace("https://", "");
+    var t = "On se fait ça quand ? Coche tes dispos 👉 ";
+    $("wa").href = "https://wa.me/?text=" + encodeURIComponent(t + url);
+    $("wa").onclick = function (e) {
+      stat("date-partage"); store("date-new-" + pollId, null);
+      var txt = (poll ? poll.title + " : on" : "On") + " se fait ça quand ? Coche tes dispos 👉 ";
+      if (navigator.share && /Mobi|Android|iPhone|iPad/i.test(navigator.userAgent)) { e.preventDefault(); navigator.share({ text: txt, url: url }).catch(function () {}); }
+      else this.href = "https://wa.me/?text=" + encodeURIComponent(txt + url);
+    };
+    $("copy").onclick = function () { stat("date-copie"); copy(url, "Lien copié ✔"); };
+    $("orgNote").hidden = !admin;
+    $("adminLink").onclick = function (e) { e.preventDefault(); stat("date-lien-orga"); copy(url + "#a=" + admin, "Lien organisateur copié : garde-le pour toi ✔"); };
+    stat(admin ? "date-ouvert-orga" : "date-ouvert");
+    load().catch(function () { $("tbl").innerHTML = "<div class='empty'>Impossible de charger le sondage. Vérifie ta connexion et recharge la page.</div>"; });
+  }
+
+  if (pollId) initPoll(); else { drawCal(); stat("date-accueil"); }
+})();
+</script>
+<script data-goatcounter="https://wavents.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
+</body>
+</html>
