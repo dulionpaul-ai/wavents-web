@@ -314,6 +314,10 @@ async function film() {
     sn.style.opacity = p1.style.opacity = p2.style.opacity = 0; await wait(fast ? 180 : 350);
     p1.textContent = a; sn.textContent = b; p2.textContent = c;
     sn.style.opacity = p1.style.opacity = p2.style.opacity = 1; (i === cards.length - 1 ? boom : braam)(); vibrate(30);
+    if (i === cards.length - 1) {
+      // Dernier carton : le Père Noël clignote en méchant, plusieurs fois (Paul, 04/11).
+      for (const [at, ms] of [[150, 120], [420, 90], [620, 160], [950, 110], [1180, 260], [1650, 140]]) setTimeout(() => morph(ms), at);
+    }
     await wait(i === cards.length - 1 ? 2600 : fast ? 900 : 1500);
   }
   // 2. La bande-annonce (histoire écrite par Paul, 04/11/2026).
