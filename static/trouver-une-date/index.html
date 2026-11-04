@@ -105,7 +105,7 @@
   .tri button.on[data-v="0"] { filter: none; opacity: 1; background: var(--no-bg); border-color: var(--no); }
   .prop { margin-top: 5px; background: var(--pro-bg); border-radius: 9px; padding: 4px 7px; font-size: 12px; font-weight: 800; color: var(--pro); display: flex; gap: 6px; align-items: center; }
   .prop + .prop { margin-top: 3px; }
-  .lk { display: flex; justify-content: space-between; gap: 8px; margin-top: 3px; }
+  .lk { display: flex; flex-wrap: wrap; column-gap: 14px; row-gap: 0; margin: 4px 126px 0 0; }
   .lk button { background: none; border: 0; padding: 3px 0; font: 900 12px Nunito; color: var(--deep); cursor: pointer; }
   .lk .lk-i { color: var(--pro); }
   .idea { border: 0; background: var(--pro-bg); color: var(--pro); font: 900 11px Nunito; padding: 1px 6px; border-radius: 99px; cursor: pointer; vertical-align: 1px; }
@@ -446,7 +446,7 @@
         "<div class='av'>" + y.map(function (v) { return chip(v, "y", ""); }).join("") + m.map(function (v) { return chip(v, "m", " ?"); }).join("") + n.map(function (v) { return chip(v, "n", ""); }).join("") + "</div></div>" +
         "<div class='tri'>" + [[2, "✅", "Dispo"], [1, "?", "Peut-être"], [0, "❌", "Pas dispo"]].map(function (x) {
           return "<button data-i='" + i + "' data-v='" + x[0] + "' aria-label='" + x[2] + " le " + esc(fmtLong.format(parse(o.d))) + "'" + (choice[i] === x[0] ? " class='on'" : "") + ">" + x[1] + "</button>"; }).join("") + "</div></div>" +
-        (nb ? "<div class='lk'>" + (ideas.length ? "<button class='lk-i' data-ev='" + i + "' data-f='prop'>💡 Proposées (" + ideas.length + ")</button>" : "<span></span>") +
+        (nb ? "<div class='lk'>" + (ideas.length ? "<button class='lk-i' data-ev='" + i + "' data-f='prop'>💡 Proposées (" + ideas.length + ")</button>" : "") +
           "<button data-ev='" + i + "'>" + (ideas.length ? "Autres sorties ›" : "Voir les sorties du jour ›") + "</button></div>" : "");
       t.appendChild(row);
     });
