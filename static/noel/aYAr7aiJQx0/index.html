@@ -217,6 +217,16 @@ function siren(sec) { const a = audio(), o = a.createOscillator(), g = a.createG
   g.gain.setValueAtTime(.0001, t); g.gain.exponentialRampToValueAtTime(.07, t + .2); g.gain.setValueAtTime(.07, t + sec - .3); g.gain.exponentialRampToValueAtTime(.0001, t + sec);
   o.connect(g); g.connect(master); o.start(t); o.stop(t + sec + .05); }
 function crowd(sec) { for (let i = 0; i < sec * 6; i++) noise(.4, 400 + Math.random() * 600, .6, .12, i / 6); }
+// Voix off de bande-annonce (Paul, 04/11) : voix française, grave et lente.
+let voice = null;
+function pickVoice() { const vs = (window.speechSynthesis && speechSynthesis.getVoices()) || [];
+  voice = vs.find((v) => /fr/i.test(v.lang) && /thomas|male|homme|daniel|paul/i.test(v.name)) || vs.find((v) => /^fr/i.test(v.lang)) || null; }
+if (window.speechSynthesis) { pickVoice(); speechSynthesis.onvoiceschanged = pickVoice; }
+function say(text, rate = .82) {
+  if (muted || !window.speechSynthesis) return;
+  try { const u = new SpeechSynthesisUtterance(text); u.lang = "fr-FR"; if (voice) u.voice = voice;
+    u.pitch = .45; u.rate = rate; u.volume = 1; speechSynthesis.cancel(); speechSynthesis.speak(u); } catch (e) {}
+}
 function fanfare() { const n = [523, 659, 784, 1047, 784, 1047]; n.forEach((f, i) => { tone(f, .5, "triangle", .22, i * .14); tone(f / 2, .5, "sawtooth", .08, i * .14); }); }
 
 // ---- Neige, feux d'artifice, confettis ---------------------------------------
@@ -280,8 +290,9 @@ async function film() {
   // 2. La bande-annonce (histoire écrite par Paul, 04/11/2026).
   show("trailer");
   const l = $("tline");
-  async function line(text, style = "", ms = 2300, sound = braam) {
+  async function line(text, style = "", ms = 2300, sound = braam, spoken = text) {
     l.classList.remove("show"); await wait(450); l.className = "line cinzel " + style; l.textContent = text;
+    if (spoken) say(spoken.toLowerCase().replace(/…/g, "..."));
     // Mot très long (« SAINT-VICTOR-LA-COSTE ») : plus petit, sur une ligne.
     l.style.fontSize = text.length > 16 && !text.includes(" ") ? "min(6.2vw, 34px)" : "";
     void l.offsetWidth; l.classList.add("show"); if (sound) sound(); vibrate(40); await wait(ms);
@@ -297,12 +308,14 @@ async function film() {
     whoosh(); await wait(900); boom(); document.body.classList.add("shake"); setTimeout(() => document.body.classList.remove("shake"), 500); vibrate(120);
     await wait(1300);
   }
+  say("Dans un monde... où plus rien n'est sûr...", .78); await wait(3200);
   await line(data.date ? data.date.toUpperCase() + "." : "CETTE ANNÉE.");
   await line((data.place || "QUELQUE PART EN FRANCE").toUpperCase() + ".");
   await line("La famille se réunit.", "whisper", 2600, chime);
   await line("MAIS…", "big", 2200, boom);
   $("red").classList.add("on"); siren(9); crowd(9);
   l.classList.remove("show");
+  say("La crise frappe.", .8);
   await news("LE PETIT BEAUJOLAIS · ÉDITION SPÉCIALE", "Pénurie mondiale de papier cadeau", -6);
   await news("FLASH INFO", "Les lutins en grève illimitée", 5);
   await news("DERNIÈRE MINUTE", "Le Père Noël revend son traîneau sur Leboncoin", -3);
@@ -318,9 +331,9 @@ async function film() {
   await line("…d'une audace inouïe…", "whisper", 2200, null);
   await line("…d'une originalité jamais vue…", "whisper", 2400, null);
   await line("…ne change tout.", "", 2200, braam);
-  await line("UN", "big", 900, boom);
-  await line("SECRET", "big gold", 900, boom);
-  await line("SANTA.", "big gold", 2600, () => { boom(); chime(); burst(W / 2, H / 2, 160, ["#f7d36a", "#fff"], 10, .08, 2.6, 90); });
+  await line("UN", "big", 900, boom, "un... secret... santa.");
+  await line("SECRET", "big gold", 900, boom, null);
+  await line("SANTA.", "big gold", 2600, () => { boom(); chime(); burst(W / 2, H / 2, 160, ["#f7d36a", "#fff"], 10, .08, 2.6, 90); }, null);
   // 3. Le bouton du tirage (Paul, 04/11), puis la machine à sous des prénoms.
   l.classList.remove("show"); await wait(700);
   show("launch"); tone(220, 2.5, "sine", .08);
@@ -339,7 +352,12 @@ async function film() {
       k < 1 ? requestAnimationFrame(step) : res(); })(t0); });
   await animateTo(stops[0], 4200); $("tease").textContent = `${fake1} ?…`; await wait(900);
   $("tease").textContent = "Non ! 😱"; await animateTo(stops[1], 900); $("tease").textContent = `${fake2} ?…`; await wait(900);
-  $("tease").textContent = "Toujours pas…"; await animateTo(seq.length - 1, 900); $("tease").textContent = "";
+  $("tease").textContent = "Toujours pas…"; await animateTo(seq.length - 1.55, 700);
+  // Dernier cran au ralenti extrême, sur un battement de cœur (Paul, 04/11).
+  $("tease").textContent = ""; document.querySelector("#reel .window").style.transition = "box-shadow 3s";
+  document.querySelector("#reel .window").style.boxShadow = "0 0 90px rgba(247,211,106,.9), inset 0 0 30px rgba(0,0,0,.8)";
+  const beats = setInterval(() => { heartbeat(); vibrate([50, 90, 50]); }, 900); heartbeat();
+  await animateTo(seq.length - 1, 4200); clearInterval(beats); await wait(500);
   strip.innerHTML = strip.innerHTML.replace(new RegExp(`>${data.target}<`, "g"), ">❓<");
   // 4. Le cadeau et le compte à rebours.
   show("gift"); whoosh(); await wait(1000); boom(); vibrate(60); await wait(900);
@@ -368,7 +386,7 @@ async function credits() {
 }
 $("go").onclick = film;
 $("again").onclick = () => { fireworksOn = false; document.querySelectorAll(".spot").forEach((s) => s.classList.remove("on")); film(); };
-$("reveal").addEventListener("click", (e) => { if (e.target.id !== "again" && !running) credits(); });
+// Pas de générique de fin (Paul, 04/11).
 
 (async () => {
   try { data = await decrypt(); }
