@@ -1,0 +1,347 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<title>Secret Santa · Wavents Pictures</title>
+<link rel="icon" href="/img/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700;900&family=Nunito:wght@600;800;900&display=swap" rel="stylesheet">
+<style>
+  :root { --gold: #f7d36a; --gold2: #ffefb0; --deep: #065FBB; --night: #05070d; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; background: var(--night); color: #fff; overflow: hidden;
+    font-family: Nunito, system-ui, sans-serif; -webkit-tap-highlight-color: transparent; }
+  canvas { position: fixed; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+  #fx { z-index: 5; } #snow { z-index: 1; }
+  .bar { position: fixed; left: 0; right: 0; height: 9vh; background: #000; z-index: 20; transition: height 1.2s ease; }
+  .bar.top { top: 0; } .bar.bottom { bottom: 0; }
+  body.open .bar { height: 0; }
+  .scene { position: fixed; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center;
+    text-align: center; padding: 0 22px; z-index: 10; opacity: 0; pointer-events: none; transition: opacity .9s ease; }
+  .scene.on { opacity: 1; pointer-events: auto; }
+  .cinzel { font-family: Cinzel, Georgia, serif; letter-spacing: .08em; }
+  .gold { background: linear-gradient(180deg, var(--gold2), var(--gold) 45%, #b8862b 70%, var(--gold2));
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+    filter: drop-shadow(0 0 18px rgba(247, 211, 106, .45)); }
+  #start h1 { font-size: clamp(28px, 8vw, 48px); line-height: 1.15; margin-bottom: 10px; }
+  #start p { color: #cfd8e6; font-weight: 700; margin-bottom: 34px; font-size: 17px; }
+  .btn { font: 900 18px Nunito, sans-serif; color: #2a1b00; border: 0; border-radius: 999px; padding: 18px 34px;
+    background: linear-gradient(180deg, var(--gold2), var(--gold)); box-shadow: 0 0 0 0 rgba(247,211,106,.7);
+    animation: pulse 1.8s infinite; cursor: pointer; }
+  .btn.ghost { background: transparent; color: var(--gold); border: 2px solid rgba(247,211,106,.6); animation: none; font-size: 16px; padding: 13px 24px; }
+  @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(247,211,106,.6); } 70% { box-shadow: 0 0 0 26px rgba(247,211,106,0); } 100% { box-shadow: 0 0 0 0 rgba(247,211,106,0); } }
+  #studio .pin { width: 92px; margin-bottom: 18px; transform: translateY(-40px) scale(.7); opacity: 0;
+    transition: transform .9s cubic-bezier(.3,1.6,.5,1), opacity .5s; }
+  #studio.on .pin { transform: none; opacity: 1; }
+  #studio .name { font-size: clamp(26px, 8vw, 46px); font-weight: 900; }
+  #studio .sub { color: #9fb2c8; letter-spacing: .5em; font-size: 12px; margin-top: 8px; }
+  .ring { position: fixed; left: 50%; top: 50%; width: 10px; height: 10px; margin: -5px; border-radius: 50%;
+    border: 2px solid rgba(247,211,106,.85); box-shadow: 0 0 30px rgba(247,211,106,.5); z-index: 9; pointer-events: none;
+    animation: ring 1.8s cubic-bezier(.2,.7,.3,1) forwards; }
+  @keyframes ring { to { transform: scale(140); opacity: 0; border-width: .1px; } }
+  #trailer .line { font-size: clamp(22px, 6.5vw, 40px); line-height: 1.3; opacity: 0; transform: scale(1.08);
+    transition: opacity 1s ease, transform 3s ease; text-shadow: 0 0 30px rgba(255,255,255,.25); }
+  #trailer .line.show { opacity: 1; transform: scale(1); }
+  #reel .label { color: #cfd8e6; font-weight: 800; letter-spacing: .3em; font-size: 13px; margin-bottom: 18px; }
+  #reel .window { position: relative; width: min(86vw, 420px); height: 96px; overflow: hidden; border-radius: 18px;
+    border: 3px solid var(--gold); box-shadow: 0 0 40px rgba(247,211,106,.35), inset 0 0 30px rgba(0,0,0,.8); background: #0b1020; }
+  #reel .strip { position: absolute; left: 0; right: 0; top: 0; }
+  #reel .cell { height: 96px; display: flex; align-items: center; justify-content: center; font: 900 clamp(26px, 8vw, 40px) Cinzel, serif; }
+  #reel .window::before, #reel .window::after { content: ""; position: absolute; left: 0; right: 0; height: 30px; z-index: 2; }
+  #reel .window::before { top: 0; background: linear-gradient(#0b1020, transparent); }
+  #reel .window::after { bottom: 0; background: linear-gradient(transparent, #0b1020); }
+  #reel .tease { height: 30px; margin-top: 18px; color: var(--gold); font-weight: 900; font-size: 18px; }
+  #gift .box { font-size: 110px; transform: translateY(-120vh); }
+  #gift.on .box { animation: drop 1s cubic-bezier(.3,1.5,.5,1) forwards, shake .12s linear 1.2s 30, glow 3.5s ease-in 1s forwards; }
+  @keyframes drop { to { transform: none; } }
+  @keyframes shake { 0%,100% { transform: rotate(-6deg); } 50% { transform: rotate(6deg) translateY(-3px); } }
+  @keyframes glow { to { filter: drop-shadow(0 0 60px #fff) brightness(1.8); } }
+  #gift .count { font: 900 120px Cinzel, serif; height: 140px; margin-top: 10px; }
+  #flash { position: fixed; inset: 0; background: #fff; opacity: 0; z-index: 30; pointer-events: none; }
+  #flash.go { animation: flash 1.2s ease-out; }
+  @keyframes flash { 0% { opacity: 1; } 100% { opacity: 0; } }
+  body.shake .scene { animation: quake .5s linear; }
+  @keyframes quake { 0%,100% { transform: none; } 20% { transform: translate(-12px, 8px); } 40% { transform: translate(10px, -10px); } 60% { transform: translate(-8px, -6px); } 80% { transform: translate(6px, 8px); } }
+  #reveal .pre { color: #cfd8e6; letter-spacing: .35em; font-size: 13px; font-weight: 900; margin-bottom: 14px; }
+  #reveal .who { font-size: clamp(44px, 15vw, 96px); font-weight: 900; line-height: 1.05; min-height: 1.1em; }
+  #reveal .who span { display: inline-block; opacity: 0; transform: translateY(30px) scale(1.6); filter: blur(8px);
+    transition: all .5s cubic-bezier(.3,1.6,.5,1); }
+  #reveal .who span.in { opacity: 1; transform: none; filter: none; }
+  #reveal .gifts { font-size: 40px; margin: 10px 0 8px; }
+  #reveal .info { color: #e8eef6; font-weight: 800; font-size: 17px; margin-top: 6px; }
+  #reveal .shh { color: var(--gold); font-weight: 900; margin: 22px 0 26px; font-size: 18px; }
+  #reveal .actions { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; }
+  .spot { position: fixed; top: -20vh; width: 60vw; height: 140vh; background: radial-gradient(ellipse at top, rgba(255,240,200,.18), transparent 60%);
+    z-index: 2; pointer-events: none; opacity: 0; transition: opacity 1s; transform-origin: top center; }
+  .spot.on { opacity: 1; animation: sweep 6s ease-in-out infinite alternate; }
+  .spot.l { left: -10vw; transform: rotate(18deg); } .spot.r { right: -10vw; transform: rotate(-18deg); animation-delay: -3s; }
+  @keyframes sweep { from { transform: rotate(22deg); } to { transform: rotate(-8deg); } }
+  #credits { justify-content: flex-start; padding-top: 100vh; }
+  #credits.on .roll { animation: roll 16s linear forwards; }
+  #credits .roll { color: #cfd8e6; font-weight: 800; line-height: 2; }
+  #credits .roll b { color: var(--gold); display: block; letter-spacing: .3em; font-size: 12px; margin-top: 24px; }
+  @keyframes roll { to { transform: translateY(-190vh); } }
+  #err { color: #cfd8e6; font-weight: 700; }
+  #trailer .line.big { font-size: clamp(40px, 14vw, 88px); }
+  #trailer .line.whisper { font-family: Nunito, sans-serif; font-style: italic; color: #cfd8e6; font-size: clamp(20px, 5.5vw, 30px); letter-spacing: .02em; }
+  #trailer .line.crisis { color: #ff4d4d; text-shadow: 0 0 30px rgba(255,40,40,.7); }
+  #red { position: fixed; inset: 0; background: radial-gradient(ellipse at center, rgba(255,0,0,.0), rgba(160,0,0,.55)); opacity: 0; z-index: 8; pointer-events: none; transition: opacity .4s; }
+  #red.on { animation: alarm 1s ease-in-out infinite; }
+  @keyframes alarm { 0%,100% { opacity: .15; } 50% { opacity: .9; } }
+  .news { position: fixed; left: 50%; top: 50%; width: min(84vw, 380px); padding: 16px 18px 18px; background: #f3ead2; color: #1a1a1a;
+    font-family: Georgia, serif; text-align: left; box-shadow: 0 20px 60px rgba(0,0,0,.7); z-index: 12; transform: translate(-50%, -50%) rotate(720deg) scale(0);
+    animation: spin 1s cubic-bezier(.2,.8,.3,1) forwards; }
+  .news small { display: block; font: 900 11px Nunito, sans-serif; letter-spacing: .25em; border-bottom: 2px solid #1a1a1a; padding-bottom: 6px; margin-bottom: 8px; }
+  .news strong { display: block; font-size: 26px; line-height: 1.1; text-transform: uppercase; }
+  @keyframes spin { to { transform: translate(-50%, -50%) rotate(var(--r, -4deg)) scale(1); } }
+  .mute { position: fixed; right: 14px; top: calc(9vh + 10px); z-index: 25; background: rgba(255,255,255,.08); color: #fff;
+    border: 0; border-radius: 999px; width: 40px; height: 40px; font-size: 18px; }
+  body.open .mute { top: 14px; }
+</style>
+</head>
+<body>
+<canvas id="snow"></canvas>
+<canvas id="fx"></canvas>
+<div class="bar top"></div><div class="bar bottom"></div>
+<div class="spot l"></div><div class="spot r"></div>
+<div id="flash"></div>
+<div id="red"></div>
+<button class="mute" id="mute" aria-label="Son">🔊</button>
+
+<section class="scene on" id="start">
+  <h1 class="cinzel gold" id="hello">Secret Santa</h1>
+  <p id="hello2">Une production Wavents Pictures</p>
+  <button class="btn" id="go">🎬 Lancer la projection</button>
+</section>
+
+<section class="scene" id="studio">
+  <img class="pin" src="/img/pin.png" alt="">
+  <div class="name cinzel gold">WAVENTS PICTURES</div>
+  <div class="sub">PRÉSENTE</div>
+</section>
+
+<section class="scene" id="trailer"><div class="line cinzel" id="tline"></div></section>
+
+<section class="scene" id="reel">
+  <div class="label">LE DESTIN TIRE AU SORT…</div>
+  <div class="window"><div class="strip" id="strip"></div></div>
+  <div class="tease" id="tease"></div>
+</section>
+
+<section class="scene" id="gift">
+  <div class="box">🎁</div>
+  <div class="count cinzel gold" id="count"></div>
+</section>
+
+<section class="scene" id="reveal">
+  <div class="pre">TU OFFRES UN CADEAU À</div>
+  <div class="who cinzel gold" id="who"></div>
+  <div class="gifts">🎁✨🎄</div>
+  <div class="info" id="info"></div>
+  <div class="shh">Chut ! 🤫 C'est top secret.</div>
+  <div class="actions">
+    <button class="btn ghost" id="again">↻ Revoir le spectacle</button>
+  </div>
+</section>
+
+<section class="scene" id="credits"><div class="roll" id="roll"></div></section>
+
+<section class="scene" id="locked">
+  <p id="err">Ce lien est incomplet : demande à Paul de te le renvoyer en entier 🎅</p>
+</section>
+
+<script>
+// Tirage chiffré (AES-GCM) : la clé n'est que dans le lien (#…), jamais dans
+// le dépôt ni sur le serveur.
+const PAYLOAD = "JZ2tRyhx-FZlDN4v9jyYyHIAarvGUQpKSVJ00_T_o_2UmERPSD94WbIsEkZn66gyrwi9twWbEJ6MocgeTyehetz8OWT0RWzEWiJKOZ2Su3oxaj7bHAE674DIsJWBqmAmDZ-SfOal1-XJHkp2wgpVME5XJkzZ2_1OtakK19YZtjQ2_w_R6xhKiXiXCHddYYdlx1yH5tooDkdSvN8LdTWgeQPuvHaxQEqEsG4oD8pZsdyJyu7XoFci5dmpFcZD_uvCf2IOjHLRJRKwG7W-Rj2jb5J3CvlMDYcyiIFEC_l9eQnGhI9VdVEUXRVuP-K46_Rb6Pj-MSdntfLwaN7gZ-nZMCMopd-BZNBnLUGwlHpiNzKnXKd5dZ8F";
+
+const $ = (id) => document.getElementById(id);
+const wait = (ms) => new Promise((r) => setTimeout(r, ms));
+const scenes = ["start", "studio", "trailer", "reel", "gift", "reveal", "credits", "locked"];
+function show(id) { scenes.forEach((s) => $(s).classList.toggle("on", s === id)); }
+const vibrate = (p) => { try { navigator.vibrate && navigator.vibrate(p); } catch (e) {} };
+
+// ---- Déchiffrement ---------------------------------------------------------
+const b64 = (s) => Uint8Array.from(atob(s.replace(/-/g, "+").replace(/_/g, "/").padEnd(Math.ceil(s.length / 4) * 4, "=")), (c) => c.charCodeAt(0));
+async function decrypt() {
+  const key = location.hash.slice(1);
+  if (!key) throw new Error("clé absente");
+  const raw = b64(PAYLOAD);
+  const k = await crypto.subtle.importKey("raw", b64(key), "AES-GCM", false, ["decrypt"]);
+  const plain = await crypto.subtle.decrypt({ name: "AES-GCM", iv: raw.slice(0, 12) }, k, raw.slice(12));
+  return JSON.parse(new TextDecoder().decode(plain));
+}
+
+// ---- Son (synthétisé, aucun fichier) -----------------------------------------
+let ac = null, muted = false, master = null;
+function audio() {
+  if (!ac) { ac = new (window.AudioContext || window.webkitAudioContext)(); master = ac.createGain(); master.gain.value = .8; master.connect(ac.destination); }
+  return ac;
+}
+$("mute").onclick = () => { muted = !muted; $("mute").textContent = muted ? "🔇" : "🔊"; if (master) master.gain.value = muted ? 0 : .8; };
+function noise(dur, freq, q, vol, t0 = 0) {
+  const a = audio(), n = a.createBufferSource(), buf = a.createBuffer(1, a.sampleRate * dur, a.sampleRate);
+  const d = buf.getChannelData(0); for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
+  n.buffer = buf; const f = a.createBiquadFilter(); f.type = "bandpass"; f.frequency.value = freq; f.Q.value = q;
+  const g = a.createGain(); const t = a.currentTime + t0;
+  g.gain.setValueAtTime(vol, t); g.gain.exponentialRampToValueAtTime(.001, t + dur);
+  n.connect(f); f.connect(g); g.connect(master); n.start(t); n.stop(t + dur);
+}
+function tone(freq, dur, type = "sine", vol = .3, t0 = 0, slide = 0) {
+  const a = audio(), o = a.createOscillator(), g = a.createGain(), t = a.currentTime + t0;
+  o.type = type; o.frequency.setValueAtTime(freq, t); if (slide) o.frequency.exponentialRampToValueAtTime(slide, t + dur);
+  g.gain.setValueAtTime(.0001, t); g.gain.exponentialRampToValueAtTime(vol, t + .03); g.gain.exponentialRampToValueAtTime(.0001, t + dur);
+  o.connect(g); g.connect(master); o.start(t); o.stop(t + dur + .05);
+}
+const boom = () => { tone(60, 1.8, "sine", .9, 0, 28); noise(1.2, 120, .7, .8); };
+const braam = () => { [55, 82.4, 110].forEach((f) => tone(f, 2.6, "sawtooth", .16, 0, f * .97)); noise(2.4, 200, .5, .25); };
+const whoosh = () => noise(1.2, 900, .4, .35);
+const tick = () => tone(1800, .05, "square", .07);
+const chime = () => [1047, 1319, 1568, 2093].forEach((f, i) => tone(f, 1.6, "sine", .18, i * .09));
+function drumroll(sec) { for (let i = 0; i < sec * 22; i++) noise(.06, 300 + Math.random() * 200, 1.2, .25 + i / (sec * 22) * .35, i / 22); }
+function heartbeat() { tone(70, .18, "sine", .8); tone(62, .2, "sine", .6, .22); }
+function siren(sec) { const a = audio(), o = a.createOscillator(), g = a.createGain(), t = a.currentTime;
+  o.type = "sawtooth"; for (let i = 0; i < sec * 2; i++) { o.frequency.setValueAtTime(620, t + i * .5); o.frequency.linearRampToValueAtTime(950, t + i * .5 + .25); o.frequency.linearRampToValueAtTime(620, t + i * .5 + .5); }
+  g.gain.setValueAtTime(.0001, t); g.gain.exponentialRampToValueAtTime(.07, t + .2); g.gain.setValueAtTime(.07, t + sec - .3); g.gain.exponentialRampToValueAtTime(.0001, t + sec);
+  o.connect(g); g.connect(master); o.start(t); o.stop(t + sec + .05); }
+function crowd(sec) { for (let i = 0; i < sec * 6; i++) noise(.4, 400 + Math.random() * 600, .6, .12, i / 6); }
+function fanfare() { const n = [523, 659, 784, 1047, 784, 1047]; n.forEach((f, i) => { tone(f, .5, "triangle", .22, i * .14); tone(f / 2, .5, "sawtooth", .08, i * .14); }); }
+
+// ---- Neige, feux d'artifice, confettis ---------------------------------------
+const snow = $("snow"), sx = snow.getContext("2d"), fx = $("fx"), fc = fx.getContext("2d");
+let W, H, dpr = Math.min(2, window.devicePixelRatio || 1);
+function resize() { W = innerWidth; H = innerHeight; [snow, fx].forEach((c) => { c.width = W * dpr; c.height = H * dpr; c.getContext("2d").setTransform(dpr, 0, 0, dpr, 0, 0); }); }
+resize(); addEventListener("resize", resize);
+const flakes = Array.from({ length: 140 }, () => ({ x: Math.random() * innerWidth, y: Math.random() * innerHeight, r: Math.random() * 2.4 + .6, s: Math.random() * .8 + .3, w: Math.random() * 2 * Math.PI }));
+let parts = [];
+function burst(x, y, n, colors, speed = 7, gravity = .12, size = 2.6, life = 90) {
+  for (let i = 0; i < n; i++) { const a = Math.random() * Math.PI * 2, v = Math.random() * speed;
+    parts.push({ x, y, vx: Math.cos(a) * v, vy: Math.sin(a) * v, g: gravity, c: colors[i % colors.length], s: size * (Math.random() + .5), l: life * (Math.random() * .5 + .75), t: 0, conf: false }); }
+}
+function confetti(n) {
+  const cols = ["#f7d36a", "#ff4d6d", "#4dd4ff", "#7CFF8A", "#ffffff", "#b388ff"];
+  for (let i = 0; i < n; i++) parts.push({ x: Math.random() * W, y: -20 - Math.random() * H * .5, vx: (Math.random() - .5) * 2, vy: Math.random() * 2 + 1.5, g: .02,
+    c: cols[i % cols.length], s: Math.random() * 6 + 4, l: 400, t: 0, conf: true, r: Math.random() * 6, vr: (Math.random() - .5) * .3 });
+}
+let fireworksOn = false;
+function frame() {
+  sx.clearRect(0, 0, W, H); sx.fillStyle = "rgba(255,255,255,.85)";
+  for (const f of flakes) { f.y += f.s; f.w += .02; f.x += Math.sin(f.w) * .4; if (f.y > H) { f.y = -5; f.x = Math.random() * W; }
+    sx.beginPath(); sx.arc(f.x, f.y, f.r, 0, 7); sx.fill(); }
+  fc.globalCompositeOperation = "source-over"; fc.fillStyle = "rgba(5,7,13,.22)"; fc.clearRect(0, 0, W, H);
+  if (fireworksOn && Math.random() < .045) { const cols = [["#f7d36a", "#fff"], ["#ff4d6d", "#ffd1dc"], ["#4dd4ff", "#fff"], ["#7CFF8A", "#fff"], ["#b388ff", "#fff"]][Math.floor(Math.random() * 5)];
+    burst(Math.random() * W * .8 + W * .1, Math.random() * H * .45 + H * .08, 90, cols, 6.5, .06, 2.2, 80); tone(200 + Math.random() * 200, .3, "triangle", .05); noise(.5, 1500, .8, .18); }
+  fc.globalCompositeOperation = "lighter";
+  parts = parts.filter((p) => p.t < p.l && p.y < H + 40);
+  for (const p of parts) { p.t++; p.vy += p.g; p.vx *= p.conf ? .99 : .985; p.x += p.vx; p.y += p.vy;
+    const a = p.conf ? 1 : 1 - p.t / p.l; fc.globalAlpha = Math.max(0, a); fc.fillStyle = p.c;
+    if (p.conf) { p.r += p.vr; fc.save(); fc.translate(p.x, p.y); fc.rotate(p.r); fc.fillRect(-p.s / 2, -p.s / 4, p.s, p.s / 2); fc.restore(); }
+    else { fc.beginPath(); fc.arc(p.x, p.y, p.s, 0, 7); fc.fill(); } }
+  fc.globalAlpha = 1; requestAnimationFrame(frame);
+}
+requestAnimationFrame(frame);
+function ring(x = "50%", y = "50%") { const r = document.createElement("div"); r.className = "ring"; r.style.left = x; r.style.top = y; document.body.appendChild(r); setTimeout(() => r.remove(), 2000); }
+
+// ---- Le film -----------------------------------------------------------------
+let data = null, running = false;
+async function film() {
+  if (running) return; running = true;
+  audio(); if (ac.state === "suspended") await ac.resume();
+  document.body.classList.add("open");
+  // 1. Le studio : l'épingle se pose, l'onde part de sa pointe.
+  show("studio"); whoosh(); await wait(900); boom(); vibrate(80);
+  const pin = document.querySelector("#studio .pin").getBoundingClientRect();
+  ring(pin.left + pin.width / 2 + "px", pin.bottom - 4 + "px"); await wait(2600);
+  // 2. La bande-annonce (histoire écrite par Paul, 04/11/2026).
+  show("trailer");
+  const l = $("tline");
+  async function line(text, style = "", ms = 2300, sound = braam) {
+    l.classList.remove("show"); await wait(450); l.className = "line cinzel " + style; l.textContent = text;
+    // Mot très long (« SAINT-VICTOR-LA-COSTE ») : plus petit, sur une ligne.
+    l.style.fontSize = text.length > 16 && !text.includes(" ") ? "min(6.2vw, 34px)" : "";
+    void l.offsetWidth; l.classList.add("show"); if (sound) sound(); vibrate(40); await wait(ms);
+  }
+  async function news(kicker, title, rot) {
+    const n = document.createElement("div"); n.className = "news"; n.style.setProperty("--r", rot + "deg");
+    n.innerHTML = `<small>${kicker}</small><strong>${title}</strong>`; document.body.appendChild(n);
+    whoosh(); await wait(900); boom(); document.body.classList.add("shake"); setTimeout(() => document.body.classList.remove("shake"), 500); vibrate(120);
+    await wait(1500); n.remove();
+  }
+  await line(data.date ? data.date.toUpperCase() + "." : "CETTE ANNÉE.");
+  await line((data.place || "QUELQUE PART EN FRANCE").toUpperCase() + ".");
+  await line("La famille se réunit.", "whisper", 2600, chime);
+  await line("MAIS…", "big", 2200, boom);
+  $("red").classList.add("on"); siren(9); crowd(9);
+  l.classList.remove("show");
+  await news("LE PETIT BEAUJOLAIS · ÉDITION SPÉCIALE", "Pénurie mondiale de papier cadeau", -6);
+  await news("FLASH INFO", "Les lutins en grève illimitée", 5);
+  await news("DERNIÈRE MINUTE", "Le Père Noël revend son traîneau sur Leboncoin", -3);
+  await news("ÉCONOMIE", "Le prix de la bûche s'envole : +400 %", 4);
+  await line("Les portefeuilles sont vides.", "crisis", 2300, boom);
+  await line("Impossible d'offrir un cadeau à chacun.", "crisis", 2600, boom);
+  $("red").classList.remove("on");
+  await line("Tout semble perdu…", "whisper", 2600, null);
+  await line("Jusqu'à ce qu'une idée…", "whisper", 2200, null);
+  await line("…d'une audace inouïe…", "whisper", 2200, null);
+  await line("…d'une originalité jamais vue…", "whisper", 2400, null);
+  await line("…ne change tout.", "", 2200, braam);
+  await line("UN", "big", 900, boom);
+  await line("SECRET", "big gold", 900, boom);
+  await line("SANTA.", "big gold", 2600, () => { boom(); chime(); burst(W / 2, H / 2, 160, ["#f7d36a", "#fff"], 10, .08, 2.6, 90); });
+  // 3. La machine à sous des prénoms.
+  show("reel"); const strip = $("strip"); const others = data.names.filter((n) => n !== data.giver);
+  const seq = []; for (let i = 0; i < 44; i++) seq.push(others[(i * 7 + 3) % others.length]);
+  const fake1 = others.find((n) => n !== data.target) || data.target, fake2 = others.filter((n) => n !== data.target).slice(-1)[0] || data.target;
+  seq.push(fake1, fake2, data.target);
+  strip.innerHTML = seq.map((n) => `<div class="cell gold">${n}</div>`).join("");
+  drumroll(7.5);
+  const stops = [seq.length - 3, seq.length - 2]; let pos = 0;
+  const animateTo = (idx, ms) => new Promise((res) => { const from = pos, t0 = performance.now(); let lastCell = Math.round(from);
+    (function step(t) { const k = Math.min(1, (t - t0) / ms), e = 1 - Math.pow(1 - k, 3); pos = from + (idx - from) * e;
+      strip.style.transform = `translateY(${-pos * 96}px)`; const c = Math.round(pos); if (c !== lastCell) { lastCell = c; tick(); }
+      k < 1 ? requestAnimationFrame(step) : res(); })(t0); });
+  await animateTo(stops[0], 4200); $("tease").textContent = `${fake1} ?…`; await wait(900);
+  $("tease").textContent = "Non ! 😱"; await animateTo(stops[1], 900); $("tease").textContent = `${fake2} ?…`; await wait(900);
+  $("tease").textContent = "Toujours pas…"; await animateTo(seq.length - 1, 900); $("tease").textContent = "";
+  strip.innerHTML = strip.innerHTML.replace(new RegExp(`>${data.target}<`, "g"), ">❓<");
+  // 4. Le cadeau et le compte à rebours.
+  show("gift"); whoosh(); await wait(1000); boom(); vibrate(60); await wait(900);
+  for (const n of ["3", "2", "1"]) { $("count").textContent = n; heartbeat(); vibrate([60, 120, 60]); await wait(1000); }
+  $("count").textContent = "";
+  // 5. L'explosion.
+  $("flash").classList.remove("go"); void $("flash").offsetWidth; $("flash").classList.add("go");
+  document.body.classList.add("shake"); setTimeout(() => document.body.classList.remove("shake"), 600);
+  boom(); vibrate([200, 50, 200]); chime();
+  burst(W / 2, H / 2, 260, ["#f7d36a", "#fff", "#ffefb0"], 14, .08, 3, 110); confetti(260); ring(); setTimeout(ring, 250);
+  fireworksOn = true;
+  // 6. La révélation, lettre par lettre, sous les projecteurs.
+  show("reveal"); document.querySelectorAll(".spot").forEach((s) => s.classList.add("on"));
+  $("who").innerHTML = [...data.target].map((c) => `<span>${c === " " ? "&nbsp;" : c}</span>`).join("");
+  $("info").textContent = data.info || "";
+  await wait(500);
+  for (const s of $("who").children) { s.classList.add("in"); tone(880 + Math.random() * 400, .25, "triangle", .12); await wait(170); }
+  fanfare(); confetti(160); await wait(5500);
+  running = false;
+}
+async function credits() {
+  fireworksOn = false; show("credits"); const r = $("roll");
+  r.innerHTML = `<b>RÉALISÉ PAR</b>Le Père Noël<b>PRODUIT PAR</b>Wavents Pictures<b>AVEC</b>${data.names.join("<br>")}<b>MUSIQUE</b>Le roulement de tambour<b>EFFETS SPÉCIAUX</b>Les lutins<b>DANS TOUTES LES BONNES CHEMINÉES</b>Le ${data.date || "soir de Noël"}<br><br>🎄`;
+  $("credits").classList.remove("on"); void $("credits").offsetWidth; $("credits").classList.add("on");
+  await wait(16500); show("reveal"); fireworksOn = true;
+}
+$("go").onclick = film;
+$("again").onclick = () => { fireworksOn = false; document.querySelectorAll(".spot").forEach((s) => s.classList.remove("on")); film(); };
+$("reveal").addEventListener("click", (e) => { if (e.target.id !== "again" && !running) credits(); });
+
+(async () => {
+  try { data = await decrypt(); }
+  catch (e) { document.querySelectorAll("#start button").forEach((b) => b.remove()); show("locked"); return; }
+  $("hello").textContent = data.giver;
+  $("hello2").textContent = "Le Père Noël a une mission pour toi…";
+})();
+</script>
+</body>
+</html>
