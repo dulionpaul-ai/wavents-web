@@ -42,11 +42,18 @@
   .link button, .link a { flex: 1; text-align: center; text-decoration: none; border: 0; border-radius: 12px; padding: 11px 8px; font: 800 14px Nunito; cursor: pointer; }
   .copy { background: #e8f2fc; color: var(--deep); } .share { background: #25D366; color: #fff; }
   .warn { background: #fff7e0; border-radius: 14px; padding: 12px 14px; font-weight: 700; font-size: 14px; color: #6b4f00; margin-bottom: 12px; }
+  .seo { max-width: 620px; margin: 0 auto 20px; padding: 0 18px; color: var(--soft); font-weight: 600; line-height: 1.55; }
+  .seo h2 { color: var(--ink); font-size: 17px; margin: 18px 0 4px; }
   footer { text-align: center; color: var(--soft); font-weight: 700; font-size: 14px; padding: 10px 18px 40px; line-height: 1.6; }
   footer a { color: var(--deep); }
   .toast { position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%); background: var(--ink); color: #fff; font-weight: 800; padding: 12px 18px; border-radius: 999px; opacity: 0; transition: opacity .3s; pointer-events: none; }
   .toast.on { opacity: 1; }
 </style>
+<link rel="canonical" href="https://wavents.fr/secret-santa/">
+<meta property="og:title" content="Secret Santa façon film d'action 🎬">
+<meta property="og:description" content="Tirage au sort gratuit : chacun découvre qui il gâte dans une bande-annonce hollywoodienne.">
+<meta property="og:image" content="https://wavents.fr/img/og.png">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"WebApplication","name":"Secret Santa en ligne","url":"https://wavents.fr/secret-santa/","applicationCategory":"EntertainmentApplication","operatingSystem":"Tous","offers":{"@type":"Offer","price":"0","priceCurrency":"EUR"},"inLanguage":"fr","publisher":{"@type":"Organization","name":"Wavents","url":"https://wavents.fr/"}}</script>
 </head>
 <body>
 <header>
@@ -97,6 +104,18 @@
   </section>
 </main>
 
+<section class="seo">
+  <h2>Comment ça marche ?</h2>
+  <p><strong>1.</strong> Donne un nom à ton groupe (la famille, les collègues, les copains…), la date, le lieu et le budget.
+  <strong>2.</strong> Ajoute les participants et les couples qui ne doivent pas se tirer au sort.
+  <strong>3.</strong> Lance le tirage : chacun reçoit son propre lien, à envoyer par WhatsApp, SMS ou mail.
+  En l'ouvrant, il découvre qui il gâte dans une bande-annonce de film, avec suspense, roulement de tambour et feu d'artifice.</p>
+  <h2>C'est gratuit ?</h2>
+  <p>Oui, sans compte et sans publicité. Rien n'est enregistré sur nos serveurs : le tirage se fait sur ton téléphone, et chaque lien ne contient que le tirage de la personne qui le reçoit.</p>
+  <h2>Et si deux personnes ne doivent pas se tirer ?</h2>
+  <p>Ajoute-les dans « Ceux qui ne peuvent pas se tirer » : ni l'un ni l'autre ne tombera sur l'autre. Personne ne se tire jamais soi-même.</p>
+</section>
+
 <footer>
   Fait avec ❤️ par <a href="/">Wavents</a>, l'appli gratuite des sorties près de chez toi :<br>
   lotos, concerts, marchés de Noël, fêtes de village… <a href="/app/">Télécharger l'appli</a>
@@ -105,6 +124,8 @@
 
 <script>
 const $ = (id) => document.getElementById(id);
+const stat = (name) => { try { window.goatcounter && window.goatcounter.count({ path: name, title: name, event: true }); } catch (e) {} };
+if (new URLSearchParams(location.search).get("ref") === "film") setTimeout(() => stat("santa-venu-du-film"), 1500);
 const esc = (s) => s.replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
 
 function toast(t) { const e = $("toast"); e.textContent = t; e.classList.add("on"); setTimeout(() => e.classList.remove("on"), 1800); }
@@ -168,7 +189,8 @@ function render(links) {
     const msg = `🎅 ${name}, ton Secret Santa t'attend ! Monte le son 🔊 et ouvre ce lien (il est pour toi seul) : ${url}`;
     const box = document.createElement("div"); box.className = "link";
     box.innerHTML = `<b>${esc(name)}</b><div class="btns"><button type="button" class="copy">Copier le lien</button><a class="share" href="https://wa.me/?text=${encodeURIComponent(msg)}" target="_blank" rel="noopener">Envoyer</a></div>`;
-    box.querySelector(".copy").onclick = async () => { try { await navigator.clipboard.writeText(msg); toast("Lien de " + name + " copié"); } catch (e) { prompt("Copie ce message :", msg); } };
+    box.querySelector(".share").addEventListener("click", () => stat("santa-envoi"));
+    box.querySelector(".copy").onclick = async () => { stat("santa-copie"); try { await navigator.clipboard.writeText(msg); toast("Lien de " + name + " copié"); } catch (e) { prompt("Copie ce message :", msg); } };
     if (navigator.share) box.querySelector(".share").onclick = (e) => { e.preventDefault(); navigator.share({ text: msg }).catch(() => {}); };
     $("links").appendChild(box);
   }
@@ -190,6 +212,7 @@ $("form").onsubmit = (e) => {
   const links = list.map((g) => [g, base + b64(JSON.stringify({ giver: g, target: result[g], names: list, group: $("group").value.trim(),
     date, place, budget, info }))]);
   try { localStorage.setItem("secret-santa-links", JSON.stringify(links)); } catch (err) {}
+  stat("santa-cree"); stat("santa-participants-" + list.length); if (budget) stat("santa-avec-budget");
   render(links);
 };
 $("restart").onclick = () => {
@@ -204,5 +227,6 @@ try { saved = JSON.parse(localStorage.getItem("secret-santa-links") || "null"); 
 if (saved && saved.length) render(saved);
 else { for (let i = 0; i < 4; i++) addPerson(); addPair(); }
 </script>
+<script data-goatcounter="https://wavents.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
 </body>
 </html>

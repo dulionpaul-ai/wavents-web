@@ -187,6 +187,7 @@
   <div class="actions">
     <button class="btn ghost" id="again">↻ Revoir le spectacle</button>
   </div>
+  <a class="btn ghost" id="own" href="/secret-santa/?ref=film" style="margin-top:14px;text-decoration:none">🎅 Organiser mon propre Secret Santa</a>
 </section>
 
 <section class="scene" id="credits"><div class="roll" id="roll"></div></section>
@@ -206,6 +207,9 @@ const group = () => (data && data.group) || "La famille Jubert";
 const wait = (ms) => new Promise((r) => setTimeout(r, ms));
 const scenes = ["start", "studio", "trailer", "launch", "reel", "gift", "reveal", "credits", "locked"];
 function show(id) { scenes.forEach((s) => $(s).classList.toggle("on", s === id)); }
+// Statistiques (GoatCounter, sans cookie ni donnée personnelle ; la partie
+// du lien après « # » n'est jamais envoyée).
+const stat = (name) => { try { window.goatcounter && window.goatcounter.count({ path: name, title: name, event: true }); } catch (e) {} };
 const vibrate = (p) => { try { navigator.vibrate && navigator.vibrate(p); } catch (e) {} };
 
 // ---- Déchiffrement ---------------------------------------------------------
@@ -298,7 +302,7 @@ function ring(x = "50%", y = "50%") { const r = document.createElement("div"); r
 // ---- Le film -----------------------------------------------------------------
 let data = null, running = false;
 async function film() {
-  if (running) return; running = true;
+  if (running) return; running = true; stat(data.group ? "santa-film-lance" : "santa-jubert-lance");
   audio(); if (ac.state === "suspended") await ac.resume();
   document.body.classList.add("open");
   // 1. Le studio : l'épingle se pose, l'onde part de sa pointe.
@@ -389,7 +393,7 @@ async function film() {
   l.classList.remove("show"); await wait(700);
   show("launch"); tone(220, 2.5, "sine", .08);
   await new Promise((res) => { $("draw").onclick = () => { $("draw").onclick = null; res(); }; });
-  boom(); vibrate(100);
+  boom(); vibrate(100); stat("santa-tirage");
   show("reel"); const strip = $("strip"); const others = data.names.filter((n) => n !== data.giver);
   const seq = []; for (let i = 0; i < 44; i++) seq.push(others[(i * 7 + 3) % others.length]);
   const fake1 = others.find((n) => n !== data.target) || data.target, fake2 = others.filter((n) => n !== data.target).slice(-1)[0] || data.target;
@@ -427,7 +431,7 @@ async function film() {
   $("info").textContent = data.info || "";
   await wait(500);
   for (const s of $("who").children) { s.classList.add("in"); tone(880 + Math.random() * 400, .25, "triangle", .12); await wait(170); }
-  fanfare(); confetti(160); await wait(5500);
+  fanfare(); confetti(160); stat("santa-revele"); await wait(5500);
   running = false;
 }
 async function credits() {
@@ -450,5 +454,7 @@ $("again").onclick = () => { fireworksOn = false; document.querySelectorAll(".sp
   $("hello2").textContent = "Le Père Noël a une mission pour toi…";
 })();
 </script>
+<script>document.getElementById("own").addEventListener("click", () => stat("santa-cta-organiser"));</script>
+<script data-goatcounter="https://wavents.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
 </body>
 </html>

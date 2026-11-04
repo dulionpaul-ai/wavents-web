@@ -561,6 +561,7 @@ def layout(title: str, body: str, *, description: str, url: str, image: str | No
         <a href="{root}enfants/">En famille</a>
         <a href="{root}a-propos/">À propos</a>
         <a href="{root}ajouter/">Ajouter un événement</a>
+        <a href="{root}secret-santa/" data-goatcounter-click="clic-pied-secret-santa">🎅 Secret Santa en ligne</a>
         <a href="{root}faq/">Questions fréquentes</a>
         <a href="{root}confidentialite.html">Confidentialité</a>
         <a href="{root}mentions-legales.html">Mentions légales</a>
@@ -2574,7 +2575,8 @@ def main() -> int:
     (out / "app").mkdir(exist_ok=True)
     (out / "app" / "index.html").write_text(app_page(upcoming, communes), encoding="utf-8")
     extra_pages = ([f"{BASE_URL}/{t[0]}/" for t in THEMES] + [f"{BASE_URL}/{f['slug']}/" for f in FESTIVALS]
-                   + [f"{BASE_URL}/a-propos/", f"{BASE_URL}/faq/", f"{BASE_URL}/app/", f"{BASE_URL}/ajouter/"])
+                   + [f"{BASE_URL}/a-propos/", f"{BASE_URL}/faq/", f"{BASE_URL}/app/", f"{BASE_URL}/ajouter/",
+                      f"{BASE_URL}/secret-santa/"])
 
     # Plan du site en quatre parties (26/10/2026) : la Search Console donne
     # alors le nombre de pages indexées par type (pages, communes, marchés,
