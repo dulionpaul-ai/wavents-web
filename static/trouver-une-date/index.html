@@ -105,6 +105,9 @@
   .tri button.on[data-v="0"] { filter: none; opacity: 1; background: var(--no-bg); border-color: var(--no); }
   .prop { margin-top: 5px; background: var(--pro-bg); border-radius: 9px; padding: 4px 7px; font-size: 12px; font-weight: 800; color: var(--pro); display: flex; gap: 6px; align-items: center; }
   .prop + .prop { margin-top: 3px; }
+  .lk { display: flex; justify-content: space-between; gap: 8px; margin-top: 3px; }
+  .lk button { background: none; border: 0; padding: 3px 0; font: 900 12px Nunito; color: var(--deep); cursor: pointer; }
+  .lk .lk-i { color: var(--pro); }
   .idea { border: 0; background: var(--pro-bg); color: var(--pro); font: 900 11px Nunito; padding: 1px 6px; border-radius: 99px; cursor: pointer; vertical-align: 1px; }
   .idea.on { background: var(--pro); color: #fff; }
   .moreprop { display: block; margin-top: 3px; background: none; border: 0; padding: 2px 7px; font: 900 12px Nunito; color: var(--pro); cursor: pointer; }
@@ -146,7 +149,7 @@
   .seo h2 { color: var(--ink); font-size: 16px; margin: 16px 0 3px; } .seo a { color: var(--deep); }
   footer { text-align: center; color: var(--soft); font-weight: 700; font-size: 13px; padding: 8px 16px 30px; line-height: 1.6; }
   footer a { color: var(--deep); }
-  .toast { position: fixed; left: 50%; bottom: 90px; transform: translateX(-50%); background: var(--ink); color: #fff; font-weight: 800; padding: 11px 18px; border-radius: 999px; opacity: 0; transition: opacity .3s; pointer-events: none; z-index: 9; white-space: nowrap; }
+  .toast { position: fixed; left: 50%; top: 12px; transform: translateX(-50%); background: var(--yes); color: #fff; font-weight: 800; font-size: 14px; padding: 8px 14px; border-radius: 999px; box-shadow: 0 6px 18px rgba(0,0,0,.18); max-width: calc(100% - 24px); white-space: normal !important; text-align: center; opacity: 0; transition: opacity .3s; pointer-events: none; z-index: 9; white-space: nowrap; }
   .toast.on { opacity: 1; }
   .frozen .tri { pointer-events: none; opacity: .7; }
   [hidden] { display: none !important; }
@@ -327,7 +330,6 @@
   };
 
   /* ================= Sondage ================= */
-  var openProps = {};
   var poll = null, mine = null, choice = [], admin = null, isNew = false, events = null, byOpt = [];
 
   function shareUrl() { return "https://wavents.fr/trouver-une-date/?s=" + encodeURIComponent(pollId); }
@@ -436,27 +438,20 @@
       var row = document.createElement("div"); row.className = "dr" + (decided === i ? " win" : "");
       var chip = function (v, cls, suf) { return "<span class='" + cls + "'>" + esc(v.name) + suf + "</span>" + (admin ? "<button data-del='" + v.id + "' aria-label='Retirer la réponse de " + esc(v.name) + "'>×</button>" : ""); };
       var ideas = props.filter(function (p) { return p.opt === i; });
-      row.innerHTML = "<div class='dl'><div class='d'><b>" + esc(shortLabel(o.d)) +
-        (ideas.length ? " <button class='idea" + (openProps[i] ? " on" : "") + "' data-open='" + i + "' aria-label='" + ideas.length + " idée(s) de sortie'>💡" + ideas.length + "</button>" : "") + "</b>" +
-        (nb ? "<button data-ev='" + i + "'>Voir les sorties ›</button>" : "") +
+      row.innerHTML = "<div class='dl'><div class='d'><b>" + esc(shortLabel(o.d)) + "</b>" +
         (admin && decided == null ? "<button class='crown' data-pick='" + i + "'>✔ Retenir</button>" : "") + "</div>" +
         "<div class='p'><div class='c" + (y.length || m.length ? "" : " z") + "'>" + (others.length ? y.length + " dispo" + (m.length ? " · " + m.length + " ?" : "") : "—") + "</div>" +
         "<div class='av'>" + y.map(function (v) { return chip(v, "y", ""); }).join("") + m.map(function (v) { return chip(v, "m", " ?"); }).join("") + n.map(function (v) { return chip(v, "n", ""); }).join("") + "</div></div>" +
         "<div class='tri'>" + [[2, "✅", "Dispo"], [1, "?", "Peut-être"], [0, "❌", "Pas dispo"]].map(function (x) {
-          return "<button data-i='" + i + "' data-v='" + x[0] + "' aria-label='" + x[2] + " le " + esc(fmtLong.format(parse(o.d))) + "'" + (choice[i] === x[0] ? " class='on'" : "") + ">" + x[1] + "</button>"; }).join("") + "</div></div>";
-      if (openProps[i]) ideas.forEach(function (p) {
-        var ev = p.event || {}, canDel = admin || mp[p.id];
-        row.insertAdjacentHTML("beforeend", "<div class='prop'>" + (ev.img ? "<img src='" + esc(ev.img) + "' alt='' loading='lazy'>" : "💡") +
-          "<a href='/e/" + encodeURIComponent(ev.id) + "/' target='_blank' rel='noopener' data-goatcounter-click='date-fiche-proposee'>" + esc(ev.title) + (ev.time ? ", " + esc(ev.time) : "") + " · proposé par " + esc(p.name) + "</a>" +
-          (canDel ? "<button data-unprop='" + p.id + "' aria-label='Retirer la proposition'>×</button>" : "") + "</div>");
-      });
+          return "<button data-i='" + i + "' data-v='" + x[0] + "' aria-label='" + x[2] + " le " + esc(fmtLong.format(parse(o.d))) + "'" + (choice[i] === x[0] ? " class='on'" : "") + ">" + x[1] + "</button>"; }).join("") + "</div></div>" +
+        (nb ? "<div class='lk'>" + (ideas.length ? "<button class='lk-i' data-ev='" + i + "' data-f='prop'>💡 Proposées (" + ideas.length + ")</button>" : "<span></span>") +
+          "<button data-ev='" + i + "'>" + (ideas.length ? "Autres sorties ›" : "Voir les sorties du jour ›") + "</button></div>" : "");
       t.appendChild(row);
     });
     t.querySelectorAll(".tri button").forEach(function (b) {
       b.onclick = function () { var i = +b.dataset.i; choice[i] = +b.dataset.v; b.parentNode.querySelectorAll("button").forEach(function (o) { o.classList.toggle("on", o === b); }); };
     });
-    t.querySelectorAll("[data-open]").forEach(function (b) { b.onclick = function () { var k = +b.dataset.open; openProps[k] = !openProps[k]; if (openProps[k]) stat("date-idees-ouvert"); render(); }; });
-    t.querySelectorAll("[data-ev]").forEach(function (b) { b.onclick = function () { openEvents(+b.dataset.ev); }; });
+    t.querySelectorAll("[data-ev]").forEach(function (b) { b.onclick = function () { openEvents(+b.dataset.ev, b.dataset.f); }; });
     t.querySelectorAll("[data-pick]").forEach(function (b) { b.onclick = function () { decide(+b.dataset.pick); }; });
     t.querySelectorAll("[data-del]").forEach(function (b) { b.onclick = function () {
       if (!confirm("Retirer cette réponse du sondage ?")) return;
@@ -466,7 +461,7 @@
       rpc("date_poll_unpropose", { p_id: pollId, p_prop_id: id, p_token: m[id] || null, p_admin: admin }).then(function () { delete m[id]; store("date-props-" + pollId, m); return load(); }); }; });
 
     $("voteBtn").textContent = myVote ? "Mettre à jour mes dispos" : "Valider mes dispos";
-    $("lock").innerHTML = myVote ? "🔒 Seul ce téléphone peut modifier les réponses de " + esc(myVote.name) + "<button id='unvote'>Retirer</button>" : "🔒 Seul ce téléphone pourra modifier tes réponses";
+    $("lock").innerHTML = myVote ? "🔒 Seul ce téléphone peut modifier les réponses " + (/^[aeiouyhâéèêîïôûAEIOUYHÂÉÈÊÎÏÔÛ]/.test(myVote.name) ? "d'" : "de ") + esc(myVote.name) + " · <button id='unvote'>Retirer ma réponse</button>" : "🔒 Seul ce téléphone pourra modifier tes réponses";
     if ($("unvote")) $("unvote").onclick = unvote;
 
     // Organisateur
@@ -534,14 +529,19 @@
     var c = CATS[e.category_id] || CATS.associatif_autre, proposed = (poll.proposals || []).filter(function (p) { return p.opt === i && p.event.id === e.id; })[0];
     return "<div class='ev'><img src='" + esc(imgOf(e)) + "' alt=''" + (k > 5 ? " loading='lazy'" : "") + "><div class='t'><span class='cat' style='color:" + c[1] + "'>" + c[0] + "</span><b>" + esc(e.title) + "</b><small>" +
       esc([timeTxt(e, day), placeTxt(e), priceTxt(e)].filter(Boolean).join(" · ")) + "</small>" +
-      "<div class='acts'>" + (withActs ? (proposed ? "<span class='pp done'>✓ Proposé par " + esc(proposed.name) + "</span>" : "<button class='pp' data-prop='" + esc(e.id) + "'>💡 Proposer au groupe</button>") : "") +
+      "<div class='acts'>" + (withActs ? (proposed ? "<span class='pp done'>✓ Proposé par " + esc(proposed.name) + "</span>" + (admin || myProps()[proposed.id] ? "<button class='vw' data-unprop='" + proposed.id + "'>Retirer</button>" : "") : "<button class='pp' data-prop='" + esc(e.id) + "'>💡 Proposer au groupe</button>") : "") +
       "<a class='vw' href='/e/" + encodeURIComponent(e.id) + "/' target='_blank' rel='noopener' data-goatcounter-click='date-voir-fiche'>Voir ›</a></div></div></div>";
   }
   function bindEv(root, i) {
     root.querySelectorAll("[data-prop]").forEach(function (b) { b.onclick = function () { propose(i, b.dataset.prop); }; });
+    root.querySelectorAll("[data-unprop]").forEach(function (b) { b.onclick = function () {
+      var id = +b.dataset.unprop, m = myProps();
+      rpc("date_poll_unpropose", { p_id: pollId, p_prop_id: id, p_token: m[id] || null, p_admin: admin }).then(function () {
+        delete m[id]; store("date-props-" + pollId, m); stat("date-proposition-retiree"); toast("Proposition retirée");
+        return load().then(function () { if (!$("evView").hidden) drawEvents(); }); }); }; });
   }
-  function openEvents(i) {
-    evOpt = i; evFilter = "tout"; drawEvents();
+  function openEvents(i, f) {
+    evOpt = i; evFilter = f || "tout"; drawEvents(); if (f) stat("date-idees-ouvert");
     $("evView").hidden = false; $("evView").scrollTop = 0; document.body.style.overflow = "hidden";
     if (location.hash !== "#sorties") history.pushState({ ev: 1 }, "", "#sorties");
     stat("date-sorties-ouvert");
@@ -554,14 +554,16 @@
     $("evTitle").textContent = longLabel(o.d);
     $("evSub").textContent = "Sorties près de " + town(poll.place) + (poll.moment ? " · " + MOMENT_TXT[poll.moment] : "");
     var cats = {}; all.forEach(function (e) { cats[e.category_id] = (cats[e.category_id] || 0) + 1; });
+    var prop = {}, np = 0; (poll.proposals || []).forEach(function (p) { if (p.opt === evOpt) { prop[p.event.id] = p; np++; } });
     var filters = [["tout", "Tout (" + all.length + ")"]];
+    if (np) filters.push(["prop", "💡 Proposées (" + np + ")"]);
     if (all.some(function (e) { return e.price_type === "free"; })) filters.push(["free", "Gratuit"]);
     if (all.some(function (e) { return e.for_kids; })) filters.push(["kids", "En famille"]);
     filters = filters.concat(Object.keys(cats).sort(function (a, b) { return cats[b] - cats[a]; }).slice(0, 5).map(function (k) { return [k, (CATS[k] || CATS.associatif_autre)[0]]; }));
     $("evFil").innerHTML = filters.map(function (f) { return "<button data-f='" + f[0] + "'" + (f[0] === evFilter ? " class='on'" : "") + ">" + esc(f[1]) + "</button>"; }).join("");
     $("evFil").querySelectorAll("button").forEach(function (b) { b.onclick = function () { evFilter = b.dataset.f; drawEvents(); stat("date-sorties-filtre"); }; });
-    var prop = {}; (poll.proposals || []).forEach(function (p) { if (p.opt === evOpt) prop[p.event.id] = 1; });
-    var list = all.filter(function (e) { return evFilter === "tout" || e.category_id === evFilter || e.price_type === evFilter || (evFilter === "kids" && e.for_kids); })
+    if (evFilter === "prop" && !np) evFilter = "tout";
+    var list = all.filter(function (e) { return evFilter === "tout" || (evFilter === "prop" && prop[e.id]) || e.category_id === evFilter || e.price_type === evFilter || (evFilter === "kids" && e.for_kids); })
       .sort(function (a, b) { return (prop[b.id] ? 1 : 0) - (prop[a.id] ? 1 : 0); });
     $("evList").innerHTML = list.length ? list.map(function (e, k) { return evHtml(e, o.d, evOpt, true, k); }).join("") : "<div class='empty'>Rien pour ce filtre.</div>";
     bindEv($("evList"), evOpt);
