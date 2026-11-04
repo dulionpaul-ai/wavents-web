@@ -35,8 +35,11 @@
   .btn { white-space: nowrap; }
   .btn.ghost { background: transparent; color: var(--gold); border: 2px solid rgba(247,211,106,.6); animation: none; font-size: 16px; padding: 13px 24px; }
   @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(247,211,106,.6); } 70% { box-shadow: 0 0 0 26px rgba(247,211,106,0); } 100% { box-shadow: 0 0 0 0 rgba(247,211,106,0); } }
-  .creepy .eyes { animation: flicker 2.4s infinite; }
-  @keyframes flicker { 0%, 18%, 22%, 60%, 64%, 100% { opacity: 1; } 20%, 62% { opacity: .15; } }
+  .santa { position: relative; height: 110px; }
+  .santa svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+  .santa .scary { opacity: 0; }
+  .santa.morph .scary { opacity: 1; } .santa.morph .kind { opacity: 0; }
+  .santa.morph { filter: drop-shadow(0 0 18px rgba(255,0,0,.8)); transform: scale(1.12) !important; }
   #studio .pin { width: 92px; margin-bottom: 18px; transform: translateY(-40px) scale(.7); opacity: 0;
     transition: transform .9s cubic-bezier(.3,1.6,.5,1), opacity .5s; }
   #studio.on .pin { transform: none; opacity: 1; }
@@ -122,21 +125,35 @@
 </section>
 
 <section class="scene" id="studio">
-  <svg class="pin creepy" viewBox="0 0 100 120" aria-hidden="true">
-    <defs>
-      <radialGradient id="face" cx="50%" cy="45%" r="60%"><stop offset="0" stop-color="#f4f1ea"/><stop offset="1" stop-color="#9aa0a8"/></radialGradient>
-      <filter id="glow" x="-80%" y="-80%" width="260%" height="260%"><feGaussianBlur stdDeviation="2.6" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
-    </defs>
-    <!-- Bonhomme de neige inquiétant sous un bonnet de Père Noël qui dégouline -->
-    <circle cx="50" cy="74" r="34" fill="url(#face)"/>
-    <path d="M14 52 C 22 14, 64 2, 86 36 L 92 50 C 70 44, 34 44, 14 52 Z" fill="#8b0d14"/>
-    <path d="M30 47 l3 9 l3 -9 M58 46 l2 12 l3 -12" fill="#8b0d14"/>
-    <rect x="10" y="46" width="80" height="10" rx="5" fill="#e9e4da"/>
-    <circle cx="88" cy="34" r="8" fill="#e9e4da"/>
-    <g class="eyes" filter="url(#glow)"><ellipse cx="38" cy="72" rx="6" ry="4" fill="#ff1a1a"/><ellipse cx="62" cy="72" rx="6" ry="4" fill="#ff1a1a"/></g>
-    <path d="M47 80 l3 9 l3 -9 z" fill="#c45a12"/>
-    <path d="M30 94 q5 -4 8 1 q4 -5 8 0 q4 -5 8 0 q4 -5 8 0 q3 -5 8 -1" stroke="#1a1a1a" stroke-width="3" fill="none" stroke-linecap="round"/>
-  </svg>
+  <div class="pin santa" aria-hidden="true">
+    <!-- Père Noël gentil… -->
+    <svg class="kind" viewBox="0 0 100 120">
+      <path d="M16 50 C 24 12, 66 2, 88 34 L 92 48 C 70 42, 34 42, 16 50 Z" fill="#d1202b"/>
+      <circle cx="89" cy="33" r="8" fill="#fff"/>
+      <circle cx="50" cy="66" r="22" fill="#f6c9a8"/>
+      <path d="M22 66 C 22 108, 78 108, 78 66 C 70 80, 30 80, 22 66 Z" fill="#fff"/>
+      <path d="M34 82 q16 -9 32 0 q-16 6 -32 0 z" fill="#fff" stroke="#e5e5e5"/>
+      <rect x="12" y="45" width="76" height="11" rx="5.5" fill="#fff"/>
+      <path d="M38 63 q4 -4 8 0 M54 63 q4 -4 8 0" stroke="#3a2a20" stroke-width="2.6" fill="none" stroke-linecap="round"/>
+      <circle cx="35" cy="71" r="4" fill="#f29b9b" opacity=".7"/><circle cx="65" cy="71" r="4" fill="#f29b9b" opacity=".7"/>
+      <circle cx="50" cy="71" r="4" fill="#e88a7a"/>
+    </svg>
+    <!-- …qui devient effrayant le temps d'un éclair (Paul, 04/11). -->
+    <svg class="scary" viewBox="0 0 100 120">
+      <defs><filter id="glowR" x="-80%" y="-80%" width="260%" height="260%"><feGaussianBlur stdDeviation="2.4" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>
+      <path d="M16 50 C 24 12, 66 2, 88 34 L 92 48 C 70 42, 34 42, 16 50 Z" fill="#5a0008"/>
+      <path d="M28 49 l3 10 l3 -10 M60 48 l2 13 l3 -13" fill="#5a0008"/>
+      <circle cx="89" cy="33" r="8" fill="#bdb7ad"/>
+      <circle cx="50" cy="66" r="22" fill="#8f9a8c"/>
+      <path d="M22 66 C 22 110, 78 110, 78 66 C 70 80, 30 80, 22 66 Z" fill="#cfcac0"/>
+      <rect x="12" y="45" width="76" height="11" rx="5.5" fill="#bdb7ad"/>
+      <ellipse cx="41" cy="64" rx="7" ry="6" fill="#0a0a0a"/><ellipse cx="59" cy="64" rx="7" ry="6" fill="#0a0a0a"/>
+      <g filter="url(#glowR)"><circle cx="41" cy="64" r="2.6" fill="#ff1a1a"/><circle cx="59" cy="64" r="2.6" fill="#ff1a1a"/></g>
+      <path d="M33 80 q17 14 34 0 q-17 6 -34 0 z" fill="#1a0000"/>
+      <path d="M36 81 l3 5 l3 -4 l3 5 l3 -5 l3 5 l3 -5 l3 5 l3 -5 l3 4" stroke="#e8e2cf" stroke-width="1.6" fill="none"/>
+      <path d="M44 72 l6 -5 l6 5 z" fill="#1a0000"/>
+    </svg>
+  </div>
   <div class="sub" id="pre1"></div>
   <div class="name cinzel gold" id="studioName">PAUL</div>
   <div class="sub" id="pre2">PRÉSENTE</div>
@@ -280,6 +297,11 @@ async function film() {
   show("studio"); whoosh(); await wait(900); boom(); vibrate(80);
   const pin = document.querySelector("#studio .pin").getBoundingClientRect();
   ring(pin.left + pin.width / 2 + "px", pin.bottom - 4 + "px"); await wait(2400);
+  // Le Père Noël se change en Père Noël effrayant le temps d'un éclair.
+  const santa = document.querySelector("#studio .santa");
+  const morph = (ms = 140) => { santa.classList.add("morph"); noise(.25, 2500, .7, .5); tone(90, .3, "sawtooth", .25); vibrate(60);
+    setTimeout(() => santa.classList.remove("morph"), ms); };
+  setTimeout(() => morph(), 1200); setTimeout(() => morph(110), 7400); setTimeout(() => morph(180), 13600);
   // Générique d'ouverture : Paul partout (comique de répétition, Paul 04/11).
   const cards = [["UNE PRODUCTION", "PAUL", ""], ["EN ASSOCIATION AVEC", "PAUL", ""], ["SUR UN SCÉNARIO ORIGINAL DE", "PAUL", ""],
     ["D'APRÈS UNE IDÉE DE", "PAUL", ""], ["MUSIQUE ORIGINALE", "PAUL", ""], ["EFFETS SPÉCIAUX", "PAUL", ""],
