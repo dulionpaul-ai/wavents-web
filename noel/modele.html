@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="robots" content="noindex, nofollow">
-<title>Secret Santa · Une production Paul</title>
+<title>Secret Santa · Une production Jubert's Family</title>
 <link rel="icon" href="/img/favicon.svg">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -43,7 +43,7 @@
   #studio .pin { width: 92px; margin-bottom: 18px; transform: translateY(-40px) scale(.7); opacity: 0;
     transition: transform .9s cubic-bezier(.3,1.6,.5,1), opacity .5s; }
   #studio.on .pin { transform: none; opacity: 1; }
-  #studio .name { font-size: clamp(26px, 8vw, 46px); font-weight: 900; }
+  #studio .name { font-size: clamp(24px, 7.2vw, 46px); font-weight: 900; line-height: 1.15; }
   #studio .sub { color: #9fb2c8; letter-spacing: .35em; font-size: 12px; margin: 8px 0; min-height: 1em; }
   .ring { position: fixed; left: 50%; top: 50%; width: 10px; height: 10px; margin: -5px; border-radius: 50%;
     border: 2px solid rgba(247,211,106,.85); box-shadow: 0 0 30px rgba(247,211,106,.5); z-index: 9; pointer-events: none;
@@ -120,7 +120,7 @@
 
 <section class="scene on" id="start">
   <h1 class="cinzel gold" id="hello">Secret Santa</h1>
-  <p id="hello2">Une production Paul</p>
+  <p id="hello2">Une production Jubert's Family</p>
   <button class="btn" id="go">🎬 Lancer la projection</button>
 </section>
 
@@ -155,7 +155,7 @@
     </svg>
   </div>
   <div class="sub" id="pre1"></div>
-  <div class="name cinzel gold" id="studioName">PAUL</div>
+  <div class="name cinzel gold" id="studioName">JUBERT'S FAMILY</div>
   <div class="sub" id="pre2">PRÉSENTE</div>
 </section>
 
@@ -302,10 +302,11 @@ async function film() {
   const morph = (ms = 140) => { santa.classList.add("morph"); noise(.25, 2500, .7, .5); tone(90, .3, "sawtooth", .25); vibrate(60);
     setTimeout(() => santa.classList.remove("morph"), ms); };
   setTimeout(() => morph(), 1200); setTimeout(() => morph(110), 7400); setTimeout(() => morph(180), 13600);
-  // Générique d'ouverture : Paul partout (comique de répétition, Paul 04/11).
-  const cards = [["UNE PRODUCTION", "PAUL", ""], ["EN ASSOCIATION AVEC", "PAUL", ""], ["SUR UN SCÉNARIO ORIGINAL DE", "PAUL", ""],
-    ["D'APRÈS UNE IDÉE DE", "PAUL", ""], ["MUSIQUE ORIGINALE", "PAUL", ""], ["EFFETS SPÉCIAUX", "PAUL", ""],
-    ["CASTING", "PAUL", ""], ["AVEC LA PARTICIPATION EXCEPTIONNELLE DE…", "PAUL", "(dans son propre rôle)"]];
+  // Générique : « Jubert » partout (comique de répétition, Paul 04/11).
+  const cards = [["UNE PRODUCTION", "JUBERT", ""], ["EN ASSOCIATION AVEC", "LES JUBERT", ""], ["SUR UN SCÉNARIO ORIGINAL DE", "LA FAMILLE JUBERT", ""],
+    ["D'APRÈS UNE IDÉE D'UN", "JUBERT", ""], ["MUSIQUE ORIGINALE", "JUBERT & JUBERT", ""], ["EFFETS SPÉCIAUX", "JUBERT", ""],
+    ["CASTING", "100 % JUBERT", ""], ["TOURNÉ CHEZ", "LES JUBERT", ""],
+    ["AVEC LA PARTICIPATION EXCEPTIONNELLE DE…", "LA FAMILLE JUBERT", "(dans son propre rôle)"]];
   const sn = $("studioName"), p1 = $("pre1"), p2 = $("pre2");
   for (let i = 0; i < cards.length; i++) {
     const [a, b, c] = cards[i]; const fast = i > 2 && i < cards.length - 1;
