@@ -1,0 +1,208 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Secret Santa en ligne gratuit : tirage au sort façon film d'action | Wavents</title>
+<meta name="description" content="Organise ton Secret Santa en 2 minutes : participants, couples qui ne doivent pas se tirer, budget. Chacun reçoit son lien et découvre son tirage dans une bande-annonce hollywoodienne. Gratuit, sans compte.">
+<link rel="icon" href="/img/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@900&family=Nunito:wght@600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root { --deep: #065FBB; --bright: #0B81E1; --sun: #FFD66B; --ink: #0A2A3D; --soft: #4B6475; --line: #d9e6f2; --bg: #f3f8fd; --card: #fff; --red: #c62828; }
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: Nunito, system-ui, sans-serif; color: var(--ink); background: var(--bg); }
+  header { background: linear-gradient(160deg, #05070d, #0b1a33 60%, #3a0a10); color: #fff; padding: 34px 18px 40px; text-align: center; }
+  header .logo { display: inline-flex; align-items: center; gap: 8px; color: #cfd8e6; text-decoration: none; font-weight: 800; font-size: 14px; }
+  header .logo img { width: 26px; }
+  h1 { font-family: Cinzel, Georgia, serif; font-size: clamp(30px, 8vw, 46px); margin: 18px 0 8px; letter-spacing: .04em;
+    background: linear-gradient(180deg, #ffefb0, #f7d36a 50%, #b8862b); -webkit-background-clip: text; background-clip: text; color: transparent; }
+  header p { color: #cfd8e6; font-weight: 700; max-width: 520px; margin: 0 auto; line-height: 1.45; }
+  main { max-width: 620px; margin: -22px auto 40px; padding: 0 14px; }
+  .card { background: var(--card); border-radius: 22px; padding: 18px; margin-bottom: 14px; box-shadow: 0 6px 22px rgba(6,95,187,.08); }
+  .card h2 { margin: 0 0 4px; font-size: 18px; } .card .hint { color: var(--soft); font-weight: 600; font-size: 14px; margin: 0 0 12px; }
+  label { display: block; font-weight: 800; font-size: 14px; margin: 12px 0 6px; }
+  input, select { width: 100%; font: 700 16px Nunito, sans-serif; color: var(--ink); padding: 12px 14px; border: 2px solid var(--line); border-radius: 14px; background: #fff; }
+  input:focus, select:focus { outline: none; border-color: var(--bright); }
+  .row { display: flex; gap: 8px; align-items: center; margin-bottom: 8px; }
+  .row input, .row select { flex: 1; min-width: 0; }
+  .x { flex: none; width: 44px; height: 44px; border: 0; border-radius: 12px; background: #fdecea; color: var(--red); font-size: 20px; font-weight: 900; cursor: pointer; }
+  .add { border: 2px dashed var(--line); background: transparent; color: var(--deep); font: 800 15px Nunito; padding: 12px; border-radius: 14px; width: 100%; cursor: pointer; }
+  .two { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  @media (max-width: 420px) { .two { grid-template-columns: 1fr; } }
+  .amp { flex: none; color: var(--soft); font-weight: 900; }
+  .go { display: block; width: 100%; border: 0; border-radius: 999px; padding: 18px; font: 900 18px Nunito; color: #2a1b00; cursor: pointer;
+    background: linear-gradient(180deg, #ffefb0, #f7d36a); box-shadow: 0 10px 26px rgba(247,180,40,.45); }
+  .err { color: var(--red); font-weight: 800; margin: 10px 0 0; min-height: 1em; }
+  .result { display: none; } .result.on { display: block; }
+  .link { border: 2px solid var(--line); border-radius: 16px; padding: 12px; margin-bottom: 10px; }
+  .link b { display: block; font-size: 17px; margin-bottom: 8px; }
+  .link .btns { display: flex; gap: 8px; }
+  .link button, .link a { flex: 1; text-align: center; text-decoration: none; border: 0; border-radius: 12px; padding: 11px 8px; font: 800 14px Nunito; cursor: pointer; }
+  .copy { background: #e8f2fc; color: var(--deep); } .share { background: #25D366; color: #fff; }
+  .warn { background: #fff7e0; border-radius: 14px; padding: 12px 14px; font-weight: 700; font-size: 14px; color: #6b4f00; margin-bottom: 12px; }
+  footer { text-align: center; color: var(--soft); font-weight: 700; font-size: 14px; padding: 10px 18px 40px; line-height: 1.6; }
+  footer a { color: var(--deep); }
+  .toast { position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%); background: var(--ink); color: #fff; font-weight: 800; padding: 12px 18px; border-radius: 999px; opacity: 0; transition: opacity .3s; pointer-events: none; }
+  .toast.on { opacity: 1; }
+</style>
+</head>
+<body>
+<header>
+  <a class="logo" href="/"><img src="/img/pin.png" alt="">Wavents</a>
+  <h1>Secret Santa</h1>
+  <p>Chacun reçoit son lien et découvre qui il gâte dans une bande-annonce digne d'Hollywood 🎬 Gratuit, sans compte, et rien n'est enregistré : tout se passe sur ton téléphone.</p>
+</header>
+
+<main>
+  <form id="form" autocomplete="off">
+    <section class="card">
+      <h2>🎬 Le film</h2>
+      <p class="hint">L'intitulé est répété dans tout le générique : « Une production… La famille Jubert ».</p>
+      <label for="group">Intitulé du groupe</label>
+      <input id="group" required maxlength="40" placeholder="Ex. : Les copains du 34">
+      <div class="two">
+        <div><label for="date">Date de l'échange</label><input id="date" type="date"></div>
+        <div><label for="place">Lieu</label><input id="place" maxlength="40" placeholder="Vénéjan"></div>
+      </div>
+      <label for="budget">Budget par cadeau (facultatif)</label>
+      <input id="budget" type="number" min="1" max="10000" inputmode="numeric" placeholder="30 (en euros)">
+    </section>
+
+    <section class="card">
+      <h2>🎅 Les participants</h2>
+      <p class="hint">3 au minimum. Des prénoms différents (ajoute une initiale en cas de doublon).</p>
+      <div id="people"></div>
+      <button type="button" class="add" id="addPerson">+ Ajouter un participant</button>
+    </section>
+
+    <section class="card">
+      <h2>🚫 Ceux qui ne peuvent pas se tirer</h2>
+      <p class="hint">Les couples par exemple : ni l'un ni l'autre ne tombera sur l'autre.</p>
+      <div id="pairs"></div>
+      <button type="button" class="add" id="addPair">+ Ajouter une paire</button>
+    </section>
+
+    <button class="go" type="submit">🎲 Lancer le tirage au sort</button>
+    <p class="err" id="err"></p>
+  </form>
+
+  <section class="card result" id="result">
+    <h2>✅ Le tirage est fait !</h2>
+    <p class="hint">Envoie à chacun <strong>son</strong> lien, en privé. Il découvre son tirage en l'ouvrant (son conseillé 🔊).</p>
+    <div class="warn">🤫 N'ouvre pas les liens des autres : tu découvrirais leur tirage. Garde cette page ouverte le temps de tout envoyer (elle est aussi gardée sur ce téléphone).</div>
+    <div id="links"></div>
+    <button type="button" class="add" id="restart">↻ Recommencer un autre Secret Santa</button>
+  </section>
+</main>
+
+<footer>
+  Fait avec ❤️ par <a href="/">Wavents</a>, l'appli gratuite des sorties près de chez toi :<br>
+  lotos, concerts, marchés de Noël, fêtes de village… <a href="/app/">Télécharger l'appli</a>
+</footer>
+<div class="toast" id="toast"></div>
+
+<script>
+const $ = (id) => document.getElementById(id);
+const esc = (s) => s.replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+
+function toast(t) { const e = $("toast"); e.textContent = t; e.classList.add("on"); setTimeout(() => e.classList.remove("on"), 1800); }
+
+// ---- Participants -----------------------------------------------------------
+function names() { return [...document.querySelectorAll("#people input")].map((i) => i.value.trim()).filter(Boolean); }
+function addPerson(value = "") {
+  const row = document.createElement("div"); row.className = "row";
+  row.innerHTML = `<input maxlength="24" placeholder="Prénom" value="${esc(value)}"><button type="button" class="x" aria-label="Retirer">×</button>`;
+  row.querySelector("button").onclick = () => { row.remove(); refreshPairs(); };
+  row.querySelector("input").addEventListener("input", refreshPairs);
+  $("people").appendChild(row);
+  return row.querySelector("input");
+}
+$("addPerson").onclick = () => addPerson().focus();
+
+// ---- Paires interdites --------------------------------------------------------
+function options(selected) {
+  return `<option value="">Choisir…</option>` + names().map((n) => `<option ${n === selected ? "selected" : ""}>${esc(n)}</option>`).join("");
+}
+function addPair(a = "", b = "") {
+  const row = document.createElement("div"); row.className = "row";
+  row.innerHTML = `<select></select><span class="amp">&amp;</span><select></select><button type="button" class="x" aria-label="Retirer">×</button>`;
+  const [s1, s2] = row.querySelectorAll("select"); s1.innerHTML = options(a); s2.innerHTML = options(b);
+  row.querySelector("button").onclick = () => row.remove();
+  $("pairs").appendChild(row);
+}
+function refreshPairs() {
+  for (const row of document.querySelectorAll("#pairs .row")) {
+    for (const s of row.querySelectorAll("select")) { const v = s.value; s.innerHTML = options(v); }
+  }
+}
+$("addPair").onclick = () => addPair();
+function pairs() {
+  return [...document.querySelectorAll("#pairs .row")].map((r) => [...r.querySelectorAll("select")].map((s) => s.value))
+    .filter(([a, b]) => a && b && a !== b);
+}
+
+// ---- Tirage : personne ne se tire soi-même ni une personne interdite -----------
+function draw(list, banned) {
+  const no = new Set(banned.flatMap(([a, b]) => [a + "\u0000" + b, b + "\u0000" + a]));
+  const rnd = (n) => crypto.getRandomValues(new Uint32Array(1))[0] % n;
+  for (let tries = 0; tries < 20000; tries++) {
+    const t = list.slice();
+    for (let i = t.length - 1; i > 0; i--) { const j = rnd(i + 1); [t[i], t[j]] = [t[j], t[i]]; }
+    if (list.every((g, i) => g !== t[i] && !no.has(g + "\u0000" + t[i]))) return Object.fromEntries(list.map((g, i) => [g, t[i]]));
+  }
+  return null;
+}
+
+// ---- Liens : chaque lien ne contient que la fiche de sa personne ------------------
+const b64 = (s) => btoa(String.fromCharCode(...new TextEncoder().encode(s))).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+function dateLabel(v) {
+  if (!v) return "";
+  const d = new Date(v + "T12:00:00");
+  return d.toLocaleDateString("fr-FR", { day: "numeric", month: "long" });
+}
+function render(links) {
+  $("links").innerHTML = "";
+  for (const [name, url] of links) {
+    const msg = `🎅 ${name}, ton Secret Santa t'attend ! Monte le son 🔊 et ouvre ce lien (il est pour toi seul) : ${url}`;
+    const box = document.createElement("div"); box.className = "link";
+    box.innerHTML = `<b>${esc(name)}</b><div class="btns"><button type="button" class="copy">Copier le lien</button><a class="share" href="https://wa.me/?text=${encodeURIComponent(msg)}" target="_blank" rel="noopener">Envoyer</a></div>`;
+    box.querySelector(".copy").onclick = async () => { try { await navigator.clipboard.writeText(msg); toast("Lien de " + name + " copié"); } catch (e) { prompt("Copie ce message :", msg); } };
+    if (navigator.share) box.querySelector(".share").onclick = (e) => { e.preventDefault(); navigator.share({ text: msg }).catch(() => {}); };
+    $("links").appendChild(box);
+  }
+  $("form").style.display = "none"; $("result").classList.add("on"); window.scrollTo(0, 0);
+}
+
+$("form").onsubmit = (e) => {
+  e.preventDefault(); $("err").textContent = "";
+  const list = names();
+  if (list.length < 3) return ($("err").textContent = "Il faut au moins 3 participants.");
+  if (new Set(list.map((n) => n.toLowerCase())).size !== list.length) return ($("err").textContent = "Deux participants ont le même prénom : ajoute une initiale.");
+  const result = draw(list, pairs());
+  if (!result) return ($("err").textContent = "Impossible de faire un tirage avec ces interdits : retires-en un.");
+  const date = dateLabel($("date").value), place = $("place").value.trim();
+  const budget = $("budget").value ? `${Math.round(+$("budget").value)} €` : "";
+  const info = [date && place ? `Rendez-vous le ${date} à ${place} 🎄` : date ? `Rendez-vous le ${date} 🎄` : place ? `Rendez-vous à ${place} 🎄` : "",
+    budget ? `Budget : ${budget}` : ""].filter(Boolean).join(" · ");
+  const base = location.origin + "/secret-santa/film/#d=";
+  const links = list.map((g) => [g, base + b64(JSON.stringify({ giver: g, target: result[g], names: list, group: $("group").value.trim(),
+    date, place, budget, info }))]);
+  try { localStorage.setItem("secret-santa-links", JSON.stringify(links)); } catch (err) {}
+  render(links);
+};
+$("restart").onclick = () => {
+  if (!confirm("Effacer ce tirage et en recommencer un ?")) return;
+  try { localStorage.removeItem("secret-santa-links"); } catch (e) {}
+  location.reload();
+};
+
+// Au retour sur la page : le dernier tirage, pour finir d'envoyer les liens.
+let saved = null;
+try { saved = JSON.parse(localStorage.getItem("secret-santa-links") || "null"); } catch (e) {}
+if (saved && saved.length) render(saved);
+else { for (let i = 0; i < 4; i++) addPerson(); addPair(); }
+</script>
+</body>
+</html>

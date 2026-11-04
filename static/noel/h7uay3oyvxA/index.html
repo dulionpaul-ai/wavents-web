@@ -201,6 +201,8 @@
 const PAYLOAD = "I54BV52qi7yek8rSvk5kKdwZYIfy_E9l0vAWw5HcosrFai-83-ImEA4EcR8inXPhPr2WEKIEInNpUpPg2ZDj1cOZrwIw4urLizFisU7aXFQ4hLjRDe5buS9FzLFpKdOhQCBfulUfKEMPq1eo2VwmOC_n5ftC6mYj53oEYTvsO-n-bV6H4eDTBAuLxhoPhAxXpVwyTY-ICpRop-cH3OZBruxRFzPQZjHHUtGJP10fTo6c9v6SXpqg3sMJLH3IlY7xfI7C57zuGp9OzL3oRO1PcT_klzrfChh1LDULbnGcBBINFmZCjj8hxlNvqFDuyLggog2i0ylimTfBI54fy2jvMg";
 
 const $ = (id) => document.getElementById(id);
+// Intitulé du groupe (les pages /noel/ de la famille Jubert n'en ont pas).
+const group = () => (data && data.group) || "La famille Jubert";
 const wait = (ms) => new Promise((r) => setTimeout(r, ms));
 const scenes = ["start", "studio", "trailer", "launch", "reel", "gift", "reveal", "credits", "locked"];
 function show(id) { scenes.forEach((s) => $(s).classList.toggle("on", s === id)); }
@@ -208,7 +210,13 @@ const vibrate = (p) => { try { navigator.vibrate && navigator.vibrate(p); } catc
 
 // ---- Déchiffrement ---------------------------------------------------------
 const b64 = (s) => Uint8Array.from(atob(s.replace(/-/g, "+").replace(/_/g, "/").padEnd(Math.ceil(s.length / 4) * 4, "=")), (c) => c.charCodeAt(0));
+// Deux façons de recevoir son tirage : le générateur public
+// (/secret-santa/, « #d=… » : la fiche de la personne, encodée dans son seul
+// lien) ou une page chiffrée (/noel/…, PAYLOAD + clé dans le lien).
 async function decrypt() {
+  if (location.hash.startsWith("#d=")) {
+    return JSON.parse(new TextDecoder().decode(b64(location.hash.slice(3))));
+  }
   const key = location.hash.slice(1);
   if (!key) throw new Error("clé absente");
   const raw = b64(PAYLOAD);
@@ -303,10 +311,13 @@ async function film() {
     setTimeout(() => santa.classList.remove("morph"), ms); };
   setTimeout(() => morph(), 1200); setTimeout(() => morph(110), 7400); setTimeout(() => morph(180), 13600);
   // Générique : « Jubert » partout (comique de répétition, Paul 04/11).
-  const cards = [["UNE PRODUCTION", "JUBERT", ""], ["EN ASSOCIATION AVEC", "LES JUBERT", ""], ["SUR UN SCÉNARIO ORIGINAL DE", "LA FAMILLE JUBERT", ""],
-    ["D'APRÈS UNE IDÉE D'UN", "JUBERT", ""], ["MUSIQUE ORIGINALE", "JUBERT & JUBERT", ""], ["EFFETS SPÉCIAUX", "JUBERT", ""],
-    ["CASTING", "100 % JUBERT", ""], ["TOURNÉ CHEZ", "LES JUBERT", ""],
-    ["AVEC LA PARTICIPATION EXCEPTIONNELLE DE…", "LA FAMILLE JUBERT", "(dans son propre rôle)"]];
+  // L'intitulé du groupe, répété tel quel (Paul, 04/11 : « la famille
+  // Jubert », « les collègues Renault », « les copains du 34 »…).
+  const F = group().toUpperCase(), plural = /^(les|nous)\b/i.test(group());
+  const cards = [["UNE PRODUCTION", F, ""], ["EN ASSOCIATION AVEC", F, ""], ["SUR UN SCÉNARIO ORIGINAL DE", F, ""],
+    ["D'APRÈS UNE IDÉE DE", F, ""], ["MUSIQUE ORIGINALE", F, ""], ["EFFETS SPÉCIAUX", F, ""],
+    ["CASTING", F, ""], ["TOURNÉ CHEZ", F, ""],
+    ["AVEC LA PARTICIPATION EXCEPTIONNELLE DE…", F, plural ? "(dans leur propre rôle)" : "(dans son propre rôle)"]];
   const sn = $("studioName"), p1 = $("pre1"), p2 = $("pre2");
   for (let i = 0; i < cards.length; i++) {
     const [a, b, c] = cards[i]; const fast = i > 2 && i < cards.length - 1;
@@ -342,7 +353,7 @@ async function film() {
   }
   await line(data.date ? data.date.toUpperCase() + "." : "CETTE ANNÉE.");
   await line((data.place || "QUELQUE PART EN FRANCE").toUpperCase() + ".");
-  await line("La famille se réunit.", "whisper", 2600, chime);
+  await line(data.group ? "Tout le monde se réunit." : "La famille se réunit.", "whisper", 2600, chime);
   await line("MAIS…", "big", 2200, boom);
   $("red").classList.add("on"); siren(9); crowd(9);
   l.classList.remove("show");
@@ -369,6 +380,12 @@ async function film() {
   // carillon et le feu d'artifice (Paul, 04/11).
   await line("SANTA.", "big gold", 3600, () => { boom(); setTimeout(() => { chime(); burst(W / 2, H / 2, 160, ["#f7d36a", "#fff"], 10, .08, 2.6, 90); }, 1000); });
   // 3. Le bouton du tirage (Paul, 04/11), puis la machine à sous des prénoms.
+  // Le budget, s'il y en a un (Paul, 04/11).
+  if (data.budget) {
+    await line("RÈGLE N°1", "big", 1800, boom);
+    await line("Le budget est fixé à…", "whisper", 2200, null);
+    await line(data.budget, "big gold", 2800, () => { boom(); chime(); vibrate(150); });
+  }
   l.classList.remove("show"); await wait(700);
   show("launch"); tone(220, 2.5, "sine", .08);
   await new Promise((res) => { $("draw").onclick = () => { $("draw").onclick = null; res(); }; });
@@ -427,6 +444,9 @@ $("again").onclick = () => { fireworksOn = false; document.querySelectorAll(".sp
   try { data = await decrypt(); }
   catch (e) { document.querySelectorAll("#start button").forEach((b) => b.remove()); show("locked"); return; }
   $("hello").textContent = data.giver;
+  $("studioName").textContent = data.group ? group().toUpperCase() : "JUBERT'S FAMILY";
+  $("pre2").textContent = /^(les|nous)\b/i.test(group()) ? "PRÉSENTENT" : "PRÉSENTE";
+  document.title = "Secret Santa · " + (data.group ? group() : "Jubert's Family");
   $("hello2").textContent = "Le Père Noël a une mission pour toi…";
 })();
 </script>
