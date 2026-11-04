@@ -365,7 +365,9 @@ async function film() {
   await line("…ne change tout.", "", 2200, braam);
   await line("UN", "big", 900, boom);
   await line("SECRET", "big gold", 900, boom);
-  await line("SANTA.", "big gold", 2600, () => { boom(); chime(); burst(W / 2, H / 2, 160, ["#f7d36a", "#fff"], 10, .08, 2.6, 90); });
+  // « SANTA. » avec le coup sourd, puis une seconde de silence avant le
+  // carillon et le feu d'artifice (Paul, 04/11).
+  await line("SANTA.", "big gold", 3600, () => { boom(); setTimeout(() => { chime(); burst(W / 2, H / 2, 160, ["#f7d36a", "#fff"], 10, .08, 2.6, 90); }, 1000); });
   // 3. Le bouton du tirage (Paul, 04/11), puis la machine à sous des prénoms.
   l.classList.remove("show"); await wait(700);
   show("launch"); tone(220, 2.5, "sine", .08);
