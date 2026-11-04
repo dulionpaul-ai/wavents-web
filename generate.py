@@ -2300,8 +2300,8 @@ def llms_txt(upcoming: list[dict], now: datetime, communes: dict[str, list[dict]
         " midi, soir) ; chacun donne son prénom et coche dispo, peut-être ou non pour chaque date. La meilleure"
         " date est mise en avant ; seul le téléphone qui a répondu peut modifier sa réponse. Pour chaque date,"
         " « Voir les sorties » montre les événements du jour près du lieu (là où Wavents est présent), avec"
-        " catégorie, adresse et prix, et chacun peut proposer une sortie au groupe. L'organisateur choisit la date,"
-        " l'ajoute à l'agenda et prévient le groupe par un message WhatsApp prêt à envoyer.",
+        " catégorie, adresse et prix, et chacun peut proposer une sortie au groupe. L'organisateur choisit la date"
+        " puis prévient le groupe par un message WhatsApp prêt à envoyer.",
         "",
         "## Pages thématiques (mises à jour chaque jour)",
         "",

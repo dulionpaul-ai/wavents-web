@@ -20,7 +20,7 @@
 {"@type":"Question","name":"Quelqu'un d'autre peut-il modifier mes réponses ?","acceptedAnswer":{"@type":"Answer","text":"Non. Seul le téléphone qui a répondu peut modifier ou retirer la réponse. L'organisateur peut seulement retirer une réponse (doublon, erreur)."}},
 {"@type":"Question","name":"Quelle est la différence avec un Doodle ?","acceptedAnswer":{"@type":"Answer","text":"Même principe, en plus simple et pensé pour les sorties entre amis : pas de compte, pas de publicité, trois choix par date, la meilleure date affichée d'un coup d'œil, et pour chaque date les sorties près du lieu (concerts, spectacles, marchés…) que chacun peut proposer au groupe."}},
 {"@type":"Question","name":"Peut-on proposer une activité pour la date ?","acceptedAnswer":{"@type":"Answer","text":"Oui : sous chaque date, « Voir les sorties » affiche les événements de ce jour-là près du lieu choisi (là où Wavents est présent). Chacun peut en proposer un au groupe ; il s'affiche sous la date, avec le prénom de celui qui l'a proposé."}},
-{"@type":"Question","name":"Comment annoncer la date retenue ?","acceptedAnswer":{"@type":"Answer","text":"L'organisateur choisit la date ; le bouton « Prévenir le groupe » prépare un message avec la date, le lieu, les participants, la sortie proposée et le lien, à coller dans WhatsApp. Chacun peut aussi ajouter la date à son agenda."}}]}</script>
+{"@type":"Question","name":"Comment annoncer la date retenue ?","acceptedAnswer":{"@type":"Answer","text":"L'organisateur choisit la date ; le bouton « Prévenir le groupe » prépare un message avec la date, le lieu, les participants et le lien, à envoyer dans WhatsApp."}}]}</script>
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"HowTo","name":"Trouver une date commune entre amis","totalTime":"PT1M","step":[{"@type":"HowToStep","text":"Indiquer ce que c'est (par exemple « Soirée entre copains ») et l'emplacement."},{"@type":"HowToStep","text":"Choisir les dates possibles dans le calendrier, et le moment (journée, midi ou soir)."},{"@type":"HowToStep","text":"Envoyer le lien du sondage dans le groupe (WhatsApp, SMS, mail)."},{"@type":"HowToStep","text":"Chacun donne son prénom et coche ses dispos : la meilleure date ressort automatiquement."},{"@type":"HowToStep","text":"L'organisateur choisit la date et prévient le groupe en un message."}]}</script>
 <style>
   :root { --deep: #065FBB; --bright: #0B81E1; --ink: #0A2A3D; --soft: #4B6475; --line: #d9e6f2; --bg: #f3f8fd; --card: #fff;
@@ -104,6 +104,8 @@
   .tri button.on[data-v="1"] { background: var(--maybe-bg); border-color: #f2b33d; color: var(--maybe); }
   .tri button.on[data-v="0"] { filter: none; opacity: 1; background: var(--no-bg); border-color: var(--no); }
   .prop { margin-top: 5px; background: var(--pro-bg); border-radius: 9px; padding: 4px 7px; font-size: 12px; font-weight: 800; color: var(--pro); display: flex; gap: 6px; align-items: center; }
+  .prop + .prop { margin-top: 3px; }
+  .moreprop { display: block; margin-top: 3px; background: none; border: 0; padding: 2px 7px; font: 900 12px Nunito; color: var(--pro); cursor: pointer; }
   .prop img { width: 24px; height: 24px; border-radius: 5px; object-fit: cover; flex: none; }
   .prop a { color: inherit; text-decoration: none; flex: 1; min-width: 0; }
   .prop button { border: 0; background: none; color: var(--pro); font: 900 15px Nunito; cursor: pointer; padding: 0 3px; }
@@ -163,7 +165,7 @@
       <input type="text" id="title" maxlength="80" placeholder="Soirée entre copains, anniv de Léa…">
       <label class="lab" for="place" style="margin-top:8px">Emplacement</label>
       <div class="sug"><input type="text" id="place" maxlength="120" placeholder="📍 Ville ou village" autocomplete="off"><ul id="placeSug" hidden></ul></div>
-      <p class="hint">L'emplacement m'aidera à trouver des activités sur place ce jour-là.</p>
+      <p class="hint">L'emplacement permettra de te proposer des activités sur place ce jour-là.</p>
     </div>
     <div class="card">
       <div class="mn"><button class="nav" id="prev" aria-label="Mois précédent">‹</button><span id="month"></span><button class="nav" id="next" aria-label="Mois suivant">›</button></div>
@@ -182,7 +184,6 @@
       <b id="shareTitle">Envoie ce lien au groupe 👇</b>
       <div class="url" id="url"></div>
       <button class="go" id="shareBtn" style="padding:10px;font-size:15px">📤 Partager le lien</button>
-      <div class="orgnote" id="orgNote" hidden>👑 Tu es l'organisateur sur ce téléphone : tu pourras choisir la date. <a href="#" id="adminLink">Garder mon lien organisateur</a></div>
     </div>
     <div class="card who" id="whoCard"><label class="lab" for="name">Je suis</label><input type="text" id="name" maxlength="40" placeholder="Ton prénom" autocomplete="given-name"></div>
     <div class="card tbl" id="tbl"></div>
@@ -211,7 +212,7 @@
   <h2>Et on fait quoi ce jour-là ?</h2>
   <p>Sous chaque date, « Voir les sorties » montre les concerts, spectacles, marchés et fêtes de ce jour-là près du lieu choisi, avec le prix et l'adresse. Chacun peut en proposer une au groupe. Ces sorties viennent de <a href="/">Wavents</a>, l'appli gratuite des sorties près de chez toi (disponible pour l'instant autour de Villefranche-sur-Saône et du Beaujolais).</p>
   <h2>Gratuit, sans compte, sans pub</h2>
-  <p>Un lien et un prénom suffisent. Seul ton téléphone peut modifier tes réponses. L'organisateur choisit la date et prévient le groupe en un message, que chacun peut ajouter à son agenda.</p>
+  <p>Un lien et un prénom suffisent. Seul ton téléphone peut modifier tes réponses. L'organisateur choisit la date et prévient le groupe en un message.</p>
   <h2>Pour quelles occasions ?</h2>
   <p>Soirée entre copains, repas de famille, anniversaire, week-end entre amis, réunion d'association, match à cinq, répétition… Et pour Noël, organise aussi ton <a href="/secret-santa/">Secret Santa en ligne</a>.</p>
 </section>
@@ -324,6 +325,7 @@
   };
 
   /* ================= Sondage ================= */
+  var openProps = {};
   var poll = null, mine = null, choice = [], admin = null, isNew = false, events = null, byOpt = [];
 
   function shareUrl() { return "https://wavents.fr/trouver-une-date/?s=" + encodeURIComponent(pollId); }
@@ -438,8 +440,11 @@
         "<div class='av'>" + y.map(function (v) { return chip(v, "y", ""); }).join("") + m.map(function (v) { return chip(v, "m", " ?"); }).join("") + n.map(function (v) { return chip(v, "n", ""); }).join("") + "</div></div>" +
         "<div class='tri'>" + [[2, "✅", "Dispo"], [1, "?", "Peut-être"], [0, "❌", "Pas dispo"]].map(function (x) {
           return "<button data-i='" + i + "' data-v='" + x[0] + "' aria-label='" + x[2] + " le " + esc(fmtLong.format(parse(o.d))) + "'" + (choice[i] === x[0] ? " class='on'" : "") + ">" + x[1] + "</button>"; }).join("") + "</div></div>";
-      props.filter(function (p) { return p.opt === i; }).forEach(function (p) {
+      var mine4 = props.filter(function (p) { return p.opt === i; }), open4 = openProps[i] || mine4.length <= 2;
+      mine4.forEach(function (p, k) {
         var ev = p.event || {}, canDel = admin || mp[p.id];
+        if (!open4 && k === 2) row.insertAdjacentHTML("beforeend", "<button class='moreprop' data-open='" + i + "'>+ " + (mine4.length - 2) + " autre" + (mine4.length > 3 ? "s" : "") + " idée" + (mine4.length > 3 ? "s" : "") + " de sortie ›</button>");
+        if (!open4 && k >= 2) return;
         row.insertAdjacentHTML("beforeend", "<div class='prop'>" + (ev.img ? "<img src='" + esc(ev.img) + "' alt='' loading='lazy'>" : "💡") +
           "<a href='/e/" + encodeURIComponent(ev.id) + "/' target='_blank' rel='noopener' data-goatcounter-click='date-fiche-proposee'>" + esc(ev.title) + (ev.time ? ", " + esc(ev.time) : "") + " · proposé par " + esc(p.name) + "</a>" +
           (canDel ? "<button data-unprop='" + p.id + "' aria-label='Retirer la proposition'>×</button>" : "") + "</div>");
@@ -449,6 +454,7 @@
     t.querySelectorAll(".tri button").forEach(function (b) {
       b.onclick = function () { var i = +b.dataset.i; choice[i] = +b.dataset.v; b.parentNode.querySelectorAll("button").forEach(function (o) { o.classList.toggle("on", o === b); }); };
     });
+    t.querySelectorAll("[data-open]").forEach(function (b) { b.onclick = function () { openProps[+b.dataset.open] = 1; render(); }; });
     t.querySelectorAll("[data-ev]").forEach(function (b) { b.onclick = function () { openEvents(+b.dataset.ev); }; });
     t.querySelectorAll("[data-pick]").forEach(function (b) { b.onclick = function () { decide(+b.dataset.pick); }; });
     t.querySelectorAll("[data-del]").forEach(function (b) { b.onclick = function () {
@@ -464,9 +470,10 @@
 
     // Organisateur
     $("orgBar").hidden = !admin;
-    if (admin) $("orgBar").innerHTML = decided == null ? "👑 Tu es l'organisateur : quand tout le monde a répondu, touche « Retenir » sous la date choisie. Tu peux aussi retirer une réponse (×)."
+    if (admin) $("orgBar").innerHTML = decided == null ? "👑 Tu es l'organisateur : quand tout le monde a répondu, touche « Retenir » sous la date choisie. Tu peux aussi retirer une réponse (×). <button id='orgLink'>Organiser depuis un autre appareil</button>"
       : "👑 Organisateur : <button id='reopen'>changer la date</button>";
     if ($("reopen")) $("reopen").onclick = function () { decide(null); };
+    if ($("orgLink")) $("orgLink").onclick = function () { stat("date-lien-orga"); copy(shareUrl() + "#a=" + admin, "Lien organisateur copié : ouvre-le sur l'autre appareil ✔"); };
 
     $("bot").hidden = decided != null;
     $("whoCard").hidden = decided != null;
@@ -482,7 +489,7 @@
     var maybe = votes.filter(function (v) { return v.answers[d] === 1; }).map(function (v) { return v.name + " ?"; });
     var html = "<div class='card'><div class='big'><div class='e'>🎉</div><small>C'est décidé !</small><b>" + esc(longLabel(o.d)) + (poll.moment ? ", " + MOMENT_TXT[poll.moment] : "") + "</b><small>" +
       esc(dispo.concat(maybe).join(", ") || "") + "</small></div>" +
-      "<div class='btn2' style='margin-top:9px'><button class='lt' id='ics'>📅 Mon agenda</button><button class='wa' id='tell'>📣 Prévenir le groupe</button></div></div>";
+      "<button class='go' id='tell' style='margin-top:10px;background:#25D366;box-shadow:0 8px 18px rgba(37,211,102,.3)'>📣 Prévenir le groupe</button></div>";
     var list = byOpt[d] || [];
     if (list.length) {
       html += "<div class='card' style='padding:2px 11px'><div style='font-weight:900;font-size:14px;padding-top:8px'>" + (poll.moment === "soir" ? "Ce soir-là" : poll.moment === "midi" ? "Ce midi-là" : "Ce jour-là") + " près de " + esc(town(poll.place)) + "</div>" +
@@ -490,7 +497,7 @@
         "<button class='more' id='moreEv'>Voir les " + list.length + " sorties ›</button></div>";
     }
     box.innerHTML = html;
-    $("ics").onclick = ics; $("tell").onclick = tell;
+    $("tell").onclick = tell;
     if ($("moreEv")) $("moreEv").onclick = function () { openEvents(d); };
     bindEv(box, d);
   }
@@ -520,16 +527,6 @@
   function copy(txt, ok) {
     (navigator.clipboard ? navigator.clipboard.writeText(txt) : Promise.reject()).then(function () { toast(ok); }, function () { window.prompt("Copie ce texte :", txt); });
   }
-  function ics() {
-    var o = poll.options[poll.decided], d = o.d.replace(/-/g, ""), nd = iso(new Date(parse(o.d).getTime() + 86400000)).replace(/-/g, "");
-    var when = poll.moment === "soir" ? ["DTSTART:" + d + "T190000", "DTEND:" + d + "T230000"] : poll.moment === "midi" ? ["DTSTART:" + d + "T120000", "DTEND:" + d + "T140000"] : ["DTSTART;VALUE=DATE:" + d, "DTEND;VALUE=DATE:" + nd];
-    var clean = function (s) { return String(s || "").replace(/[\\;,]/g, function (c) { return "\\" + c; }).replace(/\n/g, "\\n"); };
-    var body = ["BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//Wavents//Trouver une date//FR", "BEGIN:VEVENT", "UID:" + pollId + "@wavents.fr",
-      "DTSTAMP:" + new Date().toISOString().replace(/[-:]/g, "").slice(0, 15) + "Z"].concat(when, ["SUMMARY:" + clean(poll.title), poll.place ? "LOCATION:" + clean(poll.place) : "", "DESCRIPTION:" + clean(shareUrl()), "END:VEVENT", "END:VCALENDAR"]).filter(Boolean).join("\r\n");
-    var a = document.createElement("a"); a.href = URL.createObjectURL(new Blob([body], { type: "text/calendar" })); a.download = "date.ics"; document.body.appendChild(a); a.click(); a.remove();
-    stat("date-agenda");
-  }
-
   /* --- Vue « Voir les sorties » --- */
   var evFilter = "tout", evOpt = 0;
   function evHtml(e, day, i, withActs, k) {
@@ -616,8 +613,6 @@
       if (navigator.share && /Mobi|Android|iPhone|iPad/i.test(navigator.userAgent)) { stat("date-partage"); navigator.share({ text: txt, url: url }).catch(function () {}); }
       else { stat("date-copie"); copy(txt + url, "Lien copié : colle-le dans le groupe ✔"); }
     };
-    $("orgNote").hidden = !admin;
-    $("adminLink").onclick = function (e) { e.preventDefault(); stat("date-lien-orga"); copy(url + "#a=" + admin, "Lien organisateur copié : garde-le pour toi ✔"); };
     stat(admin ? "date-ouvert-orga" : "date-ouvert");
     load().catch(function () { $("tbl").innerHTML = "<div class='empty'>Impossible de charger le sondage. Vérifie ta connexion et recharge la page.</div>"; });
   }
