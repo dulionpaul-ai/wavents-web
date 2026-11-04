@@ -125,6 +125,12 @@
 
 <section class="scene" id="trailer"><div class="line cinzel" id="tline"></div></section>
 
+<section class="scene" id="launch">
+  <div class="cinzel gold" style="font-size:clamp(26px,8vw,44px);margin-bottom:12px">Le destin t'attend…</div>
+  <p style="color:#cfd8e6;font-weight:700;margin-bottom:34px">Qui vas-tu gâter cette année ?</p>
+  <button class="btn" id="draw">🎲 Lancer le tirage au sort</button>
+</section>
+
 <section class="scene" id="reel">
   <div class="label">LE DESTIN TIRE AU SORT…</div>
   <div class="window"><div class="strip" id="strip"></div></div>
@@ -156,11 +162,11 @@
 <script>
 // Tirage chiffré (AES-GCM) : la clé n'est que dans le lien (#…), jamais dans
 // le dépôt ni sur le serveur.
-const PAYLOAD = "LgYsOcJWY6AUwO6-wxhajxcQce_qyxG2KzhzJZsoslmdvbYrQ-Nxb29DUstmKldqXjiR3aYhPaiejl3zBxABhEzpV4HwNrEicrILxyVBnkLQLARm8Jazh5CBMxFE0WHpuJ_Mj8OSIEZpOPm7jSVH0nsQQ4kpaalTxNYiTq-qjOgM-YsRr2SsRZhRPyjDgWgRaJ6Gt6up4zVerEuOCTZWWYL3K6TbZ19vSXB6l41_htrDPMKhJ8XbpV_p5wL1okuEHdyL_KyCtg6BV08V-el4ajjYyifpb2xilatiG1fCiSnuGpC9q_zmUTpD_wKJWR_WN8txMXyJ3weTeYP5Ibx77iOkUnDKwuSnB8XsUh7lFO85d9ro9GWX";
+const PAYLOAD = "5--u05TSam2T26DPpWuniJjlJ1EIkRRSXYGIwvYTA42fW_xI0aHEEztRVfdPU0rD-IcJ5fRaxytOI7tK1-pYjMk8c4nCwDER_zQy1ePz3HXhAQx8fYUbvMMM2LKBeso2-yMSOqAsLbqkX3Lao0rz1KZh3wiHcO3D1nxBr6GBjuTSQAKOFw6qDmskA62f05m4JggVMlpVwm2o2Osz4LDKduZXGcn0IS4oVRW5bFDG0kiSp-ppcSeXmifedROR4A8tTWiZ35EWhd8iqQG5J05BPxp1Iva8ekcN0XHoBXz3idTnBZP0fFJzQO9iue6h-HrQcnSmCNpBNqva45ZYhxMFu9LxJE8";
 
 const $ = (id) => document.getElementById(id);
 const wait = (ms) => new Promise((r) => setTimeout(r, ms));
-const scenes = ["start", "studio", "trailer", "reel", "gift", "reveal", "credits", "locked"];
+const scenes = ["start", "studio", "trailer", "launch", "reel", "gift", "reveal", "credits", "locked"];
 function show(id) { scenes.forEach((s) => $(s).classList.toggle("on", s === id)); }
 const vibrate = (p) => { try { navigator.vibrate && navigator.vibrate(p); } catch (e) {} };
 
@@ -291,7 +297,10 @@ async function film() {
   await line("UN", "big", 900, boom);
   await line("SECRET", "big gold", 900, boom);
   await line("SANTA.", "big gold", 2600, () => { boom(); chime(); burst(W / 2, H / 2, 160, ["#f7d36a", "#fff"], 10, .08, 2.6, 90); });
-  // 3. La machine à sous des prénoms.
+  // 3. Le bouton du tirage (Paul, 04/11), puis la machine à sous des prénoms.
+  show("launch"); tone(220, 2.5, "sine", .08); 
+  await new Promise((res) => { $("draw").onclick = () => { $("draw").onclick = null; res(); }; });
+  boom(); vibrate(100);
   show("reel"); const strip = $("strip"); const others = data.names.filter((n) => n !== data.giver);
   const seq = []; for (let i = 0; i < 44; i++) seq.push(others[(i * 7 + 3) % others.length]);
   const fake1 = others.find((n) => n !== data.target) || data.target, fake2 = others.filter((n) => n !== data.target).slice(-1)[0] || data.target;
