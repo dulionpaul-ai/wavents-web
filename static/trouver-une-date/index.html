@@ -40,6 +40,7 @@
   .lab { display: block; font-size: 13px; font-weight: 900; margin: 0 2px 4px; }
   input[type=text] { width: 100%; font: 800 16px Nunito, sans-serif; color: var(--ink); padding: 8px 11px; border: 2px solid var(--line); border-radius: 12px; background: #fff; }
   input[type=text]:focus { outline: none; border-color: var(--bright); }
+  .hint { font-size: 12.5px; font-style: italic; font-weight: 700; color: #8a99a6; margin: 5px 3px 0; }
   .chk { display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 800; color: var(--deep); margin: 8px 2px 0; cursor: pointer; }
   .chk input { width: 20px; height: 20px; accent-color: var(--deep); margin: 0; flex: none; }
   .sug { position: relative; }
@@ -74,6 +75,7 @@
   /* Tableau */
   .best { display: flex; align-items: center; gap: 8px; background: var(--yes-bg); box-shadow: inset 0 0 0 2px var(--yes); border-radius: 13px; padding: 7px 11px; margin-bottom: 8px; font-size: 13px; font-weight: 800; }
   .best b { color: var(--yes); }
+  .best .pick { border: 0; background: var(--yes); color: #fff; font: 900 12.5px Nunito; padding: 6px 11px; border-radius: 99px; cursor: pointer; flex: none; }
   .who { display: flex; align-items: center; gap: 9px; }
   .who .lab { margin: 0; white-space: nowrap; }
   .tbl { padding: 6px 9px; }
@@ -161,7 +163,7 @@
       <input type="text" id="title" maxlength="80" placeholder="Soirée entre copains, anniv de Léa…">
       <label class="lab" for="place" style="margin-top:8px">Emplacement</label>
       <div class="sug"><input type="text" id="place" maxlength="120" placeholder="📍 Ville ou village" autocomplete="off"><ul id="placeSug" hidden></ul></div>
-      <label class="chk"><input type="checkbox" id="help" checked>M'aider à trouver des activités sur place ce jour-là</label>
+      <p class="hint">L'emplacement m'aidera à trouver des activités sur place ce jour-là.</p>
     </div>
     <div class="card">
       <div class="mn"><button class="nav" id="prev" aria-label="Mois précédent">‹</button><span id="month"></span><button class="nav" id="next" aria-label="Mois suivant">›</button></div>
@@ -179,7 +181,7 @@
     <div class="card share" id="shareCard" hidden>
       <b id="shareTitle">Envoie ce lien au groupe 👇</b>
       <div class="url" id="url"></div>
-      <div class="btn2"><button class="wh" id="copy">Copier le lien</button><a class="wa" id="wa" target="_blank" rel="noopener">WhatsApp</a></div>
+      <button class="go" id="shareBtn" style="padding:10px;font-size:15px">📤 Partager le lien</button>
       <div class="orgnote" id="orgNote" hidden>👑 Tu es l'organisateur sur ce téléphone : tu pourras choisir la date. <a href="#" id="adminLink">Garder mon lien organisateur</a></div>
     </div>
     <div class="card who" id="whoCard"><label class="lab" for="name">Je suis</label><input type="text" id="name" maxlength="40" placeholder="Ton prénom" autocomplete="given-name"></div>
@@ -309,11 +311,13 @@
     if (!keys.length) { err.textContent = "Touche au moins une date dans le calendrier."; return; }
     err.textContent = ""; btn.disabled = true;
     var place = $("place").value.trim();
+    var geoUsed = null;
     locate(place).then(function (g) {
+      geoUsed = g;
       return rpc("date_poll_create", { p_title: title, p_place: place || null, p_lat: g ? g.lat : null, p_lng: g ? g.lng : null,
-        p_moment: moment, p_help: $("help").checked, p_options: keys.map(function (k) { return { d: k }; }) });
+        p_moment: moment, p_help: true, p_options: keys.map(function (k) { return { d: k }; }) });
     }).then(function (res) {
-      stat("date-cree"); stat("date-options-" + Math.min(keys.length, 10)); if (!$("help").checked) stat("date-cree-sans-aide");
+      var g = geoUsed; stat("date-cree"); stat("date-options-" + Math.min(keys.length, 10)); if (!g) stat("date-cree-sans-lieu");
       store("date-admin-" + res.id, res.admin); store("date-new-" + res.id, 1);
       location.href = "/trouver-une-date/?s=" + encodeURIComponent(res.id);
     }).catch(function (e) { btn.disabled = false; err.textContent = "Oups : " + e.message; });
@@ -341,7 +345,7 @@
     events = [];
     var days = poll.options.map(function (o) { return o.d; }).sort(), lat = poll.lat, lng = poll.lng;
     var dLat = RADIUS_KM / 111, dLng = RADIUS_KM / (111 * Math.cos(lat * Math.PI / 180));
-    var q = "select=id,title,category_id,location_name,address,latitude,longitude,start_date,end_date,start_time_known,price_type,price_amount,image_url,recurring_weekdays" +
+    var q = "select=id,title,for_kids,category_id,location_name,address,latitude,longitude,start_date,end_date,start_time_known,price_type,price_amount,image_url,recurring_weekdays" +
       "&status=eq.active&latitude=gte." + (lat - dLat) + "&latitude=lte." + (lat + dLat) + "&longitude=gte." + (lng - dLng) + "&longitude=lte." + (lng + dLng) +
       "&start_date=lte." + days[days.length - 1] + "T23:59:59&or=(end_date.gte." + days[0] + ",start_date.gte." + days[0] + ")&order=start_date&limit=1500";
     fetch(SUPA + "/rest/v1/events?" + q, { headers: { apikey: KEY, Authorization: "Bearer " + KEY } }).then(function (r) { return r.json(); }).then(function (rows) {
@@ -410,7 +414,9 @@
     if (best && !best.y) best = null;
     var decided = poll.decided;
     $("best").hidden = !best || decided != null;
-    if (best) $("best").innerHTML = "🏆 <span>Pour l'instant : <b>" + esc(shortLabel(opts[best.i].d)) + "</b> (" + best.y + "/" + votes.length + " dispo)</span>";
+    if (best) $("best").innerHTML = "🏆 <span style='flex:1'>Pour l'instant : <b>" + esc(shortLabel(opts[best.i].d)) + "</b> (" + best.y + "/" + votes.length + " dispo)</span>" +
+      (admin ? "<button class='pick' data-pick='" + best.i + "'>Retenir</button>" : "");
+    $("best").querySelectorAll("[data-pick]").forEach(function (b) { b.onclick = function () { decide(+b.dataset.pick); }; });
 
     // Partage
     $("shareCard").hidden = !(isNew || admin) || decided != null;
@@ -427,7 +433,7 @@
       var chip = function (v, cls, suf) { return "<span class='" + cls + "'>" + esc(v.name) + suf + "</span>" + (admin ? "<button data-del='" + v.id + "' aria-label='Retirer la réponse de " + esc(v.name) + "'>×</button>" : ""); };
       row.innerHTML = "<div class='dl'><div class='d'><b>" + esc(shortLabel(o.d)) + "</b>" +
         (nb ? "<button data-ev='" + i + "'>Voir les sorties ›</button>" : "") +
-        (admin && decided == null ? "<button class='crown' data-pick='" + i + "'>👑 Choisir</button>" : "") + "</div>" +
+        (admin && decided == null ? "<button class='crown' data-pick='" + i + "'>✔ Retenir</button>" : "") + "</div>" +
         "<div class='p'><div class='c" + (y.length || m.length ? "" : " z") + "'>" + (others.length ? y.length + " dispo" + (m.length ? " · " + m.length + " ?" : "") : "—") + "</div>" +
         "<div class='av'>" + y.map(function (v) { return chip(v, "y", ""); }).join("") + m.map(function (v) { return chip(v, "m", " ?"); }).join("") + n.map(function (v) { return chip(v, "n", ""); }).join("") + "</div></div>" +
         "<div class='tri'>" + [[2, "✅", "Dispo"], [1, "?", "Peut-être"], [0, "❌", "Pas dispo"]].map(function (x) {
@@ -458,11 +464,12 @@
 
     // Organisateur
     $("orgBar").hidden = !admin;
-    if (admin) $("orgBar").innerHTML = decided == null ? "👑 Organisateur : touche « Choisir » sous la date retenue. Tu peux aussi retirer une réponse (×)."
+    if (admin) $("orgBar").innerHTML = decided == null ? "👑 Tu es l'organisateur : quand tout le monde a répondu, touche « Retenir » sous la date choisie. Tu peux aussi retirer une réponse (×)."
       : "👑 Organisateur : <button id='reopen'>changer la date</button>";
     if ($("reopen")) $("reopen").onclick = function () { decide(null); };
 
     $("bot").hidden = decided != null;
+    $("whoCard").hidden = decided != null;
     t.classList.toggle("frozen", decided != null);
     renderDecided();
   }
@@ -475,7 +482,6 @@
     var maybe = votes.filter(function (v) { return v.answers[d] === 1; }).map(function (v) { return v.name + " ?"; });
     var html = "<div class='card'><div class='big'><div class='e'>🎉</div><small>C'est décidé !</small><b>" + esc(longLabel(o.d)) + (poll.moment ? ", " + MOMENT_TXT[poll.moment] : "") + "</b><small>" +
       esc(dispo.concat(maybe).join(", ") || "") + "</small></div>" +
-      props.map(function (p) { return "<div class='prop' style='margin-top:7px'>" + (p.event.img ? "<img src='" + esc(p.event.img) + "' alt=''>" : "💡") + "<a href='/e/" + encodeURIComponent(p.event.id) + "/' target='_blank' rel='noopener'>" + esc(p.event.title) + (p.event.time ? ", " + esc(p.event.time) : "") + " · proposé par " + esc(p.name) + "</a></div>"; }).join("") +
       "<div class='btn2' style='margin-top:9px'><button class='lt' id='ics'>📅 Mon agenda</button><button class='wa' id='tell'>📣 Prévenir le groupe</button></div></div>";
     var list = byOpt[d] || [];
     if (list.length) {
@@ -500,11 +506,9 @@
   function message() {
     var d = poll.decided, o = poll.options[d];
     var who = poll.votes.filter(function (v) { return v.answers[d] === 2; }).map(function (v) { return v.name; });
-    var props = (poll.proposals || []).filter(function (p) { return p.opt === d; });
     var lines = ["🎉 " + poll.title + " : c'est décidé !", "📅 " + longLabel(o.d) + (poll.moment ? ", " + MOMENT_TXT[poll.moment] : "")];
     if (poll.place) lines.push("📍 " + poll.place);
     if (who.length) lines.push("🙋 " + who.join(", "));
-    props.forEach(function (p) { lines.push("💡 Idée de " + p.name + " : " + p.event.title + [p.event.time, p.event.place, p.event.price].filter(Boolean).map(function (x) { return ", " + x; }).join("")); });
     lines.push("", (byOpt[d] && byOpt[d].length ? "Tous les détails et les sorties du jour 👉 " : "Tous les détails 👉 ") + shareUrl());
     return lines.join("\n");
   }
@@ -528,9 +532,9 @@
 
   /* --- Vue « Voir les sorties » --- */
   var evFilter = "tout", evOpt = 0;
-  function evHtml(e, day, i, withActs) {
+  function evHtml(e, day, i, withActs, k) {
     var c = CATS[e.category_id] || CATS.associatif_autre, proposed = (poll.proposals || []).filter(function (p) { return p.opt === i && p.event.id === e.id; })[0];
-    return "<div class='ev'><img src='" + esc(imgOf(e)) + "' alt='' loading='lazy'><div class='t'><span class='cat' style='color:" + c[1] + "'>" + c[0] + "</span><b>" + esc(e.title) + "</b><small>" +
+    return "<div class='ev'><img src='" + esc(imgOf(e)) + "' alt=''" + (k > 5 ? " loading='lazy'" : "") + "><div class='t'><span class='cat' style='color:" + c[1] + "'>" + c[0] + "</span><b>" + esc(e.title) + "</b><small>" +
       esc([timeTxt(e, day), placeTxt(e), priceTxt(e)].filter(Boolean).join(" · ")) + "</small>" +
       "<div class='acts'>" + (withActs ? (proposed ? "<span class='pp done'>✓ Proposé par " + esc(proposed.name) + "</span>" : "<button class='pp' data-prop='" + esc(e.id) + "'>💡 Proposer au groupe</button>") : "") +
       "<a class='vw' href='/e/" + encodeURIComponent(e.id) + "/' target='_blank' rel='noopener' data-goatcounter-click='date-voir-fiche'>Voir ›</a></div></div></div>";
@@ -552,13 +556,14 @@
     $("evTitle").textContent = longLabel(o.d);
     $("evSub").textContent = "Sorties près de " + town(poll.place) + (poll.moment ? " · " + MOMENT_TXT[poll.moment] : "");
     var cats = {}; all.forEach(function (e) { cats[e.category_id] = (cats[e.category_id] || 0) + 1; });
-    var filters = [["tout", "Tout (" + all.length + ")"]].concat(Object.keys(cats).sort(function (a, b) { return cats[b] - cats[a]; }).map(function (k) { return [k, (CATS[k] || CATS.associatif_autre)[0]]; }));
+    var filters = [["tout", "Tout (" + all.length + ")"]];
     if (all.some(function (e) { return e.price_type === "free"; })) filters.push(["free", "Gratuit"]);
-    if (all.some(function (e) { return e.price_type === "paid"; })) filters.push(["paid", "Payant"]);
+    if (all.some(function (e) { return e.for_kids; })) filters.push(["kids", "En famille"]);
+    filters = filters.concat(Object.keys(cats).sort(function (a, b) { return cats[b] - cats[a]; }).slice(0, 5).map(function (k) { return [k, (CATS[k] || CATS.associatif_autre)[0]]; }));
     $("evFil").innerHTML = filters.map(function (f) { return "<button data-f='" + f[0] + "'" + (f[0] === evFilter ? " class='on'" : "") + ">" + esc(f[1]) + "</button>"; }).join("");
     $("evFil").querySelectorAll("button").forEach(function (b) { b.onclick = function () { evFilter = b.dataset.f; drawEvents(); stat("date-sorties-filtre"); }; });
-    var list = all.filter(function (e) { return evFilter === "tout" || e.category_id === evFilter || e.price_type === evFilter; });
-    $("evList").innerHTML = list.length ? list.map(function (e) { return evHtml(e, o.d, evOpt, true); }).join("") : "<div class='empty'>Rien pour ce filtre.</div>";
+    var list = all.filter(function (e) { return evFilter === "tout" || e.category_id === evFilter || e.price_type === evFilter || (evFilter === "kids" && e.for_kids); });
+    $("evList").innerHTML = list.length ? list.map(function (e, k) { return evHtml(e, o.d, evOpt, true, k); }).join("") : "<div class='empty'>Rien pour ce filtre.</div>";
     bindEv($("evList"), evOpt);
   }
   function propose(i, id) {
@@ -605,15 +610,12 @@
     if (h) { store("date-admin-" + pollId, h[1]); history.replaceState(null, "", location.pathname + location.search); }
     admin = store("date-admin-" + pollId); isNew = !!store("date-new-" + pollId);
     var url = shareUrl(); $("url").textContent = url.replace("https://", "");
-    var t = "On se fait ça quand ? Coche tes dispos 👉 ";
-    $("wa").href = "https://wa.me/?text=" + encodeURIComponent(t + url);
-    $("wa").onclick = function (e) {
-      stat("date-partage"); store("date-new-" + pollId, null);
+    $("shareBtn").onclick = function () {
+      store("date-new-" + pollId, null);
       var txt = (poll ? poll.title + " : on" : "On") + " se fait ça quand ? Coche tes dispos 👉 ";
-      if (navigator.share && /Mobi|Android|iPhone|iPad/i.test(navigator.userAgent)) { e.preventDefault(); navigator.share({ text: txt, url: url }).catch(function () {}); }
-      else this.href = "https://wa.me/?text=" + encodeURIComponent(txt + url);
+      if (navigator.share && /Mobi|Android|iPhone|iPad/i.test(navigator.userAgent)) { stat("date-partage"); navigator.share({ text: txt, url: url }).catch(function () {}); }
+      else { stat("date-copie"); copy(txt + url, "Lien copié : colle-le dans le groupe ✔"); }
     };
-    $("copy").onclick = function () { stat("date-copie"); copy(url, "Lien copié ✔"); };
     $("orgNote").hidden = !admin;
     $("adminLink").onclick = function (e) { e.preventDefault(); stat("date-lien-orga"); copy(url + "#a=" + admin, "Lien organisateur copié : garde-le pour toi ✔"); };
     stat(admin ? "date-ouvert-orga" : "date-ouvert");
