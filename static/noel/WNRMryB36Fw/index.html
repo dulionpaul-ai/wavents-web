@@ -35,6 +35,8 @@
   .btn { white-space: nowrap; }
   .btn.ghost { background: transparent; color: var(--gold); border: 2px solid rgba(247,211,106,.6); animation: none; font-size: 16px; padding: 13px 24px; }
   @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(247,211,106,.6); } 70% { box-shadow: 0 0 0 26px rgba(247,211,106,0); } 100% { box-shadow: 0 0 0 0 rgba(247,211,106,0); } }
+  .creepy .eyes { animation: flicker 2.4s infinite; }
+  @keyframes flicker { 0%, 18%, 22%, 60%, 64%, 100% { opacity: 1; } 20%, 62% { opacity: .15; } }
   #studio .pin { width: 92px; margin-bottom: 18px; transform: translateY(-40px) scale(.7); opacity: 0;
     transition: transform .9s cubic-bezier(.3,1.6,.5,1), opacity .5s; }
   #studio.on .pin { transform: none; opacity: 1; }
@@ -120,7 +122,21 @@
 </section>
 
 <section class="scene" id="studio">
-  <img class="pin" src="/img/pin.png" alt="">
+  <svg class="pin creepy" viewBox="0 0 100 120" aria-hidden="true">
+    <defs>
+      <radialGradient id="face" cx="50%" cy="45%" r="60%"><stop offset="0" stop-color="#f4f1ea"/><stop offset="1" stop-color="#9aa0a8"/></radialGradient>
+      <filter id="glow" x="-80%" y="-80%" width="260%" height="260%"><feGaussianBlur stdDeviation="2.6" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+    </defs>
+    <!-- Bonhomme de neige inquiétant sous un bonnet de Père Noël qui dégouline -->
+    <circle cx="50" cy="74" r="34" fill="url(#face)"/>
+    <path d="M14 52 C 22 14, 64 2, 86 36 L 92 50 C 70 44, 34 44, 14 52 Z" fill="#8b0d14"/>
+    <path d="M30 47 l3 9 l3 -9 M58 46 l2 12 l3 -12" fill="#8b0d14"/>
+    <rect x="10" y="46" width="80" height="10" rx="5" fill="#e9e4da"/>
+    <circle cx="88" cy="34" r="8" fill="#e9e4da"/>
+    <g class="eyes" filter="url(#glow)"><ellipse cx="38" cy="72" rx="6" ry="4" fill="#ff1a1a"/><ellipse cx="62" cy="72" rx="6" ry="4" fill="#ff1a1a"/></g>
+    <path d="M47 80 l3 9 l3 -9 z" fill="#c45a12"/>
+    <path d="M30 94 q5 -4 8 1 q4 -5 8 0 q4 -5 8 0 q4 -5 8 0 q3 -5 8 -1" stroke="#1a1a1a" stroke-width="3" fill="none" stroke-linecap="round"/>
+  </svg>
   <div class="sub" id="pre1"></div>
   <div class="name cinzel gold" id="studioName">PAUL</div>
   <div class="sub" id="pre2">PRÉSENTE</div>
@@ -217,16 +233,6 @@ function siren(sec) { const a = audio(), o = a.createOscillator(), g = a.createG
   g.gain.setValueAtTime(.0001, t); g.gain.exponentialRampToValueAtTime(.07, t + .2); g.gain.setValueAtTime(.07, t + sec - .3); g.gain.exponentialRampToValueAtTime(.0001, t + sec);
   o.connect(g); g.connect(master); o.start(t); o.stop(t + sec + .05); }
 function crowd(sec) { for (let i = 0; i < sec * 6; i++) noise(.4, 400 + Math.random() * 600, .6, .12, i / 6); }
-// Voix off de bande-annonce (Paul, 04/11) : voix française, grave et lente.
-let voice = null;
-function pickVoice() { const vs = (window.speechSynthesis && speechSynthesis.getVoices()) || [];
-  voice = vs.find((v) => /fr/i.test(v.lang) && /thomas|male|homme|daniel|paul/i.test(v.name)) || vs.find((v) => /^fr/i.test(v.lang)) || null; }
-if (window.speechSynthesis) { pickVoice(); speechSynthesis.onvoiceschanged = pickVoice; }
-function say(text, rate = .82) {
-  if (muted || !window.speechSynthesis) return;
-  try { const u = new SpeechSynthesisUtterance(text); u.lang = "fr-FR"; if (voice) u.voice = voice;
-    u.pitch = .45; u.rate = rate; u.volume = 1; speechSynthesis.cancel(); speechSynthesis.speak(u); } catch (e) {}
-}
 function fanfare() { const n = [523, 659, 784, 1047, 784, 1047]; n.forEach((f, i) => { tone(f, .5, "triangle", .22, i * .14); tone(f / 2, .5, "sawtooth", .08, i * .14); }); }
 
 // ---- Neige, feux d'artifice, confettis ---------------------------------------
@@ -290,9 +296,8 @@ async function film() {
   // 2. La bande-annonce (histoire écrite par Paul, 04/11/2026).
   show("trailer");
   const l = $("tline");
-  async function line(text, style = "", ms = 2300, sound = braam, spoken = text) {
+  async function line(text, style = "", ms = 2300, sound = braam) {
     l.classList.remove("show"); await wait(450); l.className = "line cinzel " + style; l.textContent = text;
-    if (spoken) say(spoken.toLowerCase().replace(/…/g, "..."));
     // Mot très long (« SAINT-VICTOR-LA-COSTE ») : plus petit, sur une ligne.
     l.style.fontSize = text.length > 16 && !text.includes(" ") ? "min(6.2vw, 34px)" : "";
     void l.offsetWidth; l.classList.add("show"); if (sound) sound(); vibrate(40); await wait(ms);
@@ -308,32 +313,32 @@ async function film() {
     whoosh(); await wait(900); boom(); document.body.classList.add("shake"); setTimeout(() => document.body.classList.remove("shake"), 500); vibrate(120);
     await wait(1300);
   }
-  say("Dans un monde... où plus rien n'est sûr...", .78); await wait(3200);
   await line(data.date ? data.date.toUpperCase() + "." : "CETTE ANNÉE.");
   await line((data.place || "QUELQUE PART EN FRANCE").toUpperCase() + ".");
   await line("La famille se réunit.", "whisper", 2600, chime);
   await line("MAIS…", "big", 2200, boom);
   $("red").classList.add("on"); siren(9); crowd(9);
   l.classList.remove("show");
-  say("La crise frappe.", .8);
   await news("LE PETIT BEAUJOLAIS · ÉDITION SPÉCIALE", "Pénurie mondiale de papier cadeau", -6);
   await news("FLASH INFO", "Les lutins en grève illimitée", 5);
   await news("DERNIÈRE MINUTE", "Le Père Noël revend son traîneau sur Leboncoin", -3);
   await news("ÉCONOMIE", "Le prix de la bûche s'envole : +400 %", 4);
   await wait(800);
-  pile.forEach((n) => { n.style.transition = "opacity .8s"; n.style.opacity = ".18"; });
+  // La pile disparaît entièrement avant la suite (Paul, 04/11).
+  pile.forEach((n) => { n.style.transition = "opacity .8s"; n.style.animation = "none"; n.style.transform = getComputedStyle(n).transform; n.style.opacity = "0"; });
+  await wait(850); pile.forEach((n) => n.remove()); pile.length = 0;
   await line("Les portefeuilles sont vides.", "crisis", 2300, boom);
   await line("Impossible d'offrir un cadeau à chacun.", "crisis", 2600, boom);
   $("red").classList.remove("on");
-  pile.forEach((n) => { n.style.opacity = "0"; setTimeout(() => n.remove(), 900); });
+  document.querySelectorAll(".news").forEach((n) => n.remove());
   await line("Tout semble perdu…", "whisper", 2600, null);
   await line("Jusqu'à ce qu'une idée…", "whisper", 2200, null);
   await line("…d'une audace inouïe…", "whisper", 2200, null);
   await line("…d'une originalité jamais vue…", "whisper", 2400, null);
   await line("…ne change tout.", "", 2200, braam);
-  await line("UN", "big", 900, boom, "un... secret... santa.");
-  await line("SECRET", "big gold", 900, boom, null);
-  await line("SANTA.", "big gold", 2600, () => { boom(); chime(); burst(W / 2, H / 2, 160, ["#f7d36a", "#fff"], 10, .08, 2.6, 90); }, null);
+  await line("UN", "big", 900, boom);
+  await line("SECRET", "big gold", 900, boom);
+  await line("SANTA.", "big gold", 2600, () => { boom(); chime(); burst(W / 2, H / 2, 160, ["#f7d36a", "#fff"], 10, .08, 2.6, 90); });
   // 3. Le bouton du tirage (Paul, 04/11), puis la machine à sous des prénoms.
   l.classList.remove("show"); await wait(700);
   show("launch"); tone(220, 2.5, "sine", .08);
@@ -342,7 +347,9 @@ async function film() {
   show("reel"); const strip = $("strip"); const others = data.names.filter((n) => n !== data.giver);
   const seq = []; for (let i = 0; i < 44; i++) seq.push(others[(i * 7 + 3) % others.length]);
   const fake1 = others.find((n) => n !== data.target) || data.target, fake2 = others.filter((n) => n !== data.target).slice(-1)[0] || data.target;
-  seq.push(fake1, fake2, data.target);
+  // Le nom tiré n'apparaît jamais dans la machine (Paul, 04/11) : elle
+  // s'arrête sur un point d'interrogation.
+  seq.push(fake1, fake2, "❓");
   strip.innerHTML = seq.map((n) => `<div class="cell gold">${n}</div>`).join("");
   drumroll(7.5);
   const stops = [seq.length - 3, seq.length - 2]; let pos = 0;
@@ -358,7 +365,6 @@ async function film() {
   document.querySelector("#reel .window").style.boxShadow = "0 0 90px rgba(247,211,106,.9), inset 0 0 30px rgba(0,0,0,.8)";
   const beats = setInterval(() => { heartbeat(); vibrate([50, 90, 50]); }, 900); heartbeat();
   await animateTo(seq.length - 1, 4200); clearInterval(beats); await wait(500);
-  strip.innerHTML = strip.innerHTML.replace(new RegExp(`>${data.target}<`, "g"), ">❓<");
   // 4. Le cadeau et le compte à rebours.
   show("gift"); whoosh(); await wait(1000); boom(); vibrate(60); await wait(900);
   for (const n of ["3", "2", "1"]) { $("count").textContent = n; heartbeat(); vibrate([60, 120, 60]); await wait(1000); }
