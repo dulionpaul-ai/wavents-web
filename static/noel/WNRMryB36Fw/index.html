@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="robots" content="noindex, nofollow">
-<title>Secret Santa · Wavents Pictures</title>
+<title>Secret Santa · Une production Paul</title>
 <link rel="icon" href="/img/favicon.svg">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -39,7 +39,7 @@
     transition: transform .9s cubic-bezier(.3,1.6,.5,1), opacity .5s; }
   #studio.on .pin { transform: none; opacity: 1; }
   #studio .name { font-size: clamp(26px, 8vw, 46px); font-weight: 900; }
-  #studio .sub { color: #9fb2c8; letter-spacing: .5em; font-size: 12px; margin-top: 8px; }
+  #studio .sub { color: #9fb2c8; letter-spacing: .35em; font-size: 12px; margin: 8px 0; min-height: 1em; }
   .ring { position: fixed; left: 50%; top: 50%; width: 10px; height: 10px; margin: -5px; border-radius: 50%;
     border: 2px solid rgba(247,211,106,.85); box-shadow: 0 0 30px rgba(247,211,106,.5); z-index: 9; pointer-events: none;
     animation: ring 1.8s cubic-bezier(.2,.7,.3,1) forwards; }
@@ -115,14 +115,15 @@
 
 <section class="scene on" id="start">
   <h1 class="cinzel gold" id="hello">Secret Santa</h1>
-  <p id="hello2">Une production Wavents Pictures</p>
+  <p id="hello2">Une production Paul</p>
   <button class="btn" id="go">🎬 Lancer la projection</button>
 </section>
 
 <section class="scene" id="studio">
   <img class="pin" src="/img/pin.png" alt="">
-  <div class="name cinzel gold">WAVENTS PICTURES</div>
-  <div class="sub">PRÉSENTE</div>
+  <div class="sub" id="pre1"></div>
+  <div class="name cinzel gold" id="studioName">PAUL</div>
+  <div class="sub" id="pre2">PRÉSENTE</div>
 </section>
 
 <section class="scene" id="trailer"><div class="line cinzel" id="tline"></div></section>
@@ -262,7 +263,20 @@ async function film() {
   // 1. Le studio : l'épingle se pose, l'onde part de sa pointe.
   show("studio"); whoosh(); await wait(900); boom(); vibrate(80);
   const pin = document.querySelector("#studio .pin").getBoundingClientRect();
-  ring(pin.left + pin.width / 2 + "px", pin.bottom - 4 + "px"); await wait(2600);
+  ring(pin.left + pin.width / 2 + "px", pin.bottom - 4 + "px"); await wait(2400);
+  // Générique d'ouverture : Paul partout (comique de répétition, Paul 04/11).
+  const cards = [["UNE PRODUCTION", "PAUL", ""], ["EN ASSOCIATION AVEC", "PAUL", ""], ["SUR UN SCÉNARIO ORIGINAL DE", "PAUL", ""],
+    ["D'APRÈS UNE IDÉE DE", "PAUL", ""], ["MUSIQUE ORIGINALE", "PAUL", ""], ["EFFETS SPÉCIAUX", "PAUL", ""],
+    ["CASTING", "PAUL", ""], ["AVEC LA PARTICIPATION EXCEPTIONNELLE DE…", "PAUL", "(dans son propre rôle)"]];
+  const sn = $("studioName"), p1 = $("pre1"), p2 = $("pre2");
+  for (let i = 0; i < cards.length; i++) {
+    const [a, b, c] = cards[i]; const fast = i > 2 && i < cards.length - 1;
+    sn.style.transition = p1.style.transition = p2.style.transition = "opacity .25s";
+    sn.style.opacity = p1.style.opacity = p2.style.opacity = 0; await wait(fast ? 180 : 350);
+    p1.textContent = a; sn.textContent = b; p2.textContent = c;
+    sn.style.opacity = p1.style.opacity = p2.style.opacity = 1; (i === cards.length - 1 ? boom : braam)(); vibrate(30);
+    await wait(i === cards.length - 1 ? 2600 : fast ? 900 : 1500);
+  }
   // 2. La bande-annonce (histoire écrite par Paul, 04/11/2026).
   show("trailer");
   const l = $("tline");
@@ -348,7 +362,7 @@ async function film() {
 }
 async function credits() {
   fireworksOn = false; show("credits"); const r = $("roll");
-  r.innerHTML = `<b>RÉALISÉ PAR</b>Le Père Noël<b>PRODUIT PAR</b>Wavents Pictures<b>AVEC</b>${data.names.join("<br>")}<b>MUSIQUE</b>Le roulement de tambour<b>EFFETS SPÉCIAUX</b>Les lutins<b>DANS TOUTES LES BONNES CHEMINÉES</b>Le ${data.date || "soir de Noël"}<br><br>🎄`;
+  r.innerHTML = `<b>RÉALISÉ PAR</b>Paul<b>PRODUIT PAR</b>Paul<b>SCÉNARIO</b>Paul<b>AVEC</b>${data.names.join("<br>")}<b>ET</b>Paul<b>CASCADES</b>Paul<b>MAQUILLAGE</b>Paul<b>TRAITEUR</b>Paul<b>DIRECTEUR DES LUTINS</b>Paul<b>AUCUN PAUL N'A ÉTÉ MALTRAITÉ PENDANT LE TOURNAGE</b><b>MERCI À</b>Paul<b>RENDEZ-VOUS</b>Le ${data.date || "soir de Noël"}${data.place ? " à " + data.place : ""}<br><br>🎄<br>Une production Paul`;
   $("credits").classList.remove("on"); void $("credits").offsetWidth; $("credits").classList.add("on");
   await wait(16500); show("reveal"); fireworksOn = true;
 }
