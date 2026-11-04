@@ -272,11 +272,16 @@ async function film() {
     l.style.fontSize = text.length > 16 && !text.includes(" ") ? "min(6.2vw, 34px)" : "";
     void l.offsetWidth; l.classList.add("show"); if (sound) sound(); vibrate(40); await wait(ms);
   }
+  // Les unes s'empilent les unes sur les autres (Paul, 04/11), un peu
+  // décalées, puis s'effacent ensemble.
+  const pile = [];
   async function news(kicker, title, rot) {
     const n = document.createElement("div"); n.className = "news"; n.style.setProperty("--r", rot + "deg");
-    n.innerHTML = `<small>${kicker}</small><strong>${title}</strong>`; document.body.appendChild(n);
+    const k = pile.length;
+    n.style.marginLeft = (k % 2 ? 1 : -1) * (6 + k * 5) + "px"; n.style.marginTop = (k * 14 - 20) + "px"; n.style.zIndex = 12 + k;
+    n.innerHTML = `<small>${kicker}</small><strong>${title}</strong>`; document.body.appendChild(n); pile.push(n);
     whoosh(); await wait(900); boom(); document.body.classList.add("shake"); setTimeout(() => document.body.classList.remove("shake"), 500); vibrate(120);
-    await wait(1500); n.remove();
+    await wait(1300);
   }
   await line(data.date ? data.date.toUpperCase() + "." : "CETTE ANNÉE.");
   await line((data.place || "QUELQUE PART EN FRANCE").toUpperCase() + ".");
@@ -288,9 +293,12 @@ async function film() {
   await news("FLASH INFO", "Les lutins en grève illimitée", 5);
   await news("DERNIÈRE MINUTE", "Le Père Noël revend son traîneau sur Leboncoin", -3);
   await news("ÉCONOMIE", "Le prix de la bûche s'envole : +400 %", 4);
+  await wait(800);
+  pile.forEach((n) => { n.style.transition = "opacity .8s"; n.style.opacity = ".18"; });
   await line("Les portefeuilles sont vides.", "crisis", 2300, boom);
   await line("Impossible d'offrir un cadeau à chacun.", "crisis", 2600, boom);
   $("red").classList.remove("on");
+  pile.forEach((n) => { n.style.opacity = "0"; setTimeout(() => n.remove(), 900); });
   await line("Tout semble perdu…", "whisper", 2600, null);
   await line("Jusqu'à ce qu'une idée…", "whisper", 2200, null);
   await line("…d'une audace inouïe…", "whisper", 2200, null);
