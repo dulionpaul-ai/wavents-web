@@ -1038,7 +1038,7 @@ def event_page(event: dict, neighbours: list[dict], series: dict[str, list[dict]
     maps = f"https://www.google.com/maps/dir/?api=1&destination={lat},{lon}"
     image = image_for(event, root)
 
-    actions = [f'<a class="btn btn-sun" href="event.ics" download="wavents-{event["id"][:8]}.ics" data-goatcounter-click="clic-agenda">📅 Ajouter à mon agenda</a>',
+    actions = [f'<a class="btn btn-sun" href="event.ics" rel="nofollow" download="wavents-{event["id"][:8]}.ics" data-goatcounter-click="clic-agenda">📅 Ajouter à mon agenda</a>',
                f'<a class="btn btn-ghost" href="{maps}" target="_blank" rel="noopener" data-goatcounter-click="clic-itineraire">🧭 Y aller</a>',
                '<button class="btn btn-ghost" data-share data-goatcounter-click="clic-partager">🔗 Partager</button>']
     if (event.get("website_url") or "").startswith("http"):
@@ -2648,7 +2648,9 @@ def main() -> int:
         encoding="utf-8",
     )
     (out / "llms.txt").write_text(llms_txt(upcoming, now, communes, markets), encoding="utf-8")
-    (out / "robots.txt").write_text(f"User-agent: *\nAllow: /\nSitemap: {BASE_URL}/sitemap.xml\n", encoding="utf-8")
+    # Fichiers agenda (.ics) hors de Google (09/11/2026 : la Search Console
+    # les comptait parmi les ~265 pages « explorées, non indexées »).
+    (out / "robots.txt").write_text(f"User-agent: *\nAllow: /\nDisallow: /*.ics$\nSitemap: {BASE_URL}/sitemap.xml\n", encoding="utf-8")
     # IndexNow (Bing, et par lui ChatGPT/Copilot) : liste des pages à
     # signaler après la publication (étape du workflow pages.yml). Les pages
     # communes changent chaque jour ; les événements, les 2 000 plus proches.
