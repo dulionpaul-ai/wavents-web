@@ -1,0 +1,70 @@
+# Page d'une sortie toute juste publiée (Paul, 09/11/2026) : le site n'est
+# régénéré que 4 fois par jour, et un organisateur qui partageait sa sortie
+# tout de suite donnait un lien « Page introuvable » pendant des heures (7
+# visites perdues le 08/11). Toutes les 15 minutes : si une sortie ajoutée
+# depuis l'appli ou par la veille (48 dernières heures) n'a pas encore sa
+# page, le site est régénéré (pages.yml). Une requête légère sinon, gratuite
+# (dépôt public). En attendant, static/404.html affiche la fiche depuis la base.
+name: Pages des nouvelles sorties
+
+on:
+  schedule:
+    - cron: "*/15 * * * *"
+  workflow_dispatch:
+
+permissions:
+  actions: write
+  contents: read
+
+concurrency:
+  group: pages-nouvelles
+  cancel-in-progress: false
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Chercher les sorties sans page
+        id: missing
+        run: |
+          python3 - <<'PY'
+          import json, os, urllib.error, urllib.request
+          from datetime import datetime, timedelta, timezone
+          from zoneinfo import ZoneInfo
+          key = ("eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im16Ynhud3ZydnJobHVjanpiemxzIiwicm9sZSI6"
+                 "ImFub24iLCJpYXQiOjE3ODQ2NDMwMzQsImV4cCI6MjEwMDIxOTAzNH0.wqoOLgNM92KmwZfbh4c56dVN13DDlCxJhuOOoqlH1is")
+          since = (datetime.now(timezone.utc) - timedelta(hours=48)).strftime("%Y-%m-%dT%H:%M:%SZ")
+          url = ("https://mzbxnwvrvrhlucjzbzls.supabase.co/rest/v1/events?select=id,start_date,end_date"
+                 "&status=eq.active&source=in.(app,veille)&latitude=not.is.null"
+                 f"&published_at=gte.{since}&limit=200")
+          req = urllib.request.Request(url, headers={"apikey": key, "Authorization": f"Bearer {key}"})
+          rows = json.load(urllib.request.urlopen(req, timeout=30))
+          # Dates en heure de Paris avec un suffixe UTC : comparer à l'heure de Paris.
+          now = datetime.now(ZoneInfo("Europe/Paris")).replace(tzinfo=None)
+          missing = []
+          for ev in rows:
+              end = datetime.fromisoformat((ev["end_date"] or ev["start_date"])[:19])
+              if end < now - timedelta(days=1):
+                  continue  # le site ne fait pas de page pour une sortie passée
+              try:
+                  urllib.request.urlopen(urllib.request.Request(
+                      f"https://wavents.fr/e/{ev['id']}/", method="HEAD"), timeout=20)
+              except urllib.error.HTTPError as e:
+                  if e.code == 404:
+                      missing.append(ev["id"])
+          print(f"{len(rows)} sorties récentes, {len(missing)} sans page : {missing}")
+          with open(os.environ["GITHUB_OUTPUT"], "a") as f:
+              f.write(f"count={len(missing)}\n")
+          PY
+      - name: Régénérer le site
+        if: steps.missing.outputs.count != '0'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          # Pas deux fois de suite : une génération lancée ou en cours suffit.
+          busy=$(gh run list -R "$GITHUB_REPOSITORY" -w pages.yml --limit 5 \
+                 --json status,createdAt \
+                 --jq "[.[] | select(.status != \"completed\" or (.createdAt | fromdateiso8601) > (now - 1200))] | length")
+          if [ "$busy" != "0" ]; then echo "Génération déjà lancée il y a moins de 20 min."; exit 0; fi
+          gh workflow run pages.yml -R "$GITHUB_REPOSITORY" --ref main

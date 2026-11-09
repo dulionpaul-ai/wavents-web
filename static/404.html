@@ -4,6 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Page introuvable – Wavents</title>
+  <meta name="robots" content="noindex">
   <link rel="icon" href="/favicon.ico" sizes="48x48">
   <link rel="icon" type="image/svg+xml" sizes="any" href="/img/favicon.svg">
   <link rel="icon" type="image/png" sizes="96x96" href="/img/favicon-96.png">
@@ -12,11 +13,68 @@
 </head>
 <body>
   <header class="top"><a href="/" class="brand">Wavents</a></header>
-  <main>
+  <main id="notfound">
     <h1>Cette page n'existe pas (ou plus)</h1>
     <p class="muted">Si c'était un événement, il est peut-être passé ou a été retiré par son organisateur. Les prochaines sorties autour de toi t'attendent sur l'accueil.</p>
     <p><a class="button primary" href="/">Voir les prochains événements</a></p>
   </main>
+  <main id="fresh" style="display:none">
+    <p class="muted">Tout juste ajouté sur Wavents</p>
+    <img id="f-img" alt="" style="max-width:100%;max-height:420px;border-radius:16px;display:none">
+    <h1 id="f-title"></h1>
+    <p id="f-when"></p>
+    <p id="f-where"></p>
+    <p id="f-desc" style="white-space:pre-line"></p>
+    <p><a id="f-map" class="button" target="_blank" rel="noopener">🧭 Y aller</a></p>
+    <p><a class="button primary" href="/app/" data-goatcounter-click="clic-fiche-recente-appli">Voir toutes les sorties dans l'appli Wavents</a></p>
+  </main>
+<script>
+// Fiche publiée depuis le dernier passage du site : sa page /e/<id>/
+// n'existe pas encore. Les liens partagés tout de suite par les
+// organisateurs tombaient sur « Page introuvable » (Paul, 09/11/2026) : on
+// charge la fiche depuis la base et on l'affiche en attendant la vraie page
+// (.github/workflows/pages-nouvelles.yml la crée dans le quart d'heure).
+(function () {
+  var m = location.pathname.match(/^\/e\/([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})\/?/i);
+  if (!m) return;
+  var key = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im16Ynhud3ZydnJobHVjanpiemxzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQ2NDMwMzQsImV4cCI6MjEwMDIxOTAzNH0.wqoOLgNM92KmwZfbh4c56dVN13DDlCxJhuOOoqlH1is";
+  var url = "https://mzbxnwvrvrhlucjzbzls.supabase.co/rest/v1/events?select=title,description,location_name,address,latitude,longitude,start_date,end_date,start_time_known,image_url&status=eq.active&id=eq." + m[1];
+  fetch(url, { headers: { apikey: key, Authorization: "Bearer " + key } })
+    .then(function (r) { return r.ok ? r.json() : []; })
+    .then(function (rows) {
+      var e = rows && rows[0];
+      if (!e) return;
+      // Dates en heure de Paris avec un suffixe UTC (convention de la base).
+      var opt = { weekday: "long", day: "numeric", month: "long", timeZone: "UTC" };
+      var start = new Date(e.start_date), end = e.end_date ? new Date(e.end_date) : null;
+      var day = function (d) { return d.toLocaleDateString("fr-FR", opt); };
+      var when = day(start);
+      if (e.start_time_known !== false) {
+        var mn = start.getUTCMinutes();
+        when += " à " + start.getUTCHours() + " h" + (mn ? String(mn).padStart(2, "0") : "");
+      }
+      if (end && day(end) !== day(start)) when = "du " + day(start) + " au " + day(end);
+      var set = function (id, text) { document.getElementById(id).textContent = text || ""; };
+      var where = [e.location_name, e.address].filter(function (v, i, a) { return v && a.indexOf(v) === i; });
+      set("f-title", e.title);
+      set("f-when", "🗓️ " + when.charAt(0).toUpperCase() + when.slice(1));
+      set("f-where", where.length ? "📍 " + where.join(" · ") : "");
+      set("f-desc", e.description);
+      var map = document.getElementById("f-map");
+      if (e.latitude && e.longitude) map.href = "https://www.google.com/maps/dir/?api=1&destination=" + e.latitude + "," + e.longitude;
+      else map.style.display = "none";
+      if (e.image_url) {
+        var img = document.getElementById("f-img");
+        img.onload = function () { img.style.display = "block"; };
+        img.src = e.image_url;
+      }
+      document.title = e.title + " | Wavents";
+      document.getElementById("notfound").style.display = "none";
+      document.getElementById("fresh").style.display = "";
+    })
+    .catch(function () {});
+})();
+</script>
 <script data-goatcounter="https://wavents.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
 </body>
 </html>
