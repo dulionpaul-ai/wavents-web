@@ -31,17 +31,25 @@ jobs:
     timeout-minutes: 15
     environment:
       name: github-pages
-      url: ${{ steps.deploy.outputs.page_url }}
+      url: ${{ steps.deploy.outputs.page_url || steps.deploy2.outputs.page_url }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-      - run: python generate.py site
+      # Deuxième essai après 1 min : les échecs passagers (base ou GitHub)
+      # n'envoient plus de mail d'erreur à Paul (10/11/2026).
+      - run: python generate.py site || (sleep 60 && python generate.py site)
       - uses: actions/upload-pages-artifact@v3
         with:
           path: site
       - id: deploy
+        uses: actions/deploy-pages@v4
+        continue-on-error: true
+      - if: steps.deploy.outcome == 'failure'
+        run: sleep 60
+      - id: deploy2
+        if: steps.deploy.outcome == 'failure'
         uses: actions/deploy-pages@v4
       - name: Signaler les pages à Bing (IndexNow)
         # Clé publique par conception (fichier 2c29f47b40715616fc2817b79ca473b0.txt à la racine du site).
