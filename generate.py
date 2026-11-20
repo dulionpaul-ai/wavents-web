@@ -632,10 +632,27 @@ def fallback(event: dict, root: str) -> str:
     return f"this.onerror=null;this.src='{category_photo(event.get('category_id'), root)}'"
 
 
-def media(event: dict, root: str, css: str = "") -> str:
+def thumb(url: str, width: int) -> str:
+    """Vignette des listes servie par wsrv.nl (service libre d'images,
+    derrière le cache de Cloudflare) pour les photos de notre stockage
+    Supabase : réduite à la taille affichée et gardée en cache, au lieu de
+    la photo entière téléchargée chez Supabase à chaque visite et à chaque
+    robot (20/11/2026, quota de bande passante Supabase dépassé)."""
+    if not url.startswith(f"{SUPABASE_URL}/storage/"):
+        return url
+    return f"https://wsrv.nl/?url={quote(url, safe='')}&w={width}&output=webp&q=72"
+
+
+def media(event: dict, root: str, css: str = "", width: int = 600) -> str:
     """Photo de l'événement, ou celle de sa catégorie (comme EventImage dans
-    l'appli)."""
-    return f'<img class="{css}" src="{e(image_for(event, root))}" alt="" loading="lazy" onerror="{fallback(event, root)}">'
+    l'appli). Vignette réduite (thumb) ; si elle ne vient pas, la photo
+    d'origine, puis celle de la catégorie."""
+    src = image_for(event, root)
+    small = thumb(src, width)
+    if small == src:
+        return f'<img class="{css}" src="{e(src)}" alt="" loading="lazy" onerror="{fallback(event, root)}">'
+    retry = f"this.onerror=function(){{{fallback(event, root)}}};this.src='{src}'"
+    return f'<img class="{css}" src="{e(small)}" alt="" loading="lazy" onerror="{e(retry)}">'
 
 
 def card(event: dict, series: dict[str, list[dict]], root: str = "", *, size: str = "") -> str:
@@ -682,7 +699,7 @@ def row_card(event: dict, series: dict[str, list[dict]], root: str = "") -> str:
         badges.append('<span class="badge kids">En famille</span>')
     search = fold(f"{event['title']} {commune_of(event)} {event.get('location_name') or ''} {label}")
     return f"""<a class="row-card" href="{root}{event_path(event)}" data-cat="{e(event.get('category_id') or '')}" data-free="{1 if is_free(event) else 0}" data-kids="{1 if event.get('for_kids') else 0}" data-q="{e(search)}" data-lat="{event['latitude']:.3f}" data-lon="{event['longitude']:.3f}" style="--cat:{color}">
-  <span class="row-media">{media(event, root)}</span>
+  <span class="row-media">{media(event, root, width=200)}</span>
   <span class="row-body"><span class="cat-chip">{emoji} {e(label)}</span><b>{e(event['title'])}</b><span class="row-date">{e(meta)}</span>{f'<span class="badges">{"".join(badges)}</span>' if badges else ''}</span>
 </a>"""
 
