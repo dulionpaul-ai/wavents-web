@@ -576,7 +576,7 @@ def layout(title: str, body: str, *, description: str, url: str, image: str | No
         <a href="{root}gratuit/">Sorties gratuites</a>
         <a href="{root}enfants/">En famille</a>
         <a href="{root}lettre/">💌 La lettre du jeudi</a>
-        <a href="https://ko-fi.com/wavents" target="_blank" rel="noopener" data-goatcounter-click="clic-pied-kofi">🥞 Offre-nous une crêpe</a>
+        <a href="https://ko-fi.com/wavents" target="_blank" rel="noopener" data-goatcounter-click="clic-pied-kofi">☕ Offre-nous un café</a>
         <a href="{root}a-propos/">À propos</a>
         <a href="{root}ajouter/">Ajouter un événement</a>
         <a href="{root}secret-santa/" data-goatcounter-click="clic-pied-secret-santa">🎅 Secret Santa en ligne</a>
