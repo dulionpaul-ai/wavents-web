@@ -118,6 +118,22 @@ def fetch_events() -> list[dict]:
         offset += page
 
 
+def fetch_lettre_communes() -> list[str]:
+    """Noms officiels des communes à moins de 50 km (suggestions du
+    formulaire de la lettre du jeudi). Liste vide si la base ne répond pas :
+    le formulaire marche sans."""
+    request = urllib.request.Request(
+        f"{SUPABASE_URL}/rest/v1/rpc/lettre_communes_proches", data=b"{}", method="POST",
+        headers={"apikey": SUPABASE_ANON_KEY, "Authorization": f"Bearer {SUPABASE_ANON_KEY}",
+                 "Content-Type": "application/json"})
+    try:
+        with urllib.request.urlopen(request, timeout=30) as response:
+            return [name for name in json.load(response) if isinstance(name, str)]
+    except Exception as exc:  # noqa: BLE001
+        print(f"Communes de la lettre illisibles : {exc}")
+        return []
+
+
 def fetch_gone_events(days: int = 180) -> list[dict]:
     """Fiches publiées ces derniers mois et plus en ligne (passées, ou
     doublons retirés avec la fiche gardée) : fonction site_gone_events
@@ -559,6 +575,7 @@ def layout(title: str, body: str, *, description: str, url: str, image: str | No
         <a href="{root}brocantes/">Brocantes</a>
         <a href="{root}gratuit/">Sorties gratuites</a>
         <a href="{root}enfants/">En famille</a>
+        <a href="{root}lettre/">💌 La lettre du jeudi</a>
         <a href="{root}a-propos/">À propos</a>
         <a href="{root}ajouter/">Ajouter un événement</a>
         <a href="{root}secret-santa/" data-goatcounter-click="clic-pied-secret-santa">🎅 Secret Santa en ligne</a>
@@ -866,6 +883,7 @@ def home_page(events: list[dict], all_upcoming: list[dict], now: datetime) -> st
   </section>''' if ongoing else ''}
   </div>
 
+{lettre_section("", "accueil")}
 {demos_section()}
   <section class="section">
     <div class="section-head reveal"><div><p class="kicker">Envie de quoi ?</p><h2>Par catégorie</h2></div></div>
@@ -1932,6 +1950,9 @@ FESTIVALS = [
 ]
 
 
+FEST_COUNTS: dict[str, int] = {}  # rendez-vous par page de fête (data/saisons.json, lettre du jeudi)
+
+
 def festival_page(fest: dict, upcoming: list[dict], series: dict[str, list[dict]], now: datetime) -> str:
     root = "../"
     first, last = fest["first"], fest["last"]
@@ -1958,6 +1979,7 @@ def festival_page(fest: dict, upcoming: list[dict], series: dict[str, list[dict]
     if not fest.get("town"):
         items = one_per_day(collapse_series(items))
     items.sort(key=lambda ev: wall_time(ev["start_date"]))
+    FEST_COUNTS[fest["slug"]] = len(items)
     nearby = []
     if fest.get("nearby_match"):
         nearby = one_per_day(sorted((ev for ev in collapse_series(in_window) if ev not in items and near(ev)
@@ -2121,6 +2143,7 @@ def festival_page(fest: dict, upcoming: list[dict], series: dict[str, list[dict]
   {days_html}
   {nearby_html}
   {story_block if fest.get("story_after") else ""}
+{lettre_section(root, "fete-" + fest["slug"])}
   <section class="section prose"><h2>Questions fréquentes</h2>{faq_html}</section>
   <section class="section"><div class="town-links">{links_html}</div></section>"""
     return layout(
@@ -2375,6 +2398,112 @@ def demos_section() -> str:
 """
 
 
+LETTRE_NOTE = ("Une lettre par semaine, le jeudi, gratuite. Tu confirmes ton adresse par mail, et tu te "
+               "désinscris en un clic. Ton adresse ne sert qu'à ça.")
+
+
+def lettre_form(root: str, canal: str, *, rayon: bool = False) -> str:
+    """Formulaire d'inscription à la lettre du jeudi (static/lettre.js,
+    fonction lettre_inscrire du dépôt Wavents, script SQL 239)."""
+    rayon_html = ("" if not rayon else
+                  '<label class="lettre-f lettre-rayon"><span>Jusqu\'à</span><select name="rayon">'
+                  '<option value="10">10 km</option><option value="20" selected>20 km</option>'
+                  '<option value="30">30 km</option></select></label>')
+    return (f'<form class="lettre-form" data-canal="{e(canal)}" data-supabase="{SUPABASE_URL}" '
+            f'data-key="{SUPABASE_ANON_KEY}" data-communes="{root}data/communes.json" novalidate>'
+            '<div class="lettre-fields">'
+            '<label class="lettre-f"><span>Ton e-mail</span><input type="email" name="email" required '
+            'autocomplete="email" inputmode="email" placeholder="toi@exemple.fr" maxlength="254"></label>'
+            '<label class="lettre-f"><span>Ta commune</span><input name="commune" required autocomplete="address-level2" '
+            f'placeholder="Belleville, Beaujeu…" maxlength="80" list="lettre-communes-{e(canal)}">'
+            f'<datalist id="lettre-communes-{e(canal)}"></datalist></label>'
+            f'{rayon_html}</div>'
+            '<input name="site_web" tabindex="-1" autocomplete="off" class="piege" aria-hidden="true">'
+            '<button class="btn btn-sun lettre-go" type="submit">Je m\'inscris</button>'
+            '<p class="lettre-status" aria-live="polite"></p>'
+            f'<p class="lettre-note">{e(LETTRE_NOTE)} <a href="{root}confidentialite.html#lettre">Confidentialité</a></p>'
+            f'</form><script src="{root}lettre.js" defer></script>')
+
+
+def lettre_section(root: str, canal: str) -> str:
+    """Bloc « La lettre du jeudi » des pages d'accueil et de fête."""
+    return f"""  <section class="section lettre-section" id="lettre">
+    <div class="lettre-card reveal">
+      <span class="feedback-emoji lettre-emoji" aria-hidden="true">💌</span>
+      <div class="lettre-body">
+        <p class="kicker">La lettre du jeudi</p>
+        <h2>Ce week-end autour de chez toi, dans ta boîte mail</h2>
+        <p>Chaque jeudi, les meilleures sorties du week-end près de ta commune&nbsp;: concerts, fêtes, marchés, spectacles. Rien à installer.</p>
+        {lettre_form(root, canal)}
+      </div>
+    </div>
+  </section>
+"""
+
+
+def lettre_page() -> str:
+    root = "../"
+    body = f"""  <section class="ev-hero town-hero"><div class="ev-hero-inner">
+    <a class="back" href="{root}">← Accueil</a>
+    <p class="kicker">Gratuit, chaque jeudi</p>
+    <h1>La lettre du jeudi</h1>
+    <p class="lead">Ce week-end autour de chez toi&nbsp;: les meilleures sorties près de ta commune, dans ta boîte mail, chaque jeudi.</p>
+  </div></section>
+  <main class="section lettre-page">
+    <div class="lettre-card">
+      <span class="feedback-emoji lettre-emoji" aria-hidden="true">💌</span>
+      <div class="lettre-body">
+        <h2>Inscris-toi en dix secondes</h2>
+        {lettre_form(root, "lettre", rayon=True)}
+      </div>
+    </div>
+    <div class="panel soft lettre-what">
+      <h2>Ce que tu reçois</h2>
+      <ul>
+        <li>Chaque jeudi, 5 à 8 sorties du week-end près de chez toi, choisies parmi tout ce que Wavents trouve dans les agendas du coin.</li>
+        <li>Pour chacune&nbsp;: la photo, le jour, l'heure, le lieu et le lien vers sa fiche.</li>
+        <li>Le temps fort du moment (marchés de Noël, Fête des Lumières…) avec tout son programme.</li>
+        <li>Pas de pub, pas de revente de ton adresse. Pour arrêter, un clic en bas de chaque lettre.</li>
+      </ul>
+      <p>Une lettre à faire suivre&nbsp;: transfère-la à tes voisins, à ta famille, à tes amis.</p>
+    </div>
+  </main>"""
+    return layout("La lettre du jeudi : ce week-end autour de chez toi – Wavents", body,
+                  description="Chaque jeudi, les meilleures sorties du week-end près de chez toi dans le Beaujolais et le "
+                              "nord de Lyon, dans ta boîte mail. Gratuit, désinscription en un clic.",
+                  url=f"{BASE_URL}/lettre/", depth=1, page_class="town-page")
+
+
+def lettre_action_page(kind: str) -> str:
+    """Pages /lettre/confirmer/ et /lettre/desinscription/ (jeton dans
+    l'adresse, ?j=…), non indexées. La confirmation se fait à l'ouverture ;
+    la désinscription demande un clic (les antivirus de messagerie ouvrent
+    parfois les liens tout seuls)."""
+    root = "../../"
+    if kind == "confirmer":
+        title, h1 = "Confirmer mon inscription – Wavents", "Ton inscription à la lettre du jeudi"
+        inner = '<p class="lettre-status busy" id="lettre-msg" aria-live="polite">Confirmation en cours…</p>'
+    else:
+        title, h1 = "Me désinscrire – Wavents", "Te désinscrire de la lettre du jeudi"
+        inner = ('<p id="lettre-q">Tu ne recevras plus la lettre du jeudi, et ton adresse sera effacée.</p>'
+                 '<button class="btn btn-sun" type="button" id="lettre-go">Me désinscrire</button>'
+                 '<p class="lettre-status" id="lettre-msg" aria-live="polite"></p>')
+    body = f"""  <section class="ev-hero town-hero"><div class="ev-hero-inner">
+    <p class="kicker">La lettre du jeudi</p>
+    <h1>{e(h1)}</h1>
+  </div></section>
+  <main class="section lettre-page">
+    <div class="panel lettre-action" id="lettre-action" data-kind="{kind}" data-supabase="{SUPABASE_URL}" data-key="{SUPABASE_ANON_KEY}">
+      {inner}
+      <p class="lettre-after" id="lettre-after" hidden><a class="btn btn-ghost" href="{root}#week-end">Voir les sorties du week-end</a></p>
+    </div>
+  </main>
+  <script src="{root}lettre.js" defer></script>"""
+    return layout(title, body, description="La lettre du jeudi de Wavents.",
+                  url=f"{BASE_URL}/lettre/{kind}/", depth=2, page_class="town-page",
+                  extra_head='<meta name="robots" content="noindex">')
+
+
 def orga_section() -> str:
     return """  <section class="section">
     <div class="orga reveal"><span class="orga-ico" aria-hidden="true">📣</span>
@@ -2606,6 +2735,19 @@ def main() -> int:
     for fest in FESTIVALS:
         (out / fest["slug"]).mkdir(exist_ok=True)
         (out / fest["slug"] / "index.html").write_text(festival_page(fest, upcoming, series, now), encoding="utf-8")
+    # Lettre du jeudi (20/11/2026) : page d'inscription, confirmation,
+    # désinscription ; pages de saison (lues par le script d'envoi du dépôt
+    # Wavents) et communes proposées dans le formulaire.
+    for sub in ("lettre/confirmer", "lettre/desinscription"):
+        (out / sub).mkdir(parents=True, exist_ok=True)
+    (out / "lettre" / "index.html").write_text(lettre_page(), encoding="utf-8")
+    (out / "lettre" / "confirmer" / "index.html").write_text(lettre_action_page("confirmer"), encoding="utf-8")
+    (out / "lettre" / "desinscription" / "index.html").write_text(lettre_action_page("desinscription"), encoding="utf-8")
+    (out / "data" / "saisons.json").write_text(json.dumps(
+        [{"slug": f["slug"], "name": f["name"], "first": f["first"].isoformat(), "last": f["last"].isoformat(),
+          "teaser": f["teaser"], "n": FEST_COUNTS.get(f["slug"], 0)} for f in FESTIVALS],
+        ensure_ascii=False), encoding="utf-8")
+    (out / "data" / "communes.json").write_text(json.dumps(fetch_lettre_communes(), ensure_ascii=False), encoding="utf-8")
     (out / "a-propos").mkdir(exist_ok=True)
     (out / "a-propos" / "index.html").write_text(about_page(upcoming, communes), encoding="utf-8")
     (out / "faq").mkdir(exist_ok=True)
@@ -2615,7 +2757,7 @@ def main() -> int:
     (out / "app").mkdir(exist_ok=True)
     (out / "app" / "index.html").write_text(app_page(upcoming, communes), encoding="utf-8")
     extra_pages = ([f"{BASE_URL}/{t[0]}/" for t in THEMES] + [f"{BASE_URL}/{f['slug']}/" for f in FESTIVALS]
-                   + [f"{BASE_URL}/a-propos/", f"{BASE_URL}/faq/", f"{BASE_URL}/app/", f"{BASE_URL}/ajouter/",
+                   + [f"{BASE_URL}/a-propos/", f"{BASE_URL}/faq/", f"{BASE_URL}/app/", f"{BASE_URL}/ajouter/", f"{BASE_URL}/lettre/",
                       f"{BASE_URL}/secret-santa/", f"{BASE_URL}/secret-santa/collegues/",
                       f"{BASE_URL}/secret-santa/idees-cadeaux/", f"{BASE_URL}/secret-santa/a-distance/",
                       f"{BASE_URL}/trouver-une-date/", f"{BASE_URL}/trouver-une-date/alternative-doodle/",
