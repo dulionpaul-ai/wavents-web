@@ -768,3 +768,21 @@ a.fest-related .fest-more { color: var(--deep); font-weight: 700; margin-top: 4p
   .lettre-fields, .lettre-fields:has(.lettre-rayon) { grid-template-columns: 1fr; }
   .lettre-go { width: 100%; }
 }
+/* Kit organisateur (pages /o/<slug>/kit/, 20/11/2026) */
+.kit-h1 { overflow-wrap: anywhere; }
+.kit { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 340px), 1fr)); gap: 20px; align-items: start; }
+.kit-panel { margin: 0; }
+.kit-panel p { color: var(--ink-soft); margin: 0 0 14px; line-height: 1.5; }
+.kit-visual canvas, .kit-qr canvas { display: block; width: 100%; height: auto; border-radius: 18px; }
+.kit-qr { max-width: 260px; margin: 0 auto 10px; border: 1.5px solid var(--line); border-radius: 18px; overflow: hidden; }
+.kit-link { text-align: center; overflow-wrap: anywhere; font-size: .92rem; }
+.kit-actions { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; margin-top: 14px; }
+.kit-text { width: 100%; box-sizing: border-box; font: inherit; font-size: .95rem; line-height: 1.45; padding: 12px; border-radius: 14px;
+  border: 1.5px solid var(--line); background: var(--card); color: var(--ink); resize: vertical; }
+.kit-status { color: var(--ink-soft); font-weight: 600; }
+.kit-row { display: flex; flex-direction: column; gap: 6px; }
+.kit-row .row-card { flex: 1; }
+.kit-views { align-self: flex-end; font-size: .85rem; font-weight: 700; color: var(--ink-soft); padding-right: 8px; }
+.kit-foot { padding-bottom: 40px; }
+@media (max-width: 400px) { .kit-actions .btn { width: 100%; justify-content: center; } }
+.kit-page .row-body b { display: block; -webkit-line-clamp: unset; overflow: visible; }

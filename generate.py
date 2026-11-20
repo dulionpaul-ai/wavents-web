@@ -2657,6 +2657,225 @@ def app_page(upcoming: list[dict], communes: dict[str, list[dict]]) -> str:
     )
 
 
+# --- Kit organisateur (plan PDG du 20/11/2026, pari n° 1) -----------------------
+# Une page par organisateur joignable (contact lu dans ses fiches : email,
+# site, page Facebook ; règles dans organizer_key, script 240 du dépôt
+# Wavents) : /o/<slug>/ pour le public (ses sorties, cible du QR code) et
+# /o/<slug>/kit/ pour lui (vues, visuel carré, QR code, texte à copier).
+# Pas dans le plan du site et « noindex » au départ. Les emails ne sortent
+# jamais de la base : la fonction ne renvoie que le slug et un libellé
+# (domaine ou page Facebook ; rien pour un email personnel).
+
+KIT_MIN_VIEWS = 5  # comme « Les plus vues » de l'appli : jamais « vue 1 fois »
+NOINDEX = '<meta name="robots" content="noindex, nofollow">'
+
+
+def fetch_organizer_kits() -> list[dict]:
+    """Lignes (slug, label, kind, event_id, viewers) de organizer_kits_public.
+    En cas d'échec, rien : le site part quand même, sans pages /o/."""
+    rows: list[dict] = []
+    offset, page = 0, 1000
+    try:
+        while True:
+            request = urllib.request.Request(
+                f"{SUPABASE_URL}/rest/v1/rpc/organizer_kits_public?order=event_id&limit={page}&offset={offset}",
+                data=b"{}",
+                headers={"apikey": SUPABASE_ANON_KEY, "Authorization": f"Bearer {SUPABASE_ANON_KEY}",
+                         "Content-Type": "application/json"})
+            with urllib.request.urlopen(request, timeout=60) as response:
+                batch = json.load(response)
+            rows.extend(batch)
+            if len(batch) < page:
+                return rows
+            offset += page
+    except Exception as exc:  # noqa: BLE001 — le site ne doit pas tomber pour ça
+        print(f"organizer_kits_public : {exc}", file=sys.stderr)
+        return []
+
+
+def organizer_groups(rows: list[dict], events: list[dict]) -> dict[str, dict]:
+    """slug -> {label, kind, events (triées), views {id: n}} ; seulement les
+    sorties encore sur le site."""
+    by_id = {ev["id"]: ev for ev in events}
+    groups: dict[str, dict] = {}
+    for row in rows:
+        ev = by_id.get(row["event_id"])
+        slug = row.get("slug") or ""
+        if not ev or not re.fullmatch(r"[a-z0-9][a-z0-9-]{0,80}", slug):
+            continue
+        g = groups.setdefault(slug, {"label": row.get("label"), "kind": row.get("kind"), "events": [], "views": {}})
+        g["events"].append(ev)
+        g["views"][ev["id"]] = int(row.get("viewers") or 0)
+    for g in groups.values():
+        g["events"].sort(key=lambda ev: (wall_time(ev["start_date"]), ev["title"]))
+    return groups
+
+
+def organizer_path(slug: str) -> str:
+    return f"o/{slug}/"
+
+
+def organizer_name(group: dict) -> str | None:
+    return group["label"] if group["kind"] in ("site", "facebook") and group.get("label") else None
+
+
+def plural(n: int, one: str, many: str) -> str:
+    return f"{n} {one if n == 1 else many}"
+
+
+def organizer_page(slug: str, group: dict, series: dict[str, list[dict]]) -> str:
+    """Page publique (cible du QR code et du lien partagé)."""
+    root = "../../"
+    name = organizer_name(group)
+    evs = collapse_series(group["events"])
+    title = f"Les prochaines sorties de {name}" if name else "Nos prochaines sorties"
+    lead = (f"{plural(len(evs), 'sortie à venir', 'sorties à venir')}, mises à jour chaque jour sur Wavents, "
+            f"l'agenda gratuit des sorties du Beaujolais.")
+    body = f"""  <section class="ev-hero town-hero"><div class="ev-hero-inner">
+    <p class="kicker light">Sur Wavents</p>
+    <h1 class="kit-h1">{e(title)}</h1>
+    <p class="lead">{e(lead)}</p>
+    <div class="hero-actions">{play_cta('light')}</div>
+  </div></section>
+  <section class="section"><div class="rows">{"".join(row_card(ev, series, root) for ev in evs)}</div></section>
+  <section class="section prose kit-foot"><p>Tu organises ces sorties&nbsp;? <a href="kit/">Ton kit pour les partager</a>.</p></section>
+"""
+    return layout(f"{title} – Wavents", body, description=lead, url=f"{BASE_URL}/{organizer_path(slug)}",
+                  extra_head=NOINDEX, depth=2, page_class="town-page kit-page")
+
+
+def short_when(ev: dict, long: bool = False) -> str:
+    """« Sam. 22 nov. », ou « Jusqu'au 30 nov. » si la sortie a déjà commencé."""
+    start, end = wall_time(ev["start_date"]), end_of(ev)
+    months = MONTHS if long else MONTHS_SHORT
+    if start.date() < datetime.now(PARIS).date() <= end.date():
+        return f"Jusqu'au {end.day} {months[end.month - 1]}"
+    days = DAYS if long else DAYS_SHORT
+    return f"{cap(days[start.weekday()])} {start.day} {months[start.month - 1]}"
+
+
+def share_text(slug: str, group: dict) -> str:
+    """Texte prêt à coller sur Facebook : trois prochaines dates et le lien."""
+    lines = ["📍 Retrouve toutes nos sorties sur Wavents, l'appli gratuite des sorties du Beaujolais :"]
+    for ev in collapse_series(group["events"])[:3]:
+        lines.append(f"• {short_when(ev, long=True)} : {ev['title']}")
+    lines.append(f"👉 {BASE_URL}/{organizer_path(slug)}")
+    return "\n".join(lines)
+
+
+def kit_page(slug: str, group: dict, series: dict[str, list[dict]]) -> str:
+    """Kit de l'organisateur (lien du mail) : ses chiffres, un visuel carré
+    et un QR code dessinés dans le navigateur (static/kit.js, mêmes couleurs
+    et police que l'image de partage share-card), le texte à copier."""
+    root = "../../../"
+    name = organizer_name(group)
+    evs = collapse_series(group["events"])
+    total = sum(group["views"].values())
+    page_url = f"{BASE_URL}/{organizer_path(slug)}"
+    facts = plural(len(evs), "sortie à venir", "sorties à venir")
+    if total >= KIT_MIN_VIEWS:
+        facts += f", vues {total} fois"
+    lead = f"{facts} sur Wavents{' pour ' + name if name else ''}. Voici de quoi les partager, c'est gratuit."
+    data = {"url": page_url, "name": name, "events": [{"when": short_when(ev), "title": ev["title"]} for ev in evs[:4]]}
+    data_json = json.dumps(data, ensure_ascii=False).replace("</", "<\\/")
+    rows = []
+    for ev in evs:
+        n = group["views"].get(ev["id"], 0)
+        views = f'<span class="kit-views">👁 {n} vues</span>' if n >= KIT_MIN_VIEWS else ""
+        rows.append(f'<div class="kit-row">{row_card(ev, series, root)}{views}</div>')
+    body = f"""  <section class="ev-hero town-hero"><div class="ev-hero-inner">
+    <a class="back" href="../">← Ta page publique</a>
+    <p class="kicker light">Kit organisateur</p>
+    <h1 class="kit-h1">Tes sorties sont sur Wavents</h1>
+    <p class="lead">{e(lead)}</p>
+  </div></section>
+  <section class="section kit">
+    <div class="panel kit-panel">
+      <h2>Ton visuel à partager</h2>
+      <p>Une image carrée pour ta page Facebook, Instagram ou WhatsApp, avec tes prochaines dates et un QR code vers ta page.</p>
+      <div class="kit-visual"><canvas id="kit-canvas" width="1080" height="1080" aria-label="Visuel « Retrouve nos sorties sur Wavents »"></canvas></div>
+      <div class="kit-actions">
+        <button class="btn btn-sun" type="button" id="kit-download" data-goatcounter-click="kit-visuel">Télécharger l'image</button>
+        <button class="btn btn-ghost" type="button" id="kit-share" hidden>Partager</button>
+      </div>
+    </div>
+    <div class="panel kit-panel">
+      <h2>Ton QR code</h2>
+      <p>À imprimer sur tes affiches et tes flyers : il ouvre ta page Wavents, toujours à jour.</p>
+      <div class="kit-qr"><canvas id="kit-qr" width="600" height="600" aria-label="QR code vers ta page Wavents"></canvas></div>
+      <p class="kit-link"><a href="../">{e(page_url)}</a></p>
+      <div class="kit-actions"><button class="btn btn-ghost" type="button" id="kit-qr-download" data-goatcounter-click="kit-qr">Télécharger le QR code</button></div>
+    </div>
+    <div class="panel kit-panel">
+      <h2>Le texte pour Facebook</h2>
+      <textarea id="kit-text" class="kit-text" rows="8" readonly>{e(share_text(slug, group))}</textarea>
+      <div class="kit-actions"><button class="btn btn-sun" type="button" id="kit-copy" data-goatcounter-click="kit-texte">Copier le texte</button>
+      <span class="kit-status" id="kit-status" aria-live="polite"></span></div>
+    </div>
+  </section>
+  <section class="section">
+    <div class="section-head"><div><p class="kicker">{e(facts)}</p><h2>Tes sorties</h2></div></div>
+    <div class="rows">{"".join(rows)}</div>
+  </section>
+  <section class="section prose kit-foot">
+    <h2>Une erreur, une sortie qui manque&nbsp;?</h2>
+    <p><a href="{root}ajouter/">Ajoute une sortie</a> en deux minutes (une photo de l'affiche suffit), ou écris-nous à
+    <a href="mailto:hello@wavents.fr?subject={quote('Correction ' + page_url)}">hello@wavents.fr</a> pour corriger une fiche.
+    C'est gratuit, et ça le restera.</p>
+  </section>
+  <script type="application/json" id="kit-data">{data_json}</script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js" defer></script>
+  <script src="{root}kit.js" defer></script>
+"""
+    return layout("Ton kit organisateur – Wavents", body, description=lead, url=f"{page_url}kit/",
+                  extra_head=NOINDEX, depth=3, page_class="town-page kit-page")
+
+
+def unsubscribe_page() -> str:
+    """« Ne plus recevoir » des mails organisateurs (lien des mails :
+    /o/desinscription/?t=<jeton>, fonction organizer_unsubscribe)."""
+    body = f"""  <section class="ev-hero town-hero"><div class="ev-hero-inner">
+    <p class="kicker light">Wavents</p>
+    <h1 class="kit-h1">Ne plus recevoir nos messages</h1>
+  </div></section>
+  <section class="section prose">
+    <p id="unsub-status" aria-live="polite">Un instant…</p>
+    <p>Tes sorties restent sur Wavents. Pour les corriger ou les retirer : <a href="mailto:hello@wavents.fr">hello@wavents.fr</a>.</p>
+  </section>
+  <script>
+  (function () {{
+    var out = document.getElementById("unsub-status");
+    var t = (location.search.match(/[?&]t=([0-9a-f-]{{36}})/i) || [])[1];
+    if (!t) {{ out.textContent = "Ce lien est incomplet. Écris-nous à hello@wavents.fr, on te retire tout de suite."; return; }}
+    fetch("{SUPABASE_URL}/rest/v1/rpc/organizer_unsubscribe", {{
+      method: "POST",
+      headers: {{ "apikey": "{SUPABASE_ANON_KEY}", "Authorization": "Bearer {SUPABASE_ANON_KEY}", "Content-Type": "application/json" }},
+      body: JSON.stringify({{ p_token: t }})
+    }}).then(function (r) {{ return r.json(); }}).then(function (ok) {{
+      out.textContent = ok === true ? "C'est fait : tu ne recevras plus de message de Wavents."
+        : "Ce lien n'est plus valable. Écris-nous à hello@wavents.fr, on te retire tout de suite.";
+    }}).catch(function () {{
+      out.textContent = "Ça n'a pas marché. Écris-nous à hello@wavents.fr, on te retire tout de suite.";
+    }});
+  }})();
+  </script>
+"""
+    return layout("Ne plus recevoir nos messages – Wavents", body, description="Désinscription des messages de Wavents.",
+                  url=f"{BASE_URL}/o/desinscription/", extra_head=NOINDEX, depth=2, page_class="town-page")
+
+
+def write_organizer_pages(out: Path, events: list[dict], series: dict[str, list[dict]]) -> int:
+    groups = organizer_groups(fetch_organizer_kits(), events)
+    for slug, group in groups.items():
+        folder = out / organizer_path(slug)
+        (folder / "kit").mkdir(parents=True, exist_ok=True)
+        (folder / "index.html").write_text(organizer_page(slug, group, series), encoding="utf-8")
+        (folder / "kit" / "index.html").write_text(kit_page(slug, group, series), encoding="utf-8")
+    (out / "o" / "desinscription").mkdir(parents=True, exist_ok=True)
+    (out / "o" / "desinscription" / "index.html").write_text(unsubscribe_page(), encoding="utf-8")
+    return len(groups)
+
+
 def main() -> int:
     out = Path(sys.argv[1] if len(sys.argv) > 1 else "site")
     if out.exists():
@@ -2756,6 +2975,8 @@ def main() -> int:
     (out / "ajouter" / "index.html").write_text(add_page(), encoding="utf-8")
     (out / "app").mkdir(exist_ok=True)
     (out / "app" / "index.html").write_text(app_page(upcoming, communes), encoding="utf-8")
+    # Kits organisateurs (20/11/2026) : hors plan du site, noindex.
+    print(f"{write_organizer_pages(out, upcoming, series)} pages organisateurs")
     extra_pages = ([f"{BASE_URL}/{t[0]}/" for t in THEMES] + [f"{BASE_URL}/{f['slug']}/" for f in FESTIVALS]
                    + [f"{BASE_URL}/a-propos/", f"{BASE_URL}/faq/", f"{BASE_URL}/app/", f"{BASE_URL}/ajouter/", f"{BASE_URL}/lettre/",
                       f"{BASE_URL}/secret-santa/", f"{BASE_URL}/secret-santa/collegues/",
