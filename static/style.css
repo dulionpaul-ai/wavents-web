@@ -786,3 +786,13 @@ a.fest-related .fest-more { color: var(--deep); font-weight: 700; margin-top: 4p
 .kit-foot { padding-bottom: 40px; }
 @media (max-width: 400px) { .kit-actions .btn { width: 100%; justify-content: center; } }
 .kit-page .row-body b { display: block; -webkit-line-clamp: unset; overflow: visible; }
+
+/* Encart pour les sites partenaires, page d'installation (20/11/2026) */
+.encart-install{display:grid;gap:28px;grid-template-columns:minmax(0,1fr)}
+@media (min-width:900px){.encart-install{grid-template-columns:minmax(0,1fr) 440px;align-items:start}}
+.encart-install h2{font-size:1.25rem;margin:22px 0 10px}
+.encart-install h2:first-child{margin-top:0}
+.encart-install select,.encart-install textarea{width:100%;font:inherit;font-size:15px;padding:10px 12px;border:1px solid #c9d7e8;border-radius:12px;background:#fff;color:#0b2545}
+.encart-install textarea{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:13px;resize:vertical}
+.encart-install #encart-copy{margin:10px 0 6px}
+.encart-preview iframe{display:block;margin:0 auto}

@@ -3088,6 +3088,199 @@ def write_kit_pages(out: Path, upcoming: list[dict], series: dict[str, list[dict
     (out / "sejour" / "imprimer" / "index.html").write_text(sejour_print_page(), encoding="utf-8")
 
 
+# --- Encart « Sorties près de chez vous » (20/11/2026, PDG 2) ----------------
+# Plan PDG 2 (dépôt Wavents, docs/plan_pdg2_session_nad.md), pari n° 1 : un
+# encart gratuit qu'un site (mairie, école, club, camping, média local) colle
+# en une ligne, qui affiche les prochaines sorties de sa commune et autour.
+# Leur public devient le nôtre. Une page statique par commune (`/encart/<slug>/`,
+# régénérée avec le site, aucune requête vers la base chez le visiteur), CSS
+# en ligne, noindex. Liens vers les fiches avec `?ref=encart-<slug>` (compté
+# par app.js dans GoatCounter) ; la page de l'encart est elle-même comptée,
+# avec le site hôte en provenance. Page d'installation : `/encart/`.
+ENCART_RADIUS_KM = 12
+ENCART_DAYS = 21
+ENCART_MAX = 12
+
+
+def encart_events(name: str, evs: list[dict], upcoming: list[dict], now: datetime) -> list[dict]:
+    """Sorties de la commune d'abord, puis celles à moins de 12 km, sur 3
+    semaines, par date ; les longues expositions après les dates fixes."""
+    center = commune_center(evs)
+    limit = now.date() + timedelta(days=ENCART_DAYS)
+    own, near = [], []
+    for ev in collapse_series(upcoming):
+        start = wall_time(ev["start_date"])
+        if start.date() > limit:
+            continue
+        km = distance_km(ev["latitude"], ev["longitude"], center)
+        if commune_page_name(ev) == name:
+            own.append(ev)
+        elif km <= ENCART_RADIUS_KM:
+            near.append(ev)
+    today = now.date()
+    # Ce qui commence aujourd'hui ou après d'abord ; ce qui a déjà commencé à la fin.
+    key = lambda ev: (is_long(ev) or wall_time(ev["start_date"]).date() < today, wall_time(ev["start_date"]))
+    own.sort(key=key)
+    near.sort(key=key)
+    picked = own[:8]
+    picked += near[:ENCART_MAX - len(picked)]
+    return sorted(picked, key=key)
+
+
+def encart_row(ev: dict, slug: str, now: datetime) -> str:
+    _, label, color = category(ev)
+    start = wall_time(ev["start_date"])
+    if start.date() < now.date():
+        end = end_of(ev)
+        when = f"jusqu'au {end.day} {MONTHS_SHORT[end.month - 1]}"
+    else:
+        when = f"{DAYS_SHORT[start.weekday()]} {start.day} {MONTHS_SHORT[start.month - 1]}"
+        if ev.get("start_time_known") and (start.hour or start.minute):
+            when += f" · {hour_label(start)}"
+    tags = []
+    if is_free(ev):
+        tags.append('<span class="t free">Gratuit</span>')
+    if ev.get("for_kids"):
+        tags.append('<span class="t kids">En famille</span>')
+    href = f"{BASE_URL}/{event_path(ev)}?ref=encart-{slug}"
+    return (f'<a class="r" href="{href}" target="_blank" rel="noopener" style="--c:{color}">'
+            f'<span class="i" aria-hidden="true"></span>'
+            f'<span class="b"><span class="k">{e(label)}</span><b>{e(ev["title"])}</b>'
+            f'<span class="m">{e(when)} · {e(commune_page_name(ev) or commune_of(ev))}</span>'
+            f'{"".join(tags)}</span></a>')
+
+
+ENCART_CSS = """
+*{box-sizing:border-box}html,body{margin:0;padding:0}
+body{font:15px/1.35 Roboto,system-ui,-apple-system,"Segoe UI",sans-serif;color:#0b2545;background:#fff}
+.w{border:1px solid #d6e2f0;border-radius:14px;overflow:hidden;background:#fff;height:100vh;display:flex;flex-direction:column}
+.h{background:#065FBB;color:#fff;padding:10px 14px;display:flex;align-items:center;gap:10px;flex:none}
+.h img{width:28px;height:28px;flex:none}
+.h div{min-width:0}.h strong{display:block;font-size:16px;line-height:1.2}
+.h small{display:block;opacity:.85;font-size:12.5px}
+.l{flex:1;overflow-y:auto}
+.r{display:flex;gap:10px;align-items:flex-start;padding:9px 14px;border-bottom:1px solid #eef3f9;text-decoration:none;color:inherit}
+.r:hover,.r:focus{background:#f3f8fe}
+.i{flex:none;width:4px;align-self:stretch;border-radius:4px;background:var(--c)}
+.k{display:block;font-size:11.5px;font-weight:700;text-transform:uppercase;letter-spacing:.03em;color:var(--c)}
+.b{min-width:0;display:block}.b b{display:block;font-weight:700;overflow-wrap:anywhere}
+.m{display:block;font-size:13px;color:#46607d;margin-top:1px}
+.t{display:inline-block;font-size:11.5px;font-weight:700;border-radius:999px;padding:1px 8px;margin:4px 4px 0 0}
+.t.free{background:#e3f6ea;color:#17703a}.t.kids{background:#fff1dc;color:#9a5a00}
+.e{padding:18px 14px;color:#46607d}
+.f{flex:none;display:flex;flex-wrap:wrap;gap:6px 12px;justify-content:space-between;align-items:center;padding:9px 14px;background:#f3f8fe;font-size:13px}
+.f a{color:#065FBB;font-weight:700;text-decoration:none}.f a:hover{text-decoration:underline}
+"""
+
+
+def encart_page(name: str, slug: str, items: list[dict], now: datetime) -> str:
+    rows = "".join(encart_row(ev, slug, now) for ev in items) or (
+        '<p class="e">Pas de sortie annoncée pour l\'instant. Une idée ? Ajoutez-la gratuitement.</p>')
+    town = f"{BASE_URL}/{commune_path(name)}?ref=encart-{slug}"
+    add = f"{BASE_URL}/ajouter/?ref=encart-{slug}"
+    return f"""<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Sorties à {e(name)} et autour – Wavents</title>
+  <meta name="robots" content="noindex, nofollow">
+  <link rel="canonical" href="{BASE_URL}/{commune_path(name)}">
+  <style>{ENCART_CSS}</style>
+</head>
+<body>
+  <div class="w">
+    <div class="h"><img src="{BASE_URL}/img/pin.png" alt="" width="28" height="28"><div>
+      <strong>Sorties à {e(name)} et autour</strong><small>Mis à jour chaque jour par Wavents</small></div></div>
+    <div class="l">{rows}</div>
+    <div class="f"><a href="{town}" target="_blank" rel="noopener">Toutes les sorties →</a>
+      <a href="{add}" target="_blank" rel="noopener">+ Ajouter un événement</a></div>
+  </div>
+  <script data-goatcounter="https://wavents.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
+</body>
+</html>
+"""
+
+
+def encart_install_page(choices: list[tuple[str, str, int]]) -> str:
+    options = "".join(f'<option value="{slug}">{e(name)} ({n})</option>' for name, slug, n in choices)
+    first = choices[0][1] if choices else ""
+    body = f"""  <section class="ev-hero town-hero"><div class="ev-hero-inner">
+    <p class="kicker">Mairies, écoles, associations, campings, médias</p>
+    <h1>L'agenda des sorties de votre commune, gratuit, sur votre site</h1>
+    <p class="lead">Un encart qui affiche les prochaines sorties de votre commune et des alentours,
+      mis à jour chaque jour, sans rien à saisir. Gratuit, sans publicité, sans compte.
+      Une ligne à copier dans votre site.</p>
+  </div></section>
+  <section class="section encart-install">
+    <div class="encart-steps">
+      <h2>1. Choisissez votre commune</h2>
+      <select id="encart-commune" aria-label="Commune">{options}</select>
+      <h2>2. Copiez ce code dans votre site</h2>
+      <p>Dans WordPress, Wix, Jimdo, Joomla, Campagne en ligne… : un bloc « HTML personnalisé » ou « code intégré ».</p>
+      <textarea id="encart-code" rows="4" readonly></textarea>
+      <button type="button" id="encart-copy" class="btn">Copier le code</button>
+      <p>Pas de bloc HTML ? Mettez simplement un lien vers
+        <a id="encart-link" href="{BASE_URL}/ville/">la page de votre commune</a>.</p>
+      <h2>Questions</h2>
+      <p><b>Ça coûte quelque chose ?</b> Non, et ça le restera.</p>
+      <p><b>D'où viennent les sorties ?</b> Des agendas publics (communes, offices de tourisme,
+        associations, salles) relus chaque jour, et des organisateurs qui les ajoutent sur Wavents.</p>
+      <p><b>Une sortie manque ou est fausse ?</b> Ajoutez-la sur <a href="{BASE_URL}/ajouter/">wavents.fr/ajouter</a>
+        ou écrivez à <a href="mailto:hello@wavents.fr">hello@wavents.fr</a> : elle apparaît dans l'encart le lendemain.</p>
+    </div>
+    <div class="encart-preview">
+      <h2>Aperçu</h2>
+      <iframe id="encart-frame" src="{BASE_URL}/encart/{first}/" title="Aperçu de l'encart" loading="lazy"
+        style="width:100%;max-width:420px;height:520px;border:0"></iframe>
+    </div>
+  </section>
+  <script>
+  (function(){{
+    var sel=document.getElementById('encart-commune'),code=document.getElementById('encart-code'),
+        frame=document.getElementById('encart-frame'),link=document.getElementById('encart-link'),
+        btn=document.getElementById('encart-copy'),base='{BASE_URL}';
+    function up(){{
+      var s=sel.value,u=base+'/encart/'+s+'/';
+      code.value='<iframe src="'+u+'" title="Sorties près de chez vous – Wavents" loading="lazy" style="width:100%;max-width:480px;height:520px;border:0"></iframe>';
+      frame.src=u;link.href=base+'/ville/'+s+'/?ref=encart-lien';
+    }}
+    sel.addEventListener('change',up);up();
+    btn.addEventListener('click',function(){{
+      code.select();
+      (navigator.clipboard?navigator.clipboard.writeText(code.value):Promise.reject()).catch(function(){{document.execCommand('copy');}});
+      btn.textContent='Copié ✓';setTimeout(function(){{btn.textContent='Copier le code';}},2000);
+      if(window.goatcounter&&goatcounter.count)goatcounter.count({{path:'encart-copie-'+sel.value,title:'Encart copié',event:true}});
+    }});
+  }})();
+  </script>"""
+    return layout(
+        "Agenda des sorties gratuit pour le site de votre commune – Wavents",
+        body,
+        description="Un encart gratuit, sans publicité, qui affiche sur votre site les sorties de votre commune "
+                    "et des alentours, mises à jour chaque jour.",
+        url=f"{BASE_URL}/encart/",
+        depth=1,
+        page_class="town-page",
+    )
+
+
+def write_encart_pages(out: Path, communes: dict[str, list[dict]], upcoming: list[dict], now: datetime) -> int:
+    choices = []
+    for name, evs in communes.items():
+        slug = slugify(name)
+        items = encart_events(name, evs, upcoming, now)
+        folder = out / "encart" / slug
+        folder.mkdir(parents=True, exist_ok=True)
+        (folder / "index.html").write_text(encart_page(name, slug, items, now), encoding="utf-8")
+        choices.append((name, slug, len(evs)))
+    choices.sort(key=lambda c: fold(c[0]))
+    # Belleville en premier choix : c'est notre commune.
+    choices.sort(key=lambda c: c[1] != "belleville-en-beaujolais")
+    (out / "encart" / "index.html").write_text(encart_install_page(choices), encoding="utf-8")
+    return len(choices)
+
+
 def main() -> int:
     out = Path(sys.argv[1] if len(sys.argv) > 1 else "site")
     if out.exists():
@@ -3192,8 +3385,10 @@ def main() -> int:
     # Kits de diffusion (20/11/2026) : affiches des commerçants, page et carte
     # « séjour » des hébergeurs ; noindex, hors plan du site.
     write_kit_pages(out, upcoming, series, now)
+    # Encart « Sorties près de chez vous » pour les sites partenaires (20/11/2026).
+    print(f"{write_encart_pages(out, communes, upcoming, now)} encarts")
     extra_pages = ([f"{BASE_URL}/{t[0]}/" for t in THEMES] + [f"{BASE_URL}/{f['slug']}/" for f in FESTIVALS]
-                   + [f"{BASE_URL}/a-propos/", f"{BASE_URL}/faq/", f"{BASE_URL}/app/", f"{BASE_URL}/ajouter/", f"{BASE_URL}/lettre/",
+                   + [f"{BASE_URL}/a-propos/", f"{BASE_URL}/faq/", f"{BASE_URL}/app/", f"{BASE_URL}/ajouter/", f"{BASE_URL}/lettre/", f"{BASE_URL}/encart/",
                       f"{BASE_URL}/secret-santa/", f"{BASE_URL}/secret-santa/collegues/",
                       f"{BASE_URL}/secret-santa/idees-cadeaux/", f"{BASE_URL}/secret-santa/a-distance/",
                       f"{BASE_URL}/trouver-une-date/", f"{BASE_URL}/trouver-une-date/alternative-doodle/",
