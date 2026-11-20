@@ -2659,7 +2659,7 @@ def app_page(upcoming: list[dict], communes: dict[str, list[dict]]) -> str:
 
 # --- Kit organisateur (plan PDG du 20/11/2026, pari n° 1) -----------------------
 # Une page par organisateur joignable (contact lu dans ses fiches : email,
-# site, page Facebook ; règles dans organizer_key, script 240 du dépôt
+# site, page Facebook ; règles dans organizer_key, script 241 du dépôt
 # Wavents) : /o/<slug>/ pour le public (ses sorties, cible du QR code) et
 # /o/<slug>/kit/ pour lui (vues, visuel carré, QR code, texte à copier).
 # Pas dans le plan du site et « noindex » au départ. Les emails ne sortent
