@@ -3102,10 +3102,9 @@ ENCART_DAYS = 21
 ENCART_MAX = 12
 
 
-def encart_events(name: str, evs: list[dict], upcoming: list[dict], now: datetime) -> list[dict]:
+def encart_events(name: str, center: tuple[float, float], upcoming: list[dict], now: datetime) -> list[dict]:
     """Sorties de la commune d'abord, puis celles à moins de 12 km, sur 3
     semaines, par date ; les longues expositions après les dates fixes."""
-    center = commune_center(evs)
     limit = now.date() + timedelta(days=ENCART_DAYS)
     own, near = [], []
     for ev in collapse_series(upcoming):
@@ -3113,7 +3112,7 @@ def encart_events(name: str, evs: list[dict], upcoming: list[dict], now: datetim
         if start.date() > limit:
             continue
         km = distance_km(ev["latitude"], ev["longitude"], center)
-        if commune_page_name(ev) == name:
+        if slugify(commune_page_name(ev) or "") == slugify(name):
             own.append(ev)
         elif km <= ENCART_RADIUS_KM:
             near.append(ev)
@@ -3173,10 +3172,11 @@ body{font:15px/1.35 Roboto,system-ui,-apple-system,"Segoe UI",sans-serif;color:#
 """
 
 
-def encart_page(name: str, slug: str, items: list[dict], now: datetime) -> str:
+def encart_page(name: str, slug: str, items: list[dict], now: datetime, has_page: bool = True) -> str:
     rows = "".join(encart_row(ev, slug, now) for ev in items) or (
         '<p class="e">Pas de sortie annoncée pour l\'instant. Une idée ? Ajoutez-la gratuitement.</p>')
-    town = f"{BASE_URL}/{commune_path(name)}?ref=encart-{slug}"
+    town = (f"{BASE_URL}/{commune_path(name)}?ref=encart-{slug}" if has_page
+            else f"{BASE_URL}/?ref=encart-{slug}")
     add = f"{BASE_URL}/ajouter/?ref=encart-{slug}"
     return f"""<!doctype html>
 <html lang="fr">
@@ -3185,7 +3185,6 @@ def encart_page(name: str, slug: str, items: list[dict], now: datetime) -> str:
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Sorties à {e(name)} et autour – Wavents</title>
   <meta name="robots" content="noindex, nofollow">
-  <link rel="canonical" href="{BASE_URL}/{commune_path(name)}">
   <style>{ENCART_CSS}</style>
 </head>
 <body>
@@ -3203,7 +3202,7 @@ def encart_page(name: str, slug: str, items: list[dict], now: datetime) -> str:
 
 
 def encart_install_page(choices: list[tuple[str, str, int]]) -> str:
-    options = "".join(f'<option value="{slug}">{e(name)} ({n})</option>' for name, slug, n in choices)
+    options = "".join(f'<option value="{slug}">{e(name)}</option>' for name, slug, n in choices)
     first = choices[0][1] if choices else ""
     body = f"""  <section class="ev-hero town-hero"><div class="ev-hero-inner">
     <p class="kicker">Mairies, écoles, associations, campings, médias</p>
@@ -3266,14 +3265,25 @@ def encart_install_page(choices: list[tuple[str, str, int]]) -> str:
 
 
 def write_encart_pages(out: Path, communes: dict[str, list[dict]], upcoming: list[dict], now: datetime) -> int:
+    # Communes avec une page « Que faire à » (3 sorties à venir ou plus),
+    # plus les mairies à moins de 15 km de Belleville (encart_communes.json,
+    # centres de geo.api.gouv.fr) : une petite commune sans sortie à elle a
+    # quand même un encart, rempli par ses voisines.
+    targets = {slugify(name): (name, commune_center(evs), len(evs)) for name, evs in communes.items()}
+    extra = Path(__file__).parent / "encart_communes.json"
+    if extra.exists():
+        for c in json.loads(extra.read_text(encoding="utf-8")):
+            targets.setdefault(slugify(c["name"]), (c["name"], (c["lat"], c["lon"]), 0))
     choices = []
-    for name, evs in communes.items():
-        slug = slugify(name)
-        items = encart_events(name, evs, upcoming, now)
+    for slug, (name, center, count) in targets.items():
+        items = encart_events(name, center, upcoming, now)
+        if not items:
+            continue
         folder = out / "encart" / slug
         folder.mkdir(parents=True, exist_ok=True)
-        (folder / "index.html").write_text(encart_page(name, slug, items, now), encoding="utf-8")
-        choices.append((name, slug, len(evs)))
+        (folder / "index.html").write_text(encart_page(name, slug, items, now, count > 0),
+                                             encoding="utf-8")
+        choices.append((name, slug, count))
     choices.sort(key=lambda c: fold(c[0]))
     # Belleville en premier choix : c'est notre commune.
     choices.sort(key=lambda c: c[1] != "belleville-en-beaujolais")
