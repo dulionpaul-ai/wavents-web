@@ -568,3 +568,21 @@
     try { localStorage.setItem('wv_qr_closed', '1'); } catch (e) {}
   });
 })();
+
+// Canal d'arrivée (20/11/2026) : les QR imprimés ajoutent ?ref=<canal>
+// (affiche, sejour…). GoatCounter compte l'adresse canonique, sans ce
+// paramètre : on envoie un événement « ref-<canal> » à part (/app/ a déjà
+// son propre comptage).
+(function () {
+  var m = location.search.match(/[?&]ref=([a-z0-9-]{1,40})/i);
+  if (!m || location.pathname.indexOf('/app/') === 0) return;
+  var tries = 0;
+  (function send() {
+    var gc = window.goatcounter;
+    if (gc && gc.count) {
+      gc.count({ path: 'ref-' + m[1].toLowerCase(), title: location.pathname, event: true });
+    } else if (tries++ < 20) {
+      setTimeout(send, 500);
+    }
+  })();
+})();

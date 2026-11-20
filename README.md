@@ -30,4 +30,13 @@ GitHub Pages, domaine personnalisé dans Settings > Pages). L'ancienne
 adresse github.io redirige vers wavents.fr ; à changer aussi dans l'appli
 (`lib/utils/share_links.dart`) si le domaine change.
 
+Kits de diffusion (20/11/2026, pages noindex, hors plan du site) :
+`affiche/` (affiche A4 « Que faire ce week-end autour de <commune> ? »
+pour les vitrines, une par commune de `AFFICHE_COMMUNES`), `sejour/` (les
+sorties des 7 prochains jours pour les vacanciers) et `sejour/imprimer/`
+(cartes de chambre à QR). QR et PDF dans `static/affiche/` et
+`static/sejour/`, refaits par `outils/kits_qr.py` et `outils/kits_pdf.py`
+seulement si la liste ou le dessin change. Les QR ajoutent `?ref=<canal>`,
+compté dans GoatCounter comme événement `ref-<canal>` (`static/app.js`).
+
 Réglage à faire une fois : Settings > Pages > Source : « GitHub Actions ».

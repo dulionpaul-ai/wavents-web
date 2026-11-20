@@ -1520,10 +1520,14 @@ THEMES = [
 
 
 def theme_page(slug: str, page_title: str, h1: str, kicker: str, keep, days: int | None,
-               upcoming: list[dict], series: dict[str, list[dict]], now: datetime) -> tuple[str, int]:
+               upcoming: list[dict], series: dict[str, list[dict]], now: datetime, *,
+               radius: int = THEME_RADIUS_KM, intro: str | None = None, extra_head: str = "",
+               near_chip: bool = False, after: str = "") -> tuple[str, int]:
+    """Options (20/11/2026, page /sejour/) : rayon, accroche, en-tête en plus
+    (noindex), pastille « Près de moi », section ajoutée en fin de liste."""
     root = "../"
     today = now.date()
-    pool = [ev for ev in upcoming if distance_km(ev["latitude"], ev["longitude"]) <= THEME_RADIUS_KM]
+    pool = [ev for ev in upcoming if distance_km(ev["latitude"], ev["longitude"]) <= radius]
     if slug == "ce-week-end":
         first, last = weekend_range(today)
         items = [ev for ev in pool if overlaps(ev, first, last)]
@@ -1617,6 +1621,8 @@ def theme_page(slug: str, page_title: str, h1: str, kicker: str, keep, days: int
             for c in present:
                 emoji, label, color = CATEGORIES[c]
                 chips.append(f'<button class="chip" data-tcat="{c}" style="--cat:{color}">{emoji} {e(label)}</button>')
+    if near_chip:
+        chips.append('<button class="chip toggle" data-ttoggle="near">📍 Près de moi</button>')
     if slug != "gratuit":
         chips.append('<button class="chip toggle" data-ttoggle="free">Gratuit</button>')
     if slug != "enfants":
@@ -1641,8 +1647,8 @@ def theme_page(slug: str, page_title: str, h1: str, kicker: str, keep, days: int
                f'<p class="t-empty" hidden>Aucune sortie avec ces filtres.</p></div>')
     others = "".join(
         f'<a class="town-link" href="{root}{t[0]}/">{e(t[2])}</a>' for t in THEMES if t[0] != slug)
-    intro = (f"{len(ordered)} sorties {span} dans le Beaujolais, le Val de Saône et le nord de Lyon "
-             f"(à moins de {THEME_RADIUS_KM} km de Belleville), mises à jour chaque jour.")
+    intro = intro or (f"{len(ordered)} sorties {span} dans le Beaujolais, le Val de Saône et le nord de Lyon "
+                      f"(à moins de {radius} km de Belleville), mises à jour chaque jour.")
     url = f"{BASE_URL}/{slug}/"
     item_list = {
         "@context": "https://schema.org",
@@ -1662,6 +1668,7 @@ def theme_page(slug: str, page_title: str, h1: str, kicker: str, keep, days: int
   </div></section>
   {top}
   <div class="theme-list">{bar}{"".join(blocks)}</div>
+  {after}
   <section class="section"><div class="section-head"><div><p class="kicker">Et aussi</p><h2>D'autres idées</h2></div></div>
     <div class="town-links">{others}<a class="town-link" href="{root}ville/">Par commune</a></div></section>"""
     return layout(
@@ -1669,7 +1676,7 @@ def theme_page(slug: str, page_title: str, h1: str, kicker: str, keep, days: int
         body,
         description=intro,
         url=url,
-        extra_head=f'<script type="application/ld+json">{json.dumps(item_list, ensure_ascii=False)}</script>',
+        extra_head=f'<script type="application/ld+json">{json.dumps(item_list, ensure_ascii=False)}</script>{extra_head}',
         depth=1,
         page_class="town-page",
     ), len(ordered)
@@ -2876,6 +2883,210 @@ def write_organizer_pages(out: Path, events: list[dict], series: dict[str, list[
     return len(groups)
 
 
+# --- Kits de diffusion (20/11/2026) : affiches des commerçants, séjour --------
+# Plan du 20/11 (dépôt Wavents, docs/plan_pdg_2026-11-20.md) : visibilité
+# gratuite par les commerçants (affiche en vitrine) et les hébergeurs (QR
+# dans la chambre). Pages noindex, hors plan du site. Les affiches ne
+# portent aucune date ni aucun chiffre : imprimées une fois, elles restent
+# justes ; le QR ouvre une page régénérée chaque jour. Communes : les 10 qui
+# avaient le plus de sorties à venir à moins de 15 km de Belleville le
+# 20/11/2026 (pages /ville/). Liste figée exprès : un QR imprimé ne doit pas
+# changer de cible. QR (static/affiche/qr/, static/sejour/qr.svg) et PDF
+# (static/affiche/pdf/, static/sejour/) : outils/kits_qr.py et
+# outils/kits_pdf.py, à relancer seulement si cette liste ou le dessin change.
+AFFICHE_COMMUNES = [
+    "Villefranche-sur-Saône", "Belleville-en-Beaujolais", "Beaujeu", "Montmerle-sur-Saône",
+    "Saint-Didier-sur-Chalaronne", "Arnas", "Saint-Georges-de-Reneins", "Thoissey", "Jassans-Riottier",
+    "Saint-Lager",
+]
+SEJOUR_RADIUS_KM = 20
+
+
+def affiche_target(name: str) -> str:
+    """Cible du QR de l'affiche : la page de la commune, avec le canal."""
+    return f"{BASE_URL}/{commune_path(name)}?ref=affiche"
+
+
+SEJOUR_TARGET = f"{BASE_URL}/sejour/?ref=sejour"
+
+PRINT_HEAD = """<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{title}</title>
+  <meta name="description" content="{description}">
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="theme-color" content="#065FBB">
+  <link rel="icon" href="{root}favicon.ico" sizes="48x48">
+  <link rel="icon" type="image/svg+xml" sizes="any" href="{root}img/favicon.svg">
+  <link rel="stylesheet" href="{root}affiche/affiche.css">
+</head>
+<body class="print-page">
+"""
+
+
+def _print_bar(root: str, back: str, back_label: str, pdf: str, extra: str = "") -> str:
+    return (f'<div class="print-bar no-print"><a class="pb-back" href="{back}">← {e(back_label)}</a>'
+            f'<div class="pb-actions">{extra}<button class="pb-btn" type="button" onclick="window.print()" '
+            f'data-goatcounter-click="imprimer">🖨 Imprimer</button>'
+            f'<a class="pb-btn ghost" href="{pdf}" download data-goatcounter-click="telecharger-pdf">Télécharger le PDF</a></div>'
+            f'<p class="pb-note">Format A4, sans marge à régler : « Imprimer » puis « Enregistrer en PDF » ou ton imprimante.</p></div>')
+
+
+def _print_tail(root: str) -> str:
+    return (f'  <script data-goatcounter="https://wavents.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>\n'
+            '</body>\n</html>\n')
+
+
+def _name_class(name: str) -> str:
+    """Taille du nom de commune selon sa longueur : jamais tronqué, coupé
+    au besoin après un trait d'union."""
+    n = len(name)
+    return "n-s" if n <= 10 else ("n-m" if n <= 17 else "n-l")
+
+
+def affiche_page(name: str) -> str:
+    """Affiche A4 « Que faire ce week-end autour de <commune> ? » pour les
+    vitrines : dessin en unités relatives à la feuille (cqw), même rendu à
+    l'écran (aperçu) et à l'impression."""
+    root = "../../"
+    slug = slugify(name)
+    title = f"Affiche « Que faire ce week-end autour de {name} ? » – Wavents"
+    sheet = f"""<main class="sheet-wrap"><article class="sheet poster" aria-label="Affiche A4">
+  <header class="p-top">
+    <div class="p-brand"><img src="{root}img/pin.png" alt="" width="56" height="56"><span>Wavents</span></div>
+    <h1 class="p-title">Que faire ce week-end<br>autour de <em class="{_name_class(name)}">{e(name)}&nbsp;?</em></h1>
+    <p class="p-chips"><span>Concerts</span><span>Marchés</span><span>Brocantes</span><span>En famille</span></p>
+  </header>
+  <section class="p-body">
+    <div class="p-qr"><img src="{root}affiche/qr/{slug}.svg" alt="QR code vers les sorties autour de {e(name)}"><b>Scanne-moi</b></div>
+    <div class="p-text">
+      <p class="p-lead">Toutes les sorties près d'ici.</p>
+      <ul class="p-points"><li>Mises à jour chaque jour</li><li>Gratuit, sans compte</li><li>Rien à installer</li></ul>
+      <p class="p-url">ou sur wavents.fr</p>
+    </div>
+  </section>
+  <footer class="p-foot">Une animation à annoncer&nbsp;? C'est gratuit : <b>wavents.fr/ajouter</b></footer>
+</article></main>"""
+    return (PRINT_HEAD.format(title=e(title), description=e(f"Affiche à imprimer pour les vitrines de {name}."), root=root)
+            + _print_bar(root, "../", "Toutes les affiches", f"{root}affiche/pdf/wavents-affiche-{slug}.pdf")
+            + sheet + _print_tail(root))
+
+
+def affiches_index() -> str:
+    root = "../"
+    links = "".join(
+        f'<a class="town-link" href="{slugify(n)}/">{e(n)}</a>' for n in AFFICHE_COMMUNES)
+    body = f"""  <section class="ev-hero town-hero"><div class="ev-hero-inner">
+    <p class="kicker light">Pour les commerçants</p>
+    <h1 class="kit-h1">Une affiche pour ta vitrine</h1>
+    <p class="lead">«&nbsp;Que faire ce week-end autour de chez nous&nbsp;?&nbsp;»&nbsp;: une affiche A4 avec un QR code qui ouvre
+    les sorties de ta commune, toujours à jour. Gratuite, à imprimer toi-même.</p>
+  </div></section>
+  <section class="section"><div class="section-head"><div><p class="kicker">Choisis ta commune</p><h2>Les affiches</h2></div></div>
+    <div class="town-links">{links}</div>
+    <p class="kit-note" style="margin-top:14px;color:var(--ink-soft)">Ta commune n'est pas dans la liste&nbsp;? Écris-nous à <a href="mailto:hello@wavents.fr?subject=Affiche%20Wavents">hello@wavents.fr</a>, on la prépare.</p>
+  </section>
+  <section class="section prose">
+    <h2>Le principe</h2>
+    <p>Tu poses l'affiche en vitrine ou sur ton comptoir. En échange, on met en ligne gratuitement tes animations
+    (dégustations, dédicaces, marchés, soirées) : envoie-les sur <a href="{root}ajouter/">wavents.fr/ajouter</a>,
+    une photo de ton affiche suffit.</p>
+    <h2>Tu loues un gîte, des chambres, un emplacement&nbsp;?</h2>
+    <p>Il y a aussi <a href="{root}sejour/imprimer/">une carte pour tes chambres</a>&nbsp;: «&nbsp;Que faire autour d'ici cette semaine&nbsp;?&nbsp;».</p>
+  </section>
+"""
+    return layout("Affiches pour les commerçants – Wavents", body,
+                  description="Affiches A4 gratuites « Que faire ce week-end autour de chez nous ? » avec QR code.",
+                  url=f"{BASE_URL}/affiche/", extra_head=NOINDEX, depth=1, page_class="town-page kit-page")
+
+
+def sejour_card(root: str) -> str:
+    return f"""<article class="s-card">
+    <div class="s-head"><div class="s-brand"><img src="{root}img/pin.png" alt="" width="56" height="56"><span>Wavents</span></div>
+    <p class="s-host" hidden>Avec les compliments de <b class="s-host-name"></b></p></div>
+    <h1 class="s-title">Que faire autour d'ici <em>cette semaine</em>&nbsp;?</h1>
+    <div class="s-row">
+      <div class="p-qr s-qr"><img src="{root}sejour/qr.svg" alt="QR code vers les sorties de la semaine"><b>Scanne-moi</b></div>
+      <div class="s-text">
+        <p>Fêtes, concerts, marchés, visites, sorties en famille : tout ce qui se passe près d'ici, mis à jour chaque jour.</p>
+        <p class="s-free">Gratuit, sans compte, rien à installer.</p>
+        <p class="p-url">wavents.fr/sejour</p>
+      </div>
+    </div>
+  </article>"""
+
+
+def sejour_print_page() -> str:
+    """Carte de chambre A5, deux par feuille A4 (à couper au milieu). Nom de
+    l'hébergement facultatif, tapé avant d'imprimer (jamais enregistré)."""
+    root = "../../"
+    field = ('<label class="pb-field">Ton hébergement (facultatif) <input id="host-name" type="text" maxlength="40" '
+             'placeholder="Gîte des Vignes" autocomplete="organization"></label>')
+    sheet = f"""<main class="sheet-wrap"><div class="sheet sejour-sheet" aria-label="Deux cartes A5 sur une feuille A4">
+  {sejour_card(root)}
+  <div class="s-cut" aria-hidden="true"><span>✂</span></div>
+  {sejour_card(root)}
+</div></main>
+<script>
+(function () {{
+  var input = document.getElementById("host-name");
+  if (!input) return;
+  input.addEventListener("input", function () {{
+    var v = input.value.trim();
+    document.querySelectorAll(".s-host").forEach(function (p) {{ p.hidden = !v; }});
+    document.querySelectorAll(".s-host-name").forEach(function (b) {{ b.textContent = v; }});
+  }});
+}})();
+</script>
+"""
+    return (PRINT_HEAD.format(title="Carte « Que faire autour d'ici cette semaine ? » – Wavents",
+                              description="Carte à imprimer pour les chambres d'hôtes, gîtes et campings.", root=root)
+            + _print_bar(root, "../", "Les sorties de la semaine", f"{root}sejour/wavents-sejour.pdf", field)
+            + sheet + _print_tail(root))
+
+
+def sejour_page(upcoming: list[dict], series: dict[str, list[dict]], now: datetime) -> str:
+    """« Que faire autour de chez nous cette semaine » pour les vacanciers
+    (QR des hébergeurs) : 7 jours à moins de SEJOUR_RADIUS_KM de Belleville."""
+    pool = [ev for ev in upcoming if wall_time(ev["start_date"]).date() <= now.date() + timedelta(days=6)
+            and distance_km(ev["latitude"], ev["longitude"]) <= SEJOUR_RADIUS_KM]
+    count = len(collapse_series(pool))
+    intro = (f"{count} sorties dans les 7 prochains jours à moins de {SEJOUR_RADIUS_KM} km de "
+             "Belleville-en-Beaujolais\u00a0: fêtes, concerts, marchés, visites, sorties en famille. "
+             "Mises à jour chaque jour. Bon séjour\u00a0!")
+    after = ('<section class="section prose kit-foot"><h2>Tu accueilles des vacanciers&nbsp;?</h2>'
+             '<p>Gîte, chambres d\'hôtes, camping, office de tourisme : <a href="imprimer/">imprime la carte à QR code</a> '
+             'pour tes chambres ou ton accueil. Gratuit, et toujours à jour.</p></section>')
+    page, _ = theme_page("sejour", "Que faire autour de chez nous cette semaine ?",
+                         "Que faire autour de chez nous cette semaine ?", "Pendant ton séjour",
+                         lambda ev: True, 6, upcoming, series, now, radius=SEJOUR_RADIUS_KM, intro=intro,
+                         extra_head=NOINDEX, near_chip=True, after=after)
+    return page
+
+
+def write_kit_pages(out: Path, upcoming: list[dict], series: dict[str, list[dict]], now: datetime) -> None:
+    (out / "affiche").mkdir(exist_ok=True)
+    (out / "affiche" / "index.html").write_text(affiches_index(), encoding="utf-8")
+    for name in AFFICHE_COMMUNES:
+        folder = out / "affiche" / slugify(name)
+        folder.mkdir(parents=True, exist_ok=True)
+        (folder / "index.html").write_text(affiche_page(name), encoding="utf-8")
+        # Un QR imprimé ne doit jamais tomber sur une 404 : si la commune
+        # n'a plus assez de sorties pour sa page, renvoi vers l'accueil.
+        target = out / commune_path(name)
+        if not (target / "index.html").exists():
+            target.mkdir(parents=True, exist_ok=True)
+            (target / "index.html").write_text(
+                '<!doctype html><meta charset="utf-8"><meta name="robots" content="noindex">'
+                '<meta http-equiv="refresh" content="0; url=/"><title>Wavents</title><a href="/">Wavents</a>',
+                encoding="utf-8")
+    (out / "sejour" / "imprimer").mkdir(parents=True, exist_ok=True)
+    (out / "sejour" / "index.html").write_text(sejour_page(upcoming, series, now), encoding="utf-8")
+    (out / "sejour" / "imprimer" / "index.html").write_text(sejour_print_page(), encoding="utf-8")
+
+
 def main() -> int:
     out = Path(sys.argv[1] if len(sys.argv) > 1 else "site")
     if out.exists():
@@ -2977,6 +3188,9 @@ def main() -> int:
     (out / "app" / "index.html").write_text(app_page(upcoming, communes), encoding="utf-8")
     # Kits organisateurs (20/11/2026) : hors plan du site, noindex.
     print(f"{write_organizer_pages(out, upcoming, series)} pages organisateurs")
+    # Kits de diffusion (20/11/2026) : affiches des commerçants, page et carte
+    # « séjour » des hébergeurs ; noindex, hors plan du site.
+    write_kit_pages(out, upcoming, series, now)
     extra_pages = ([f"{BASE_URL}/{t[0]}/" for t in THEMES] + [f"{BASE_URL}/{f['slug']}/" for f in FESTIVALS]
                    + [f"{BASE_URL}/a-propos/", f"{BASE_URL}/faq/", f"{BASE_URL}/app/", f"{BASE_URL}/ajouter/", f"{BASE_URL}/lettre/",
                       f"{BASE_URL}/secret-santa/", f"{BASE_URL}/secret-santa/collegues/",

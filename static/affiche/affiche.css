@@ -1,0 +1,91 @@
+/* Affiches des commerçants (/affiche/<commune>/) et cartes « séjour »
+   (/sejour/imprimer/), 20/11/2026. La feuille est dessinée en unités de sa
+   largeur (cqw : 1cqw = 2,1 mm en A4) : l'aperçu à l'écran, même sur
+   téléphone, est la réduction exacte de la page imprimée. */
+@font-face { font-family: Nunito; font-weight: 900; font-display: block; src: url(../fonts/Nunito-900.ttf); }
+@font-face { font-family: Nunito; font-weight: 800; font-display: block; src: url(../fonts/Nunito-800.ttf); }
+@font-face { font-family: Nunito; font-weight: 600; font-display: block; src: url(../fonts/Nunito-600.ttf); }
+:root { --deep: #065FBB; --blue: #0B81E1; --wave: #01BAEF; --sun: #FFD66B; --ink: #0A2A3D; --ink-soft: #4B6475; --line: #DCEAF4; }
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { -webkit-text-size-adjust: 100%; }
+body.print-page { font-family: Nunito, system-ui, sans-serif; color: var(--ink); background: #E6F1F8;
+  -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+
+/* Barre d'outils (écran seulement) */
+.print-bar { max-width: 826px; margin: 0 auto; padding: 16px 16px 4px; display: flex; flex-wrap: wrap; gap: 10px 16px;
+  align-items: center; justify-content: space-between; }
+.pb-back { color: var(--deep); font-weight: 800; text-decoration: none; }
+.pb-actions { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+.pb-btn { font: 800 1rem Nunito, system-ui, sans-serif; border: 2px solid var(--deep); background: var(--deep); color: #fff;
+  border-radius: 999px; padding: 10px 18px; cursor: pointer; text-decoration: none; line-height: 1.2; }
+.pb-btn.ghost { background: #fff; color: var(--deep); }
+.pb-note { flex-basis: 100%; color: var(--ink-soft); font-size: .92rem; font-weight: 600; line-height: 1.4; }
+.pb-field { display: flex; flex-direction: column; gap: 4px; font-weight: 800; font-size: .92rem; color: var(--ink); flex: 1 1 220px; }
+.pb-field input { font: 600 1rem Nunito, system-ui, sans-serif; padding: 9px 12px; border: 2px solid var(--line); border-radius: 12px; width: 100%; }
+
+/* La feuille */
+.sheet-wrap { padding: 12px 16px 32px; }
+.sheet { width: min(100%, 794px); aspect-ratio: 210 / 297; margin: 0 auto; background: #fff; position: relative;
+  container-type: inline-size; box-shadow: 0 10px 30px rgba(6, 60, 120, .18); border-radius: 6px; overflow: hidden; }
+
+/* Affiche « Que faire ce week-end autour de … ? » */
+.poster { display: flex; flex-direction: column; }
+.p-top { flex: none; color: #fff; padding: 6cqw 8cqw 7.5cqw;
+  background: radial-gradient(circle at 100% 100%, rgba(255,214,107,.5) 0%, rgba(255,214,107,0) 42%),
+              radial-gradient(circle at 0% 0%, #065FBB 0%, rgba(6,95,187,0) 62%),
+              linear-gradient(135deg, #0B81E1 0%, #01BAEF 100%);
+  border-radius: 0 0 50% 50% / 0 0 7cqw 7cqw; }
+.p-brand, .s-brand { display: flex; align-items: center; gap: 2.4cqw; font-weight: 900; font-size: 6.4cqw; letter-spacing: -.1cqw; line-height: 1; }
+.p-brand img { width: 8cqw; height: 8cqw; }
+.p-title { font-weight: 900; font-size: 7.2cqw; line-height: 1.08; letter-spacing: -.1cqw; margin: 4.5cqw 0 4.5cqw; }
+.p-title em { display: block; font-style: normal; color: var(--sun); margin: 1cqw 0 .6cqw; line-height: 1.04; }
+.p-title em.n-s { font-size: 12cqw; }
+.p-title em.n-m { font-size: 9.6cqw; }
+.p-title em.n-l { font-size: 8.4cqw; }
+.p-chips { display: flex; flex-wrap: wrap; gap: 1.8cqw; }
+.p-chips span { font-weight: 800; font-size: 3.1cqw; line-height: 1.2; padding: 1cqw 2.6cqw; border-radius: 99cqw;
+  background: rgba(255,255,255,.18); border: .35cqw solid rgba(255,255,255,.6); }
+.p-body { flex: 1 1 auto; display: flex; gap: 6cqw; align-items: center; padding: 3cqw 8cqw; }
+.p-qr { flex: none; width: 42cqw; background: #fff; border: .5cqw solid var(--line); border-radius: 4cqw; padding: 2.6cqw 2.6cqw 2cqw; text-align: center; }
+.p-qr img { display: block; width: 100%; height: auto; }
+.p-qr b { display: block; font-weight: 900; font-size: 4.6cqw; color: var(--deep); margin-top: 1cqw; line-height: 1.2; }
+.p-text { min-width: 0; }
+.p-lead { font-weight: 900; font-size: 4.8cqw; line-height: 1.15; margin-bottom: 3cqw; }
+.p-points { list-style: none; display: grid; gap: 1.8cqw; margin-bottom: 3.4cqw; }
+.p-points li { font-weight: 600; font-size: 3.4cqw; line-height: 1.3; padding-left: 5cqw; position: relative; }
+.p-points li::before { content: "✓"; position: absolute; left: 0; top: 0; color: var(--blue); font-weight: 900; }
+.p-url { font-weight: 800; font-size: 3.4cqw; color: var(--deep); overflow-wrap: anywhere; line-height: 1.3; }
+.p-foot { flex: none; padding: 3.2cqw 8cqw; border-top: .3cqw solid var(--line);
+  font-weight: 600; font-size: 3cqw; line-height: 1.35; color: var(--ink-soft); text-align: center; white-space: nowrap; }
+.p-foot b { color: var(--deep); font-weight: 800; }
+
+/* Cartes « séjour » : deux A5 à l'italienne sur une A4 */
+.sejour-sheet { display: flex; flex-direction: column; }
+.s-card { flex: 1 1 0; padding: 4.5cqw 8cqw 3.5cqw; display: flex; flex-direction: column; justify-content: center; position: relative; }
+.s-card::before { content: ""; position: absolute; left: 0; right: 0; top: 0; height: 2.2cqw;
+  background: linear-gradient(90deg, #065FBB 0%, #0B81E1 50%, #01BAEF 100%); }
+.s-cut + .s-card::before { top: auto; bottom: 0; }
+.s-brand { color: var(--deep); font-size: 4.8cqw; }
+.s-brand img { width: 6cqw; height: 6cqw; }
+.s-title { font-weight: 900; font-size: 5.8cqw; line-height: 1.08; margin: 2.6cqw 0 3cqw; color: var(--ink); }
+.s-title em { font-style: normal; color: var(--blue); }
+.s-row { display: flex; gap: 6cqw; align-items: center; }
+.s-qr { width: 29cqw; }
+.s-qr b { font-size: 3.6cqw; }
+.s-text { min-width: 0; }
+.s-text p { font-weight: 600; font-size: 3.4cqw; line-height: 1.35; margin-bottom: 2cqw; }
+.s-text .s-free { font-weight: 900; color: var(--deep); }
+.s-text .p-url { font-size: 3.6cqw; margin: 0; }
+.s-head { display: flex; align-items: center; justify-content: space-between; gap: 4cqw; }
+.s-host { max-width: 50cqw; text-align: right; font-weight: 600; font-size: 3cqw; line-height: 1.3; color: var(--ink-soft); }
+.s-host b { color: var(--ink); font-weight: 800; }
+.s-cut { position: relative; height: 0; border-top: .3cqw dashed #9DB3C3; }
+.s-cut span { position: absolute; left: 4cqw; top: -2.2cqw; font-size: 3.4cqw; line-height: 1; background: #fff; padding: 0 1cqw; color: #7D97A9; }
+
+@page { size: A4 portrait; margin: 0; }
+@media print {
+  .no-print { display: none !important; }
+  body.print-page { background: #fff; }
+  .sheet-wrap { padding: 0; }
+  .sheet { width: 210mm; height: 297mm; aspect-ratio: auto; box-shadow: none; border-radius: 0; margin: 0; break-inside: avoid; }
+}
