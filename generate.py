@@ -23,7 +23,9 @@ Variable d'environnement : PAGES_BASE_URL (adresse publique du site).
 
 from __future__ import annotations
 
+import gzip
 import html
+import io
 import json
 import math
 import os
@@ -98,6 +100,18 @@ e = html.escape
 
 # --- Données ---------------------------------------------------------------
 
+def urlopen_gz(request: urllib.request.Request, timeout: int):
+    """Lecture de la base compressée (20/11/2026, quota de bande passante
+    Supabase dépassé) : urllib ne demande pas gzip de lui-même, et une page
+    de 1 000 fiches pèse 1,09 Mo en clair contre 0,30 Mo compressée."""
+    request.add_header("Accept-Encoding", "gzip")
+    with urllib.request.urlopen(request, timeout=timeout) as response:
+        data = response.read()
+        if response.headers.get("Content-Encoding") == "gzip":
+            data = gzip.decompress(data)
+    return io.BytesIO(data)
+
+
 def fetch_events() -> list[dict]:
     events: list[dict] = []
     offset, page = 0, 1000
@@ -110,7 +124,7 @@ def fetch_events() -> list[dict]:
             "apikey": SUPABASE_ANON_KEY,
             "Authorization": f"Bearer {SUPABASE_ANON_KEY}",
         })
-        with urllib.request.urlopen(request, timeout=60) as response:
+        with urlopen_gz(request, timeout=60) as response:
             rows = json.load(response)
         events.extend(rows)
         if len(rows) < page:
@@ -127,7 +141,7 @@ def fetch_lettre_communes() -> list[str]:
         headers={"apikey": SUPABASE_ANON_KEY, "Authorization": f"Bearer {SUPABASE_ANON_KEY}",
                  "Content-Type": "application/json"})
     try:
-        with urllib.request.urlopen(request, timeout=30) as response:
+        with urlopen_gz(request, timeout=30) as response:
             return [name for name in json.load(response) if isinstance(name, str)]
     except Exception as exc:  # noqa: BLE001
         print(f"Communes de la lettre illisibles : {exc}")
@@ -148,7 +162,7 @@ def fetch_gone_events(days: int = 180) -> list[dict]:
                 data=json.dumps({"p_days": days}).encode(),
                 headers={"apikey": SUPABASE_ANON_KEY, "Authorization": f"Bearer {SUPABASE_ANON_KEY}",
                          "Content-Type": "application/json"})
-            with urllib.request.urlopen(request, timeout=60) as response:
+            with urlopen_gz(request, timeout=60) as response:
                 batch = json.load(response)
             rows.extend(batch)
             if len(batch) < page:
@@ -2690,7 +2704,7 @@ def fetch_organizer_kits() -> list[dict]:
                 data=b"{}",
                 headers={"apikey": SUPABASE_ANON_KEY, "Authorization": f"Bearer {SUPABASE_ANON_KEY}",
                          "Content-Type": "application/json"})
-            with urllib.request.urlopen(request, timeout=60) as response:
+            with urlopen_gz(request, timeout=60) as response:
                 batch = json.load(response)
             rows.extend(batch)
             if len(batch) < page:
