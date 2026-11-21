@@ -887,3 +887,13 @@ a.fest-related .fest-more { color: var(--deep); font-weight: 700; margin-top: 4p
 @media (max-width: 560px) { .hero-mail { text-align: center; } }
 @media (prefers-color-scheme: dark) { .kofi-box { background: color-mix(in srgb, var(--sun) 7%, var(--card)); } }
 .nowrap { white-space: nowrap; }
+
+/* Bouton flottant « + Ajouter un événement », téléphone seulement (21/11/2026,
+   idée reprise de Vivop) : le lien du menu est masqué sous 720 px. */
+.add-fab { display: none; }
+@media (max-width: 720px) {
+  .add-fab { display: block; position: fixed; right: 16px; bottom: calc(16px + env(safe-area-inset-bottom)); z-index: 900;
+    background: var(--sun); color: #3A2A00; font-weight: 800; text-decoration: none; padding: 12px 18px; border-radius: 999px;
+    box-shadow: 0 10px 26px rgba(0,0,0,.22); white-space: nowrap; font-size: .95rem; }
+  body { padding-bottom: 72px; }
+}

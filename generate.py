@@ -633,6 +633,7 @@ def layout(title: str, body: str, *, description: str, url: str, image: str | No
     <p class="footer-note">Informations issues des agendas publics et des organisateurs, mises à jour chaque jour. Vérifie auprès de l'organisateur avant de te déplacer.</p>
   </footer>
   {qr_card(root)}
+  {"" if url.rstrip("/").endswith("/ajouter") else f'<a class="add-fab" href="{root}ajouter/?ref=bouton-flottant" data-goatcounter-click="clic-bouton-ajouter">+ Ajouter un événement</a>'}
 {leaflet_js}  <script src="{root}app.js" defer></script>
   <script data-goatcounter="https://wavents.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
 </body>
