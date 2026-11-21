@@ -65,12 +65,22 @@ FIELDS = (
     # Intérieur / extérieur (script 211 du dépôt Wavents, 30/10/2026).
     "setting,setting_sure"
 )
-# id -> (icône, libellé, couleur) : mêmes icônes Material et mêmes couleurs
-# que l'appli (lib/models/category.dart), pour qu'on se sente au même endroit.
+# Police d'icônes réduite aux seules icônes utilisées (audit du 20/11/2026 :
+# 503 Ko sur chaque page avant, 4,5 Ko après). Toute nouvelle icône passée à
+# _icon() ou à la mini-carte (« place ») doit être ajoutée ici, sinon elle
+# s'affiche en toutes lettres. Ordre alphabétique exigé par Google Fonts.
+MS_ICONS = {"brush", "celebration", "child_care", "explore", "groups", "money_off", "museum", "music_note",
+            "phone_iphone", "place", "sell", "sports_soccer", "storefront", "theater_comedy"}
+MS_ICON_NAMES = ",".join(sorted(MS_ICONS))
+
+
 def _icon(name: str) -> str:
+    assert name in MS_ICONS, f"icône {name} absente de MS_ICONS"
     return f'<span class="ms" aria-hidden="true">{name}</span>'
 
 
+# id -> (icône, libellé, couleur) : mêmes icônes Material et mêmes couleurs
+# que l'appli (lib/models/category.dart), pour qu'on se sente au même endroit.
 CATEGORIES = {
     "concert": (_icon("music_note"), "Concert", "#E91E63"),
     "fete": (_icon("celebration"), "Fête", "#FF5252"),
@@ -527,6 +537,15 @@ def qr_card(root: str) -> str:
 def layout(title: str, body: str, *, description: str, url: str, image: str | None = None,
            extra_head: str = "", depth: int = 0, page_class: str = "", canonical: str | None = None) -> str:
     root = "../" * depth
+    # Leaflet (carte) seulement sur les pages qui ont une carte (audit du
+    # 20/11/2026 : 3 fichiers bloquants de moins sur les autres pages).
+    has_map = 'id="map"' in body or 'id="mini-map"' in body
+    leaflet_css = ('  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">\n'
+                   '  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.5.3/MarkerCluster.css">\n'
+                   ) if has_map else ""
+    leaflet_js = ('  <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js" defer></script>\n'
+                  '  <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.5.3/leaflet.markercluster.js" defer></script>\n'
+                  ) if has_map else ""
     og_image = (f'<meta property="og:image" content="{e(image)}">\n  '
                 f'<meta property="og:image:width" content="1200">\n  '
                 f'<meta property="og:image:height" content="630">\n  '
@@ -555,10 +574,8 @@ def layout(title: str, body: str, *, description: str, url: str, image: str | No
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800;900&family=Roboto:wght@400;500;700&display=swap">
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,500,1,0&display=block">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.5.3/MarkerCluster.css">
-  <link rel="stylesheet" href="{root}style.css">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,500,1,0&icon_names={MS_ICON_NAMES}&display=block">
+{leaflet_css}  <link rel="stylesheet" href="{root}style.css">
   {extra_head}
 </head>
 <body class="{page_class}">
@@ -576,42 +593,66 @@ def layout(title: str, body: str, *, description: str, url: str, image: str | No
   <footer class="footer">
     <div class="footer-inner">
       <div class="footer-brand">
-        <img src="{root}img/logo-256.png" alt="" width="64" height="64">
-        <div><strong>Wavents</strong><p>Suis la vague&nbsp;: ne rate plus rien près de chez toi.<br>Fait avec ❤️ à Belleville-en-Beaujolais.</p></div>
+        <div class="footer-id"><img src="{root}img/logo-256.png" alt="" width="64" height="64">
+          <div><strong>Wavents</strong><p>Suis la vague&nbsp;: ne rate plus rien près de chez toi.<br>Fait avec ❤️ à <span class="nowrap">Belleville-en-Beaujolais</span>.</p></div></div>
+        <div class="footer-cta">
+          <a class="footer-pill" href="{root}lettre/" data-goatcounter-click="clic-pied-lettre">💌 La lettre du jeudi</a>
+          <a class="footer-pill coffee" href="{KOFI_URL}" target="_blank" rel="noopener" data-goatcounter-click="clic-pied-kofi">☕ Offre-nous un café</a>
+        </div>
       </div>
-      <div class="footer-links">
-        <a href="{root}#week-end">Ce week-end</a>
-        <a href="{root}#agenda">Agenda</a>
-        <a href="{root}#carte">Carte</a>
-        <a href="{root}ville/">Par commune</a>
-        <a href="{root}ce-week-end/">Ce week-end dans le Beaujolais</a>
-        <a href="{root}marches/">Marchés</a>
-        <a href="{root}brocantes/">Brocantes</a>
-        <a href="{root}gratuit/">Sorties gratuites</a>
-        <a href="{root}enfants/">En famille</a>
-        <a href="{root}lettre/">💌 La lettre du jeudi</a>
-        <a href="https://ko-fi.com/wavents" target="_blank" rel="noopener" data-goatcounter-click="clic-pied-kofi">☕ Offre-nous un café</a>
-        <a href="{root}a-propos/">À propos</a>
-        <a href="{root}ajouter/">Ajouter un événement</a>
-        <a href="{root}secret-santa/" data-goatcounter-click="clic-pied-secret-santa">🎅 Secret Santa en ligne</a>
-        <a href="{root}trouver-une-date/" data-goatcounter-click="clic-pied-trouver-date">📅 Trouver une date entre amis</a>
-        <a href="{root}faq/">Questions fréquentes</a>
-        <a href="{root}confidentialite.html">Confidentialité</a>
-        <a href="{root}mentions-legales.html">Mentions légales</a>
-        <a href="{root}cgu.html">Conditions d'utilisation</a>
-        <a href="mailto:hello@wavents.fr">Contact</a>
-      </div>
+      <nav class="footer-cols" aria-label="Plan du site">
+        <div class="footer-col"><h2>Sorties</h2><ul>
+          <li><a href="{root}#week-end">Ce week-end</a></li>
+          <li><a href="{root}#agenda">Agenda</a></li>
+          <li><a href="{root}#carte">Carte</a></li>
+          <li><a href="{root}ville/">Par commune</a></li>
+          <li><a href="{root}ce-week-end/">Ce week-end dans le Beaujolais</a></li>
+          <li><a href="{root}marches/">Marchés</a></li>
+          <li><a href="{root}brocantes/">Brocantes</a></li>
+          <li><a href="{root}gratuit/">Sorties gratuites</a></li>
+          <li><a href="{root}enfants/">En famille</a></li>
+        </ul></div>
+        <div class="footer-col"><h2>Outils</h2><ul>
+          <li><a href="{root}ajouter/">Ajouter un événement</a></li>
+          <li><a href="{root}app/">L'appli Wavents</a></li>
+          <li><a href="{root}secret-santa/" data-goatcounter-click="clic-pied-secret-santa">🎅 Secret Santa en ligne</a></li>
+          <li><a href="{root}trouver-une-date/" data-goatcounter-click="clic-pied-trouver-date">📅 Trouver une date entre amis</a></li>
+        </ul></div>
+        <div class="footer-col"><h2>Wavents</h2><ul>
+          <li><a href="{root}a-propos/">À propos</a></li>
+          <li><a href="{root}faq/">Questions fréquentes</a></li>
+          <li><a href="mailto:hello@wavents.fr">Contact</a></li>
+        </ul></div>
+        <div class="footer-col"><h2>Légal</h2><ul>
+          <li><a href="{root}confidentialite.html">Confidentialité</a></li>
+          <li><a href="{root}mentions-legales.html">Mentions légales</a></li>
+          <li><a href="{root}cgu.html">Conditions d'utilisation</a></li>
+        </ul></div>
+      </nav>
     </div>
     <p class="footer-note">Informations issues des agendas publics et des organisateurs, mises à jour chaque jour. Vérifie auprès de l'organisateur avant de te déplacer.</p>
   </footer>
   {qr_card(root)}
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.5.3/leaflet.markercluster.js" defer></script>
-  <script src="{root}app.js" defer></script>
+{leaflet_js}  <script src="{root}app.js" defer></script>
   <script data-goatcounter="https://wavents.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
 </body>
 </html>
 """
+
+
+KOFI_URL = "https://ko-fi.com/wavents"
+
+
+def kofi_box(where: str) -> str:
+    """Encart sobre « gratuit et le restera » (audit du 20/11/2026) : don
+    facultatif, rien de réservé à ceux qui donnent (règle de Paul). Clic
+    compté dans GoatCounter comme clic-<emplacement>-kofi."""
+    return (f'<aside class="kofi-box" aria-label="Soutenir Wavents"><span class="kofi-emoji" aria-hidden="true">☕</span>'
+            f'<div><p class="kofi-title">Wavents est gratuit et le restera</p>'
+            f'<p class="kofi-text">Sans pub et sans compte. Si une sortie trouvée ici t\'a plu, tu peux nous offrir un café\u00a0: '
+            f'c\'est facultatif, et ça nous aide à continuer.</p></div>'
+            f'<a class="btn kofi-btn" href="{KOFI_URL}" target="_blank" rel="noopener" '
+            f'data-goatcounter-click="clic-{where}-kofi">☕ Offre-nous un café</a></aside>')
 
 
 # --- Composants ------------------------------------------------------------------
@@ -877,6 +918,7 @@ def home_page(events: list[dict], all_upcoming: list[dict], now: datetime) -> st
           <a class="btn btn-sun" href="#week-end">Voir ce week-end</a>
           <div class="store-row">{play_cta()}</div>
         </div>
+        <p class="hero-mail"><a href="#lettre" data-goatcounter-click="clic-hero-lettre">💌 Ou reçois les sorties du week-end chaque jeudi par mail&nbsp;→</a></p>
       </div>
       <div class="hero-visual reveal">
         {phone_mockup(weekend or shown)}
@@ -969,6 +1011,8 @@ def home_page(events: list[dict], all_upcoming: list[dict], now: datetime) -> st
       </div>
     </div>
   </section>
+
+  <section class="section kofi-section"><div class="reveal">{kofi_box("accueil")}</div></section>
 
   <section class="section app-band" id="appli">
     <div class="app-band-inner reveal">
@@ -1149,6 +1193,7 @@ def event_page(event: dict, neighbours: list[dict], series: dict[str, list[dict]
       <div class="panel mini-map-panel"><div id="mini-map" data-lat="{lat}" data-lon="{lon}" data-color="{color}" data-icon="{re.sub(r"<[^>]+>", "", emoji)}"></div></div>
       <div class="panel app-promo"><img src="{root}img/logo-256.png" alt="" width="56" height="56"><p><b>Ne rate plus rien près de chez toi</b>Favoris, rappels et notifs avec l'appli Wavents.</p>{play_cta('small')}</div>
     </aside>
+    <div class="ev-kofi">{kofi_box("fiche")}</div>
   </section>
   {near_html}"""
     return layout(
@@ -2417,19 +2462,22 @@ DEMOS = [("affiche", "Une affiche en photo, la fiche se remplit"), ("alertes", "
          ("sombre", "Le mode sombre"), ("sources", "D'où viennent les sorties")]
 
 
-def demos_section() -> str:
-    """Un téléphone par vidéo, qu'on fait glisser (Paul, 20/10) : celle du
-    milieu joue, puis la suivante arrive toute seule (app.js)."""
+def demos_section(root: str = "", kicker: str = "En 6 secondes chacune") -> str:
+    """Un téléphone par vidéo (Paul, 20/10) : celle qui est en avant joue,
+    puis la suivante prend le relais toute seule (app.js). Cadre de
+    téléphone comme celui du haut de l'accueil (audit du 20/11/2026) ;
+    carrousel sur téléphone, rangée de 4 sur ordinateur. Images d'attente
+    chargées seulement à l'approche de la rubrique (data-poster)."""
     phones = "".join(
         f'<figure class="dphone{" on" if i == 0 else ""}" data-demo="{k}"><div class="vphone">'
-        f'<video muted playsinline preload="none" poster="videos/{k}.jpg" aria-label="{e(t)}">'
-        f'<source src="videos/{k}.webm" type="video/webm"><source src="videos/{k}.mp4" type="video/mp4"></video>'
+        f'<video muted playsinline preload="none" data-poster="{root}videos/{k}.jpg" width="360" height="640" aria-label="{e(t)}">'
+        f'<source src="{root}videos/{k}.webm" type="video/webm"><source src="{root}videos/{k}.mp4" type="video/mp4"></video>'
         f'</div><figcaption>{e(t)}</figcaption></figure>'
         for i, (k, t) in enumerate(DEMOS))
     dots = "".join(f'<button type="button" aria-label="Vidéo {i + 1}"{" class=on" if i == 0 else ""}></button>'
                    for i in range(len(DEMOS)))
     return f"""  <section class="section demo-section" id="ce-que-fait-l-appli">
-    <div class="section-head reveal"><div><p class="kicker">En 6 secondes chacune</p><h2>Ce que fait l'appli</h2></div>
+    <div class="section-head reveal"><div><p class="kicker">{e(kicker)}</p><h2>Ce que fait l'appli</h2></div>
       <div class="scroller-nav"><button data-demo-step="-1" aria-label="Précédente">←</button><button data-demo-step="1" aria-label="Suivante">→</button></div></div>
     <div class="demo-track reveal">{phones}</div>
     <div class="demo-dots">{dots}</div>
@@ -2677,6 +2725,7 @@ def app_page(upcoming: list[dict], communes: dict[str, list[dict]]) -> str:
     brocantes, spectacles, sorties en famille. Gratuit, sans compte.</p>
     <div class="hero-actions">{play_cta('light')}</div>
   </div></section>
+{demos_section("../")}
   <section class="section prose">
     <h2>Pourquoi l'appli ?</h2>
     <p><strong>La carte des sorties</strong> autour de toi : aujourd'hui, ce week-end ou cette semaine.</p>

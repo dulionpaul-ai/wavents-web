@@ -157,29 +157,54 @@
     scroller.scrollBy({ left: parseInt(btn.dataset.scroll, 10) * scroller.clientWidth * 0.85, behavior: "smooth" });
   }));
 
-  /* « Ce que fait l'appli » : un téléphone par vidéo, on les fait glisser.
-     Celle du milieu joue ; à la fin, la suivante glisse au milieu toute
-     seule (seulement si la rubrique est visible). Image fixe si l'on
-     préfère moins d'animations (un toucher lance la vidéo). */
+  /* « Ce que fait l'appli » : un téléphone par vidéo. Celle qui est en avant
+     joue ; à la fin, la suivante prend le relais toute seule (seulement si la
+     rubrique est visible). Téléphone : carrousel, celle du milieu joue.
+     Ordinateur (rangée de 4) : on passe de l'une à l'autre sans bouger la
+     rangée, les flèches montrent les 4 suivantes. Image fixe si l'on préfère
+     moins d'animations (un toucher lance la vidéo). Images d'attente
+     chargées à l'approche de la rubrique (audit du 20/11/2026). */
   const track = $(".demo-track");
   if (track) {
     const phones = $$(".dphone", track);
     const videos = phones.map((f) => $("video", f));
     const dots = $$(".demo-dots button");
-    let index = 0, visible = false, timer = null;
-    const center = (i) => {
-      const f = phones[(i + phones.length) % phones.length];
-      track.scrollTo({ left: f.offsetLeft - (track.clientWidth - f.offsetWidth) / 2, behavior: "smooth" });
+    const wide = () => window.matchMedia("(min-width: 980px)").matches;
+    let index = 0, visible = false, timer = null, autoScroll = false;
+    const posters = () => videos.forEach((v) => { if (v.dataset.poster && !v.poster) v.poster = v.dataset.poster; });
+    const scrollTo = (left) => {
+      autoScroll = true;
+      track.scrollTo({ left, behavior: "smooth" });
+      setTimeout(() => { autoScroll = false; }, 700);
     };
-    const activate = (i) => {
-      if (i === index && phones[i].classList.contains("on") && (!visible || !videos[i].paused)) return;
+    const show = (i) => {
+      const f = phones[i];
+      if (wide()) {
+        const page = Math.floor(i / 4) * 4;
+        scrollTo(phones[page].offsetLeft - phones[0].offsetLeft);
+      } else {
+        scrollTo(f.offsetLeft - (track.clientWidth - f.offsetWidth) / 2);
+      }
+    };
+    const activate = (i, force) => {
+      if (!force && i === index && phones[i].classList.contains("on") && (!visible || !videos[i].paused)) return;
       index = i;
       phones.forEach((f, k) => f.classList.toggle("on", k === i));
       dots.forEach((d, k) => d.classList.toggle("on", k === i));
       videos.forEach((v, k) => { if (k !== i) v.pause(); });
       if (visible && !calm) { videos[i].currentTime = 0; videos[i].play().catch(() => {}); }
     };
+    const go = (i) => {
+      i = (i + phones.length) % phones.length;
+      if (wide()) { activate(i, true); show(i); } else show(i);
+    };
     const nearest = () => {
+      if (wide()) {
+        // Première vidéo visible de la rangée.
+        const left = track.scrollLeft + phones[0].offsetLeft - 8;
+        const k = phones.findIndex((f) => f.offsetLeft >= left);
+        return k < 0 ? 0 : k;
+      }
       const mid = track.scrollLeft + track.clientWidth / 2;
       let best = 0, gap = Infinity;
       phones.forEach((f, k) => {
@@ -188,23 +213,30 @@
       });
       return best;
     };
-    track.addEventListener("scroll", () => { clearTimeout(timer); timer = setTimeout(() => activate(nearest()), 120); }, { passive: true });
+    track.addEventListener("scroll", () => {
+      clearTimeout(timer);
+      timer = setTimeout(() => { if (!autoScroll || !wide()) activate(nearest()); }, 140);
+    }, { passive: true });
     videos.forEach((v, k) => {
-      v.addEventListener("ended", () => { if (visible && k === index) center(k + 1 < phones.length ? k + 1 : 0); });
+      v.addEventListener("ended", () => { if (visible && k === index) go(k + 1); });
       v.addEventListener("click", () => {
-        if (k !== index) { center(k); return; }
-        v.paused ? v.play().catch(() => {}) : v.pause();
+        if (k !== index) { go(k); return; }
+        if (v.paused) v.play().catch(() => {}); else v.pause();
       });
     });
-    dots.forEach((d, k) => d.addEventListener("click", () => center(k)));
-    $$("[data-demo-step]").forEach((b) => b.addEventListener("click", () => center(index + parseInt(b.dataset.demoStep, 10))));
+    dots.forEach((d, k) => d.addEventListener("click", () => go(k)));
+    $$("[data-demo-step]").forEach((b) => b.addEventListener("click", () => {
+      const step = parseInt(b.dataset.demoStep, 10);
+      go(wide() ? Math.floor(index / 4) * 4 + step * 4 : index + step);
+    }));
     if ("IntersectionObserver" in window) {
+      new IntersectionObserver(([entry]) => { if (entry.isIntersecting) posters(); }, { rootMargin: "600px 0px" }).observe(track);
       new IntersectionObserver(([entry]) => {
         visible = entry.isIntersecting;
         if (!visible) videos.forEach((v) => v.pause());
         else if (!calm) videos[index].play().catch(() => {});
       }, { threshold: 0.5 }).observe(track);
-    }
+    } else posters();
   }
 
   /* Agenda : un onglet par jour, filtres, « voir les autres » */

@@ -40,3 +40,11 @@ seulement si la liste ou le dessin change. Les QR ajoutent `?ref=<canal>`,
 compté dans GoatCounter comme événement `ref-<canal>` (`static/app.js`).
 
 Réglage à faire une fois : Settings > Pages > Source : « GitHub Actions ».
+
+Audit du 20/11/2026 (détail : `docs/audit_site_2026-11-20.md` du dépôt
+Wavents) : pied de page en colonnes titrées, encart « gratuit et le
+restera » (Ko-fi, `kofi_box()`) sur l'accueil et les fiches, vidéos de
+l'appli dans un cadre de téléphone (accueil et `/app/`). La police
+d'icônes est réduite aux icônes de `MS_ICONS` (`generate.py`) : toute
+nouvelle icône doit y être ajoutée. Leaflet n'est chargé que sur les
+pages qui ont une carte (`id="map"` ou `id="mini-map"`).

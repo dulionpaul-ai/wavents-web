@@ -9,24 +9,40 @@
   <link rel="icon" type="image/svg+xml" sizes="any" href="/img/favicon.svg">
   <link rel="icon" type="image/png" sizes="96x96" href="/img/favicon-96.png">
   <link rel="apple-touch-icon" href="/img/apple-touch-icon.png">
+  <meta name="theme-color" content="#065FBB">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800;900&family=Roboto:wght@400;500;700&display=swap">
   <link rel="stylesheet" href="/style.css">
+  <style>
+    /* Page introuvable aux couleurs du site (audit du 20/11/2026 : elle
+       utilisait des classes de l'ancienne feuille de style, police système). */
+    .nf-nav { position: relative; background: linear-gradient(135deg, var(--deep), var(--blue)); }
+    .nf { max-width: 720px; margin: 0 auto; padding: clamp(40px, 8vw, 80px) 16px 60px; }
+    .nf h1 { font-size: clamp(1.9rem, 6vw, 2.8rem); font-weight: 900; color: var(--deep); margin: 0 0 14px; }
+    .nf .lead { font-size: 1.08rem; color: var(--ink-soft); margin: 0 0 24px; }
+    .nf .kicker { margin-bottom: 8px; }
+    .nf-actions { display: flex; flex-wrap: wrap; gap: 12px; margin: 0 0 18px; }
+    .nf #f-img { max-width: 100%; max-height: 420px; border-radius: 20px; display: none; margin: 0 0 18px; }
+    .nf p { overflow-wrap: break-word; }
+    @media (prefers-color-scheme: dark) { .nf h1 { color: #7FD6F5; } }
+  </style>
 </head>
 <body>
-  <header class="top"><a href="/" class="brand">Wavents</a></header>
-  <main id="notfound">
+  <header class="nav nf-nav"><a href="/" class="nav-brand"><img src="/img/pin.png" alt="" width="56" height="56"><span>Wavents</span></a></header>
+  <main id="notfound" class="nf">
     <h1>Cette page n'existe pas (ou plus)</h1>
-    <p class="muted">Si c'était un événement, il est peut-être passé ou a été retiré par son organisateur. Les prochaines sorties autour de toi t'attendent sur l'accueil.</p>
-    <p><a class="button primary" href="/">Voir les prochains événements</a></p>
+    <p class="lead">Si c'était un événement, il est peut-être passé ou a été retiré par son organisateur. Les prochaines sorties autour de toi t'attendent sur l'accueil.</p>
+    <div class="nf-actions"><a class="btn btn-sun" href="/">Voir les prochains événements</a><a class="btn btn-ghost" href="/ce-week-end/">Ce week-end</a><a class="btn btn-ghost" href="/ville/">Par commune</a></div>
   </main>
-  <main id="fresh" style="display:none">
-    <p class="muted">Tout juste ajouté sur Wavents</p>
-    <img id="f-img" alt="" style="max-width:100%;max-height:420px;border-radius:16px;display:none">
+  <main id="fresh" class="nf" style="display:none">
+    <p class="kicker">Tout juste ajouté sur Wavents</p>
+    <img id="f-img" alt="">
     <h1 id="f-title"></h1>
     <p id="f-when"></p>
     <p id="f-where"></p>
     <p id="f-desc" style="white-space:pre-line"></p>
-    <p><a id="f-map" class="button" target="_blank" rel="noopener">🧭 Y aller</a></p>
-    <p><a class="button primary" href="/app/" data-goatcounter-click="clic-fiche-recente-appli">Voir toutes les sorties dans l'appli Wavents</a></p>
+    <div class="nf-actions"><a id="f-map" class="btn btn-ghost" target="_blank" rel="noopener">🧭 Y aller</a><a class="btn btn-sun" href="/app/" data-goatcounter-click="clic-fiche-recente-appli">Voir toutes les sorties dans l'appli Wavents</a></div>
   </main>
 <script>
 // Fiche publiée depuis le dernier passage du site : sa page /e/<id>/
