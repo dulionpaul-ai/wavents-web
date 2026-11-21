@@ -1351,6 +1351,8 @@ def markets_index(groups: dict[str, list[dict]]) -> str:
 
 COMMUNE_MIN_EVENTS = 3
 COMMUNE_NEAR_KM = 15
+AROUND_KM = 8
+AROUND_MIN_EVENTS = 5
 
 
 def slugify(text: str) -> str:
@@ -1420,7 +1422,12 @@ def commune_center(events: list[dict]) -> tuple[float, float]:
 
 
 def commune_page(name: str, events: list[dict], communes: dict[str, list[dict]],
-                 series: dict[str, list[dict]], now: datetime) -> str:
+                 series: dict[str, list[dict]], now: datetime,
+                 center: tuple[float, float] | None = None, around: bool = False) -> str:
+    """Page « Que faire à <commune> ». `around` (21/11/2026, idée reprise de
+    Vivop, qui a une page pour chaque commune) : petite commune sans assez de
+    sorties à elle, la page montre celles à moins de AROUND_KM km de son
+    centre (communes_zone.json)."""
     root = "../../"
     today = now.date()
     first, last = weekend_range(today)
@@ -1441,7 +1448,7 @@ def commune_page(name: str, events: list[dict], communes: dict[str, list[dict]],
                 f'<h2>{e(title)}</h2></div></div>'
                 f'<div class="rows">{"".join(row_card(ev, series, root) for ev in items)}</div></section>')
 
-    center = commune_center(events)
+    center = center or commune_center(events)
     near = sorted(
         ((other, distance_km(*commune_center(evs), center)) for other, evs in communes.items() if other != name),
         key=lambda item: item[1],
@@ -1458,9 +1465,9 @@ def commune_page(name: str, events: list[dict], communes: dict[str, list[dict]],
 
     free_count = sum(1 for ev in events if is_free(ev))
     kids_count = sum(1 for ev in events if ev.get("for_kids"))
-    facts = [f"{len(events)} sorties à venir"]
+    facts = [f"{len(events)} sortie{'s' if len(events) > 1 else ''} à venir"]
     if free_count:
-        facts.append(f"{free_count} gratuites")
+        facts.append(f"{free_count} gratuite{'s' if free_count > 1 else ''}")
     if kids_count:
         facts.append(f"{kids_count} en famille")
     wk_label = weekend_label(today)
@@ -1468,6 +1475,9 @@ def commune_page(name: str, events: list[dict], communes: dict[str, list[dict]],
     wk_fact = f"{wk_count} ce week-end ({wk_label}), " if wk_count else ""
     intro = (f"Concerts, marchés, spectacles, expositions, fêtes… Toutes les sorties à {name} "
              f"et autour, mises à jour chaque jour : {wk_fact}{', '.join(facts)}.")
+    if around:
+        intro = (f"Concerts, marchés, spectacles, fêtes… Les sorties à {name} et à moins de {AROUND_KM} km, "
+                 f"mises à jour chaque jour : {wk_fact}{', '.join(facts)}.")
     url = f"{BASE_URL}/{commune_path(name)}"
     market_link = (f'<section class="section"><div class="town-links"><a class="town-link" href="{root}{market_path(name)}">'
                    f'🧺 Marché {e(of_town(name))} : jours et horaires</a></div></section>'
@@ -1512,13 +1522,16 @@ def commune_page(name: str, events: list[dict], communes: dict[str, list[dict]],
     )
 
 
-def communes_index(communes: dict[str, list[dict]]) -> str:
+def communes_index(communes: dict[str, list[dict]], around: list[str] | None = None) -> str:
     root = "../"
     links = "".join(
         f'<a class="town-link" href="{root}{commune_path(name)}">{e(name)} <span>{len(evs)}</span></a>'
         for name, evs in sorted(communes.items(), key=lambda item: fold(item[0])))
+    if around:
+        links += "".join(f'<a class="town-link" href="{root}{commune_path(name)}">{e(name)}</a>'
+                         for name in sorted(around, key=fold))
     body = f"""  <section class="ev-hero town-hero"><div class="ev-hero-inner">
-    <p class="kicker">{len(communes)} communes</p>
+    <p class="kicker">{len(communes) + len(around or [])} communes</p>
     <h1>Que faire près de chez toi ?</h1>
     <p class="lead">Choisis ta commune : toutes les sorties à venir, mises à jour chaque jour.</p>
   </div></section>
@@ -3370,10 +3383,10 @@ def write_encart_pages(out: Path, communes: dict[str, list[dict]], upcoming: lis
     # centres de geo.api.gouv.fr) : une petite commune sans sortie à elle a
     # quand même un encart, rempli par ses voisines.
     targets = {slugify(name): (name, commune_center(evs), len(evs)) for name, evs in communes.items()}
-    extra = Path(__file__).parent / "encart_communes.json"
-    if extra.exists():
-        for c in json.loads(extra.read_text(encoding="utf-8")):
-            targets.setdefault(slugify(c["name"]), (c["name"], (c["lat"], c["lon"]), 0))
+    for extra in (Path(__file__).parent / "encart_communes.json", Path(__file__).parent / "communes_zone.json"):
+        if extra.exists():
+            for c in json.loads(extra.read_text(encoding="utf-8")):
+                targets.setdefault(slugify(c["name"]), (c["name"], (c["lat"], c["lon"]), 0))
     choices = []
     for slug, (name, center, count) in targets.items():
         items = encart_events(name, center, upcoming, now)
@@ -3381,7 +3394,7 @@ def write_encart_pages(out: Path, communes: dict[str, list[dict]], upcoming: lis
             continue
         folder = out / "encart" / slug
         folder.mkdir(parents=True, exist_ok=True)
-        (folder / "index.html").write_text(encart_page(name, slug, items, now, count > 0),
+        (folder / "index.html").write_text(encart_page(name, slug, items, now, (out / commune_path(name) / "index.html").exists()),
                                              encoding="utf-8")
         choices.append((name, slug, count))
     choices.sort(key=lambda c: fold(c[0]))
@@ -3448,8 +3461,29 @@ def main() -> int:
         folder = out / commune_path(name)
         folder.mkdir(parents=True, exist_ok=True)
         (folder / "index.html").write_text(commune_page(name, evs, communes, series, now), encoding="utf-8")
+    # Toutes les communes à 40 km de Belleville (communes_zone.json, geo.api.gouv.fr,
+    # 21/11/2026, idée reprise de Vivop) : celles sans page ont une page
+    # « et autour » si au moins 5 sorties sont à moins de 8 km.
+    around_names: list[str] = []
+    zone_file = Path(__file__).parent / "communes_zone.json"
+    have = {slugify(name) for name in communes}
+    if zone_file.exists():
+        for c in json.loads(zone_file.read_text(encoding="utf-8")):
+            if slugify(c["name"]) in have:
+                continue
+            center = (c["lat"], c["lon"])
+            near = [ev for ev in upcoming if distance_km(ev["latitude"], ev["longitude"], center) <= AROUND_KM]
+            if len(near) < AROUND_MIN_EVENTS:
+                continue
+            folder = out / commune_path(c["name"])
+            folder.mkdir(parents=True, exist_ok=True)
+            (folder / "index.html").write_text(
+                commune_page(c["name"], near, communes, series, now, center=center, around=True), encoding="utf-8")
+            around_names.append(c["name"])
+            have.add(slugify(c["name"]))
+    print(f"{len(around_names)} pages communes « et autour »")
     (out / "ville").mkdir(exist_ok=True)
-    (out / "ville" / "index.html").write_text(communes_index(communes), encoding="utf-8")
+    (out / "ville" / "index.html").write_text(communes_index(communes, around_names), encoding="utf-8")
 
     markets = market_groups(events)
     for town, evs in markets.items():
@@ -3509,7 +3543,7 @@ def main() -> int:
     # sorties), et sitemap.xml devient l'index des quatre.
     parts = {
         "pages": [f"{BASE_URL}/", f"{BASE_URL}/ville/", f"{BASE_URL}/marche/"] + extra_pages,
-        "communes": [f"{BASE_URL}/{commune_path(name)}" for name in communes],
+        "communes": [f"{BASE_URL}/{commune_path(name)}" for name in list(communes) + around_names],
         "marches": [f"{BASE_URL}/{market_path(town)}" for town in markets],
         "sorties": [f"{BASE_URL}/{event_path(ev)}" for ev in events if canonical_ids[ev["id"]] == ev["id"]],
     }
@@ -3540,7 +3574,7 @@ def main() -> int:
     soonest = sorted(upcoming, key=lambda ev: ev["start_date"])[:2000]
     (out / "indexnow.json").write_text(json.dumps(
         [f"{BASE_URL}/", f"{BASE_URL}/ville/", f"{BASE_URL}/marche/"] + extra_pages
-        + [f"{BASE_URL}/{commune_path(name)}" for name in communes]
+        + [f"{BASE_URL}/{commune_path(name)}" for name in list(communes) + around_names]
         + [f"{BASE_URL}/{market_path(town)}" for town in markets]
         + [f"{BASE_URL}/{event_path(ev)}" for ev in soonest]), encoding="utf-8")
     print(f"{len(events)} pages d'événements et {len(communes)} pages communes générées dans {out}/")

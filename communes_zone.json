@@ -1,0 +1,2907 @@
+[
+{
+"name": "L'Abergement-Clémenciat",
+"insee": "01001",
+"lat": 46.1517,
+"lon": 4.9306,
+"pop": 860
+},
+{
+"name": "Ambérieux-en-Dombes",
+"insee": "01005",
+"lat": 45.9992,
+"lon": 4.9119,
+"pop": 1906
+},
+{
+"name": "Ars-sur-Formans",
+"insee": "01021",
+"lat": 45.9904,
+"lon": 4.8195,
+"pop": 1528
+},
+{
+"name": "Asnières-sur-Saône",
+"insee": "01023",
+"lat": 46.3859,
+"lon": 4.882,
+"pop": 78
+},
+{
+"name": "Attignat",
+"insee": "01024",
+"lat": 46.2858,
+"lon": 5.1823,
+"pop": 3409
+},
+{
+"name": "Bâgé-Dommartin",
+"insee": "01025",
+"lat": 46.3277,
+"lon": 4.9704,
+"pop": 4050
+},
+{
+"name": "Bâgé-le-Châtel",
+"insee": "01026",
+"lat": 46.3081,
+"lon": 4.9305,
+"pop": 971
+},
+{
+"name": "Baneins",
+"insee": "01028",
+"lat": 46.1117,
+"lon": 4.9045,
+"pop": 621
+},
+{
+"name": "Beauregard",
+"insee": "01030",
+"lat": 46.0012,
+"lon": 4.7567,
+"pop": 872
+},
+{
+"name": "Béréziat",
+"insee": "01040",
+"lat": 46.3699,
+"lon": 5.0431,
+"pop": 475
+},
+{
+"name": "Bey",
+"insee": "01042",
+"lat": 46.2182,
+"lon": 4.844,
+"pop": 286
+},
+{
+"name": "Beynost",
+"insee": "01043",
+"lat": 45.8359,
+"lon": 4.9964,
+"pop": 5198
+},
+{
+"name": "Birieux",
+"insee": "01045",
+"lat": 45.9509,
+"lon": 5.0401,
+"pop": 275
+},
+{
+"name": "Biziat",
+"insee": "01046",
+"lat": 46.224,
+"lon": 4.9393,
+"pop": 889
+},
+{
+"name": "La Boisse",
+"insee": "01049",
+"lat": 45.8483,
+"lon": 5.0262,
+"pop": 3449
+},
+{
+"name": "Boissey",
+"insee": "01050",
+"lat": 46.3723,
+"lon": 4.9975,
+"pop": 396
+},
+{
+"name": "Bouligneux",
+"insee": "01052",
+"lat": 46.0202,
+"lon": 4.9957,
+"pop": 318
+},
+{
+"name": "Bourg-en-Bresse",
+"insee": "01053",
+"lat": 46.2027,
+"lon": 5.2469,
+"pop": 42372
+},
+{
+"name": "Bourg-Saint-Christophe",
+"insee": "01054",
+"lat": 45.8842,
+"lon": 5.1393,
+"pop": 1562
+},
+{
+"name": "Boz",
+"insee": "01057",
+"lat": 46.4089,
+"lon": 4.9166,
+"pop": 513
+},
+{
+"name": "Bressolles",
+"insee": "01062",
+"lat": 45.8714,
+"lon": 5.0984,
+"pop": 1028
+},
+{
+"name": "Buellas",
+"insee": "01065",
+"lat": 46.2116,
+"lon": 5.1468,
+"pop": 1899
+},
+{
+"name": "Certines",
+"insee": "01069",
+"lat": 46.1336,
+"lon": 5.2638,
+"pop": 1531
+},
+{
+"name": "Chalamont",
+"insee": "01074",
+"lat": 46.0149,
+"lon": 5.1735,
+"pop": 2533
+},
+{
+"name": "Chaleins",
+"insee": "01075",
+"lat": 46.0361,
+"lon": 4.7999,
+"pop": 1505
+},
+{
+"name": "Chaneins",
+"insee": "01083",
+"lat": 46.0947,
+"lon": 4.8517,
+"pop": 1046
+},
+{
+"name": "Chanoz-Châtenay",
+"insee": "01084",
+"lat": 46.1868,
+"lon": 5.0302,
+"pop": 989
+},
+{
+"name": "La Chapelle-du-Châtelard",
+"insee": "01085",
+"lat": 46.0683,
+"lon": 5.0174,
+"pop": 388
+},
+{
+"name": "Châtenay",
+"insee": "01090",
+"lat": 46.0276,
+"lon": 5.2085,
+"pop": 373
+},
+{
+"name": "Châtillon-sur-Chalaronne",
+"insee": "01093",
+"lat": 46.1264,
+"lon": 4.9549,
+"pop": 5250
+},
+{
+"name": "Chaveyriat",
+"insee": "01096",
+"lat": 46.1991,
+"lon": 5.0534,
+"pop": 1078
+},
+{
+"name": "Chevroux",
+"insee": "01102",
+"lat": 46.3822,
+"lon": 4.9598,
+"pop": 990
+},
+{
+"name": "Civrieux",
+"insee": "01105",
+"lat": 45.9208,
+"lon": 4.8895,
+"pop": 2016
+},
+{
+"name": "Condeissiat",
+"insee": "01113",
+"lat": 46.1541,
+"lon": 5.0863,
+"pop": 839
+},
+{
+"name": "Confrançon",
+"insee": "01115",
+"lat": 46.2732,
+"lon": 5.06,
+"pop": 1356
+},
+{
+"name": "Cormoranche-sur-Saône",
+"insee": "01123",
+"lat": 46.2459,
+"lon": 4.8305,
+"pop": 1179
+},
+{
+"name": "Crans",
+"insee": "01129",
+"lat": 45.9667,
+"lon": 5.1917,
+"pop": 326
+},
+{
+"name": "Crottet",
+"insee": "01134",
+"lat": 46.2848,
+"lon": 4.876,
+"pop": 1847
+},
+{
+"name": "Cruzilles-lès-Mépillat",
+"insee": "01136",
+"lat": 46.2233,
+"lon": 4.876,
+"pop": 984
+},
+{
+"name": "Curtafond",
+"insee": "01140",
+"lat": 46.2742,
+"lon": 5.1051,
+"pop": 825
+},
+{
+"name": "Dagneux",
+"insee": "01142",
+"lat": 45.854,
+"lon": 5.0748,
+"pop": 4778
+},
+{
+"name": "Dompierre-sur-Veyle",
+"insee": "01145",
+"lat": 46.0672,
+"lon": 5.2167,
+"pop": 1245
+},
+{
+"name": "Dompierre-sur-Chalaronne",
+"insee": "01146",
+"lat": 46.142,
+"lon": 4.9004,
+"pop": 456
+},
+{
+"name": "Faramans",
+"insee": "01156",
+"lat": 45.9086,
+"lon": 5.126,
+"pop": 934
+},
+{
+"name": "Fareins",
+"insee": "01157",
+"lat": 46.0235,
+"lon": 4.7682,
+"pop": 2533
+},
+{
+"name": "Feillens",
+"insee": "01159",
+"lat": 46.3393,
+"lon": 4.8866,
+"pop": 3411
+},
+{
+"name": "Francheleins",
+"insee": "01165",
+"lat": 46.0707,
+"lon": 4.8111,
+"pop": 1597
+},
+{
+"name": "Frans",
+"insee": "01166",
+"lat": 45.9905,
+"lon": 4.7819,
+"pop": 2582
+},
+{
+"name": "Garnerans",
+"insee": "01167",
+"lat": 46.2124,
+"lon": 4.8289,
+"pop": 711
+},
+{
+"name": "Genouilleux",
+"insee": "01169",
+"lat": 46.1211,
+"lon": 4.7926,
+"pop": 701
+},
+{
+"name": "Gorrevod",
+"insee": "01175",
+"lat": 46.4157,
+"lon": 4.9507,
+"pop": 815
+},
+{
+"name": "Grièges",
+"insee": "01179",
+"lat": 46.2669,
+"lon": 4.8475,
+"pop": 1910
+},
+{
+"name": "Guéreins",
+"insee": "01183",
+"lat": 46.106,
+"lon": 4.7839,
+"pop": 1512
+},
+{
+"name": "Illiat",
+"insee": "01188",
+"lat": 46.1838,
+"lon": 4.8884,
+"pop": 702
+},
+{
+"name": "Jassans-Riottier",
+"insee": "01194",
+"lat": 45.9771,
+"lon": 4.7626,
+"pop": 6247
+},
+{
+"name": "Joyeux",
+"insee": "01198",
+"lat": 45.946,
+"lon": 5.0998,
+"pop": 262
+},
+{
+"name": "Laiz",
+"insee": "01203",
+"lat": 46.2462,
+"lon": 4.9006,
+"pop": 1293
+},
+{
+"name": "Lapeyrouse",
+"insee": "01207",
+"lat": 45.9849,
+"lon": 4.9821,
+"pop": 348
+},
+{
+"name": "Lent",
+"insee": "01211",
+"lat": 46.1165,
+"lon": 5.1974,
+"pop": 1512
+},
+{
+"name": "Lurcy",
+"insee": "01225",
+"lat": 46.0628,
+"lon": 4.7802,
+"pop": 406
+},
+{
+"name": "Malafretaz",
+"insee": "01229",
+"lat": 46.3299,
+"lon": 5.1462,
+"pop": 1257
+},
+{
+"name": "Manziat",
+"insee": "01231",
+"lat": 46.3651,
+"lon": 4.9026,
+"pop": 2018
+},
+{
+"name": "Marlieux",
+"insee": "01235",
+"lat": 46.0542,
+"lon": 5.0756,
+"pop": 1185
+},
+{
+"name": "Marsonnas",
+"insee": "01236",
+"lat": 46.3401,
+"lon": 5.0608,
+"pop": 1039
+},
+{
+"name": "Massieux",
+"insee": "01238",
+"lat": 45.9101,
+"lon": 4.8279,
+"pop": 2843
+},
+{
+"name": "Messimy-sur-Saône",
+"insee": "01243",
+"lat": 46.048,
+"lon": 4.7609,
+"pop": 1338
+},
+{
+"name": "Mézériat",
+"insee": "01246",
+"lat": 46.2424,
+"lon": 5.0481,
+"pop": 2172
+},
+{
+"name": "Mionnay",
+"insee": "01248",
+"lat": 45.8959,
+"lon": 4.9274,
+"pop": 2294
+},
+{
+"name": "Miribel",
+"insee": "01249",
+"lat": 45.8444,
+"lon": 4.941,
+"pop": 10395
+},
+{
+"name": "Misérieux",
+"insee": "01250",
+"lat": 45.9745,
+"lon": 4.8138,
+"pop": 2008
+},
+{
+"name": "Mogneneins",
+"insee": "01252",
+"lat": 46.1454,
+"lon": 4.8203,
+"pop": 841
+},
+{
+"name": "Montceaux",
+"insee": "01258",
+"lat": 46.0978,
+"lon": 4.8041,
+"pop": 1196
+},
+{
+"name": "Montcet",
+"insee": "01259",
+"lat": 46.2199,
+"lon": 5.1123,
+"pop": 709
+},
+{
+"name": "Le Montellier",
+"insee": "01260",
+"lat": 45.9284,
+"lon": 5.0699,
+"pop": 336
+},
+{
+"name": "Monthieux",
+"insee": "01261",
+"lat": 45.9631,
+"lon": 4.948,
+"pop": 664
+},
+{
+"name": "Montluel",
+"insee": "01262",
+"lat": 45.8868,
+"lon": 5.0185,
+"pop": 6895
+},
+{
+"name": "Montmerle-sur-Saône",
+"insee": "01263",
+"lat": 46.0843,
+"lon": 4.759,
+"pop": 3799
+},
+{
+"name": "Montracol",
+"insee": "01264",
+"lat": 46.182,
+"lon": 5.1234,
+"pop": 1018
+},
+{
+"name": "Montrevel-en-Bresse",
+"insee": "01266",
+"lat": 46.3262,
+"lon": 5.1122,
+"pop": 2743
+},
+{
+"name": "Neuville-les-Dames",
+"insee": "01272",
+"lat": 46.1599,
+"lon": 5.0103,
+"pop": 1565
+},
+{
+"name": "Neyron",
+"insee": "01275",
+"lat": 45.8204,
+"lon": 4.9356,
+"pop": 2421
+},
+{
+"name": "Niévroz",
+"insee": "01276",
+"lat": 45.8241,
+"lon": 5.0615,
+"pop": 1662
+},
+{
+"name": "Ozan",
+"insee": "01284",
+"lat": 46.3863,
+"lon": 4.9191,
+"pop": 732
+},
+{
+"name": "Parcieux",
+"insee": "01285",
+"lat": 45.9197,
+"lon": 4.8299,
+"pop": 1315
+},
+{
+"name": "Péronnas",
+"insee": "01289",
+"lat": 46.1693,
+"lon": 5.2195,
+"pop": 6444
+},
+{
+"name": "Perrex",
+"insee": "01291",
+"lat": 46.2462,
+"lon": 4.9718,
+"pop": 869
+},
+{
+"name": "Peyzieux-sur-Saône",
+"insee": "01295",
+"lat": 46.1227,
+"lon": 4.8192,
+"pop": 654
+},
+{
+"name": "Pizay",
+"insee": "01297",
+"lat": 45.8906,
+"lon": 5.0901,
+"pop": 937
+},
+{
+"name": "Le Plantay",
+"insee": "01299",
+"lat": 46.0236,
+"lon": 5.0891,
+"pop": 559
+},
+{
+"name": "Polliat",
+"insee": "01301",
+"lat": 46.2504,
+"lon": 5.1355,
+"pop": 2741
+},
+{
+"name": "Pont-de-Vaux",
+"insee": "01305",
+"lat": 46.4415,
+"lon": 4.9265,
+"pop": 2204
+},
+{
+"name": "Pont-de-Veyle",
+"insee": "01306",
+"lat": 46.2647,
+"lon": 4.8818,
+"pop": 1594
+},
+{
+"name": "Rancé",
+"insee": "01318",
+"lat": 45.9674,
+"lon": 4.8665,
+"pop": 775
+},
+{
+"name": "Relevant",
+"insee": "01319",
+"lat": 46.0808,
+"lon": 4.9399,
+"pop": 465
+},
+{
+"name": "Replonges",
+"insee": "01320",
+"lat": 46.307,
+"lon": 4.8784,
+"pop": 3956
+},
+{
+"name": "Reyrieux",
+"insee": "01322",
+"lat": 45.9368,
+"lon": 4.8314,
+"pop": 5358
+},
+{
+"name": "Reyssouze",
+"insee": "01323",
+"lat": 46.4284,
+"lon": 4.9145,
+"pop": 996
+},
+{
+"name": "Rignieux-le-Franc",
+"insee": "01325",
+"lat": 45.9513,
+"lon": 5.1675,
+"pop": 1180
+},
+{
+"name": "Romans",
+"insee": "01328",
+"lat": 46.1216,
+"lon": 5.0217,
+"pop": 640
+},
+{
+"name": "Saint-André-de-Bâgé",
+"insee": "01332",
+"lat": 46.2975,
+"lon": 4.9132,
+"pop": 841
+},
+{
+"name": "Saint-André-de-Corcy",
+"insee": "01333",
+"lat": 45.9287,
+"lon": 4.9529,
+"pop": 3370
+},
+{
+"name": "Saint-André-d'Huiriat",
+"insee": "01334",
+"lat": 46.2163,
+"lon": 4.9144,
+"pop": 667
+},
+{
+"name": "Saint-André-le-Bouchoux",
+"insee": "01335",
+"lat": 46.1137,
+"lon": 5.0775,
+"pop": 409
+},
+{
+"name": "Saint-André-sur-Vieux-Jonc",
+"insee": "01336",
+"lat": 46.15,
+"lon": 5.143,
+"pop": 1229
+},
+{
+"name": "Saint-Bernard",
+"insee": "01339",
+"lat": 45.95,
+"lon": 4.7419,
+"pop": 1590
+},
+{
+"name": "Sainte-Croix",
+"insee": "01342",
+"lat": 45.8978,
+"lon": 5.0477,
+"pop": 544
+},
+{
+"name": "Saint-Cyr-sur-Menthon",
+"insee": "01343",
+"lat": 46.2751,
+"lon": 4.9669,
+"pop": 1890
+},
+{
+"name": "Saint-Denis-lès-Bourg",
+"insee": "01344",
+"lat": 46.2097,
+"lon": 5.1825,
+"pop": 6160
+},
+{
+"name": "Saint-Didier-d'Aussiat",
+"insee": "01346",
+"lat": 46.3075,
+"lon": 5.0536,
+"pop": 843
+},
+{
+"name": "Saint-Didier-de-Formans",
+"insee": "01347",
+"lat": 45.9587,
+"lon": 4.7767,
+"pop": 2203
+},
+{
+"name": "Saint-Didier-sur-Chalaronne",
+"insee": "01348",
+"lat": 46.1877,
+"lon": 4.823,
+"pop": 2934
+},
+{
+"name": "Saint-Éloi",
+"insee": "01349",
+"lat": 45.9343,
+"lon": 5.1507,
+"pop": 525
+},
+{
+"name": "Saint-Étienne-sur-Chalaronne",
+"insee": "01351",
+"lat": 46.1451,
+"lon": 4.8694,
+"pop": 1637
+},
+{
+"name": "Saint-Étienne-sur-Reyssouze",
+"insee": "01352",
+"lat": 46.3998,
+"lon": 5.0031,
+"pop": 572
+},
+{
+"name": "Sainte-Euphémie",
+"insee": "01353",
+"lat": 45.9651,
+"lon": 4.7927,
+"pop": 1757
+},
+{
+"name": "Saint-Genis-sur-Menthon",
+"insee": "01355",
+"lat": 46.281,
+"lon": 5.0162,
+"pop": 490
+},
+{
+"name": "Saint-Georges-sur-Renon",
+"insee": "01356",
+"lat": 46.1033,
+"lon": 5.0286,
+"pop": 228
+},
+{
+"name": "Saint-Germain-sur-Renon",
+"insee": "01359",
+"lat": 46.0764,
+"lon": 5.0626,
+"pop": 264
+},
+{
+"name": "Saint-Jean-de-Thurigneux",
+"insee": "01362",
+"lat": 45.9597,
+"lon": 4.8959,
+"pop": 863
+},
+{
+"name": "Saint-Jean-sur-Reyssouze",
+"insee": "01364",
+"lat": 46.3912,
+"lon": 5.0582,
+"pop": 762
+},
+{
+"name": "Saint-Jean-sur-Veyle",
+"insee": "01365",
+"lat": 46.2687,
+"lon": 4.9203,
+"pop": 1143
+},
+{
+"name": "Saint-Julien-sur-Veyle",
+"insee": "01368",
+"lat": 46.2072,
+"lon": 4.9559,
+"pop": 859
+},
+{
+"name": "Saint-Laurent-sur-Saône",
+"insee": "01370",
+"lat": 46.3053,
+"lon": 4.8395,
+"pop": 1810
+},
+{
+"name": "Saint-Marcel",
+"insee": "01371",
+"lat": 45.9485,
+"lon": 4.9862,
+"pop": 1340
+},
+{
+"name": "Saint-Martin-le-Châtel",
+"insee": "01375",
+"lat": 46.2903,
+"lon": 5.1206,
+"pop": 796
+},
+{
+"name": "Saint-Maurice-de-Beynost",
+"insee": "01376",
+"lat": 45.8325,
+"lon": 4.9763,
+"pop": 4332
+},
+{
+"name": "Saint-Nizier-le-Désert",
+"insee": "01381",
+"lat": 46.0518,
+"lon": 5.1471,
+"pop": 921
+},
+{
+"name": "Sainte-Olive",
+"insee": "01382",
+"lat": 46.0147,
+"lon": 4.9349,
+"pop": 357
+},
+{
+"name": "Saint-Paul-de-Varax",
+"insee": "01383",
+"lat": 46.0949,
+"lon": 5.1309,
+"pop": 1634
+},
+{
+"name": "Saint-Rémy",
+"insee": "01385",
+"lat": 46.1857,
+"lon": 5.1646,
+"pop": 915
+},
+{
+"name": "Saint-Sulpice",
+"insee": "01387",
+"lat": 46.3215,
+"lon": 5.0406,
+"pop": 260
+},
+{
+"name": "Saint-Trivier-sur-Moignans",
+"insee": "01389",
+"lat": 46.0632,
+"lon": 4.8984,
+"pop": 1963
+},
+{
+"name": "Sandrans",
+"insee": "01393",
+"lat": 46.0709,
+"lon": 4.9824,
+"pop": 582
+},
+{
+"name": "Savigneux",
+"insee": "01398",
+"lat": 45.9946,
+"lon": 4.8559,
+"pop": 1469
+},
+{
+"name": "Servas",
+"insee": "01405",
+"lat": 46.1366,
+"lon": 5.1845,
+"pop": 1286
+},
+{
+"name": "Sulignat",
+"insee": "01412",
+"lat": 46.1727,
+"lon": 4.9601,
+"pop": 602
+},
+{
+"name": "Thil",
+"insee": "01418",
+"lat": 45.8184,
+"lon": 5.0189,
+"pop": 1261
+},
+{
+"name": "Thoissey",
+"insee": "01420",
+"lat": 46.1697,
+"lon": 4.7963,
+"pop": 1626
+},
+{
+"name": "Toussieux",
+"insee": "01423",
+"lat": 45.961,
+"lon": 4.8289,
+"pop": 1257
+},
+{
+"name": "Tramoyes",
+"insee": "01424",
+"lat": 45.8742,
+"lon": 4.9624,
+"pop": 1852
+},
+{
+"name": "La Tranclière",
+"insee": "01425",
+"lat": 46.0915,
+"lon": 5.2656,
+"pop": 290
+},
+{
+"name": "Trévoux",
+"insee": "01427",
+"lat": 45.9398,
+"lon": 4.771,
+"pop": 7013
+},
+{
+"name": "Valeins",
+"insee": "01428",
+"lat": 46.1145,
+"lon": 4.8646,
+"pop": 128
+},
+{
+"name": "Vandeins",
+"insee": "01429",
+"lat": 46.2155,
+"lon": 5.0786,
+"pop": 732
+},
+{
+"name": "Versailleux",
+"insee": "01434",
+"lat": 45.9883,
+"lon": 5.115,
+"pop": 497
+},
+{
+"name": "Vésines",
+"insee": "01439",
+"lat": 46.3593,
+"lon": 4.8638,
+"pop": 96
+},
+{
+"name": "Villars-les-Dombes",
+"insee": "01443",
+"lat": 46,
+"lon": 5.0443,
+"pop": 5163
+},
+{
+"name": "Villeneuve",
+"insee": "01446",
+"lat": 46.0346,
+"lon": 4.8598,
+"pop": 1638
+},
+{
+"name": "Viriat",
+"insee": "01451",
+"lat": 46.2522,
+"lon": 5.2257,
+"pop": 7102
+},
+{
+"name": "Vonnas",
+"insee": "01457",
+"lat": 46.2132,
+"lon": 4.9945,
+"pop": 3255
+},
+{
+"name": "Arcinges",
+"insee": "42007",
+"lat": 46.1351,
+"lon": 4.2877,
+"pop": 216
+},
+{
+"name": "Belleroche",
+"insee": "42014",
+"lat": 46.1591,
+"lon": 4.4103,
+"pop": 313
+},
+{
+"name": "Belmont-de-la-Loire",
+"insee": "42015",
+"lat": 46.1612,
+"lon": 4.3493,
+"pop": 1410
+},
+{
+"name": "Le Cergne",
+"insee": "42033",
+"lat": 46.12,
+"lon": 4.3015,
+"pop": 622
+},
+{
+"name": "Combre",
+"insee": "42068",
+"lat": 46.0182,
+"lon": 4.2609,
+"pop": 411
+},
+{
+"name": "Cuinzier",
+"insee": "42079",
+"lat": 46.124,
+"lon": 4.2649,
+"pop": 707
+},
+{
+"name": "Écoche",
+"insee": "42086",
+"lat": 46.1524,
+"lon": 4.3077,
+"pop": 525
+},
+{
+"name": "La Gresle",
+"insee": "42104",
+"lat": 46.0752,
+"lon": 4.2727,
+"pop": 857
+},
+{
+"name": "Jarnosse",
+"insee": "42112",
+"lat": 46.0984,
+"lon": 4.2418,
+"pop": 410
+},
+{
+"name": "Machézal",
+"insee": "42128",
+"lat": 45.9285,
+"lon": 4.3147,
+"pop": 403
+},
+{
+"name": "Mars",
+"insee": "42141",
+"lat": 46.1498,
+"lon": 4.2526,
+"pop": 555
+},
+{
+"name": "Saint-Germain-la-Montagne",
+"insee": "42229",
+"lat": 46.1965,
+"lon": 4.3925,
+"pop": 211
+},
+{
+"name": "Saint-Victor-sur-Rhins",
+"insee": "42293",
+"lat": 46.005,
+"lon": 4.277,
+"pop": 1141
+},
+{
+"name": "Sevelinges",
+"insee": "42300",
+"lat": 46.0979,
+"lon": 4.2839,
+"pop": 646
+},
+{
+"name": "Affoux",
+"insee": "69001",
+"lat": 45.8448,
+"lon": 4.4116,
+"pop": 398
+},
+{
+"name": "Aigueperse",
+"insee": "69002",
+"lat": 46.2822,
+"lon": 4.4268,
+"pop": 235
+},
+{
+"name": "Albigny-sur-Saône",
+"insee": "69003",
+"lat": 45.8666,
+"lon": 4.8284,
+"pop": 3057
+},
+{
+"name": "Alix",
+"insee": "69004",
+"lat": 45.9162,
+"lon": 4.6534,
+"pop": 777
+},
+{
+"name": "Ambérieux",
+"insee": "69005",
+"lat": 45.9264,
+"lon": 4.7427,
+"pop": 651
+},
+{
+"name": "Amplepuis",
+"insee": "69006",
+"lat": 45.966,
+"lon": 4.317,
+"pop": 4876
+},
+{
+"name": "Ancy",
+"insee": "69008",
+"lat": 45.8362,
+"lon": 4.5098,
+"pop": 671
+},
+{
+"name": "Anse",
+"insee": "69009",
+"lat": 45.9451,
+"lon": 4.7049,
+"pop": 8206
+},
+{
+"name": "L'Arbresle",
+"insee": "69010",
+"lat": 45.8347,
+"lon": 4.6102,
+"pop": 6537
+},
+{
+"name": "Les Ardillats",
+"insee": "69012",
+"lat": 46.1885,
+"lon": 4.5293,
+"pop": 628
+},
+{
+"name": "Arnas",
+"insee": "69013",
+"lat": 46.0194,
+"lon": 4.7102,
+"pop": 4601
+},
+{
+"name": "Azolette",
+"insee": "69016",
+"lat": 46.1917,
+"lon": 4.4146,
+"pop": 120
+},
+{
+"name": "Bagnols",
+"insee": "69017",
+"lat": 45.9104,
+"lon": 4.6205,
+"pop": 765
+},
+{
+"name": "Beaujeu",
+"insee": "69018",
+"lat": 46.1585,
+"lon": 4.5802,
+"pop": 2082
+},
+{
+"name": "Belleville-en-Beaujolais",
+"insee": "69019",
+"lat": 46.1145,
+"lon": 4.7291,
+"pop": 14016
+},
+{
+"name": "Belmont-d'Azergues",
+"insee": "69020",
+"lat": 45.8673,
+"lon": 4.6685,
+"pop": 720
+},
+{
+"name": "Bibost",
+"insee": "69022",
+"lat": 45.7976,
+"lon": 4.5494,
+"pop": 538
+},
+{
+"name": "Blacé",
+"insee": "69023",
+"lat": 46.0364,
+"lon": 4.6308,
+"pop": 1715
+},
+{
+"name": "Val d'Oingt",
+"insee": "69024",
+"lat": 45.9386,
+"lon": 4.5668,
+"pop": 4117
+},
+{
+"name": "Le Breuil",
+"insee": "69026",
+"lat": 45.8909,
+"lon": 4.5889,
+"pop": 533
+},
+{
+"name": "Bully",
+"insee": "69032",
+"lat": 45.8595,
+"lon": 4.5786,
+"pop": 2213
+},
+{
+"name": "Cailloux-sur-Fontaines",
+"insee": "69033",
+"lat": 45.8592,
+"lon": 4.8817,
+"pop": 2989
+},
+{
+"name": "Caluire-et-Cuire",
+"insee": "69034",
+"lat": 45.7986,
+"lon": 4.8494,
+"pop": 43597
+},
+{
+"name": "Cenves",
+"insee": "69035",
+"lat": 46.2801,
+"lon": 4.6632,
+"pop": 409
+},
+{
+"name": "Cercié",
+"insee": "69036",
+"lat": 46.1251,
+"lon": 4.6702,
+"pop": 1131
+},
+{
+"name": "Chambost-Allières",
+"insee": "69037",
+"lat": 46.017,
+"lon": 4.509,
+"pop": 816
+},
+{
+"name": "Chamelet",
+"insee": "69039",
+"lat": 45.9829,
+"lon": 4.4973,
+"pop": 706
+},
+{
+"name": "Champagne-au-Mont-d'Or",
+"insee": "69040",
+"lat": 45.8006,
+"lon": 4.7864,
+"pop": 6311
+},
+{
+"name": "Charbonnières-les-Bains",
+"insee": "69044",
+"lat": 45.7792,
+"lon": 4.743,
+"pop": 5383
+},
+{
+"name": "Charentay",
+"insee": "69045",
+"lat": 46.0814,
+"lon": 4.6926,
+"pop": 1273
+},
+{
+"name": "Charnay",
+"insee": "69047",
+"lat": 45.8876,
+"lon": 4.6602,
+"pop": 1023
+},
+{
+"name": "Chasselay",
+"insee": "69049",
+"lat": 45.8733,
+"lon": 4.7699,
+"pop": 2973
+},
+{
+"name": "Châtillon",
+"insee": "69050",
+"lat": 45.872,
+"lon": 4.6487,
+"pop": 2252
+},
+{
+"name": "Chazay-d'Azergues",
+"insee": "69052",
+"lat": 45.8743,
+"lon": 4.71,
+"pop": 4410
+},
+{
+"name": "Chénas",
+"insee": "69053",
+"lat": 46.2142,
+"lon": 4.7069,
+"pop": 533
+},
+{
+"name": "Chénelette",
+"insee": "69054",
+"lat": 46.1707,
+"lon": 4.4895,
+"pop": 369
+},
+{
+"name": "Les Chères",
+"insee": "69055",
+"lat": 45.8948,
+"lon": 4.7454,
+"pop": 1503
+},
+{
+"name": "Chessy",
+"insee": "69056",
+"lat": 45.8914,
+"lon": 4.6168,
+"pop": 2055
+},
+{
+"name": "Chevinay",
+"insee": "69057",
+"lat": 45.7767,
+"lon": 4.5988,
+"pop": 580
+},
+{
+"name": "Chiroubles",
+"insee": "69058",
+"lat": 46.1853,
+"lon": 4.6495,
+"pop": 434
+},
+{
+"name": "Civrieux-d'Azergues",
+"insee": "69059",
+"lat": 45.8573,
+"lon": 4.7121,
+"pop": 1675
+},
+{
+"name": "Claveisolles",
+"insee": "69060",
+"lat": 46.0966,
+"lon": 4.5095,
+"pop": 577
+},
+{
+"name": "Cogny",
+"insee": "69061",
+"lat": 45.9885,
+"lon": 4.6012,
+"pop": 1211
+},
+{
+"name": "Collonges-au-Mont-d'Or",
+"insee": "69063",
+"lat": 45.8188,
+"lon": 4.8425,
+"pop": 4669
+},
+{
+"name": "Corcelles-en-Beaujolais",
+"insee": "69065",
+"lat": 46.1538,
+"lon": 4.7254,
+"pop": 1001
+},
+{
+"name": "Cours",
+"insee": "69066",
+"lat": 46.0968,
+"lon": 4.3445,
+"pop": 4306
+},
+{
+"name": "Couzon-au-Mont-d'Or",
+"insee": "69068",
+"lat": 45.8479,
+"lon": 4.8214,
+"pop": 2619
+},
+{
+"name": "Cublize",
+"insee": "69070",
+"lat": 46.0244,
+"lon": 4.3921,
+"pop": 1360
+},
+{
+"name": "Curis-au-Mont-d'Or",
+"insee": "69071",
+"lat": 45.8682,
+"lon": 4.8201,
+"pop": 1195
+},
+{
+"name": "Dardilly",
+"insee": "69072",
+"lat": 45.8133,
+"lon": 4.7466,
+"pop": 9221
+},
+{
+"name": "Denicé",
+"insee": "69074",
+"lat": 46.0051,
+"lon": 4.6503,
+"pop": 1571
+},
+{
+"name": "Dième",
+"insee": "69075",
+"lat": 45.9615,
+"lon": 4.4584,
+"pop": 199
+},
+{
+"name": "Dommartin",
+"insee": "69076",
+"lat": 45.8372,
+"lon": 4.7122,
+"pop": 2687
+},
+{
+"name": "Dracé",
+"insee": "69077",
+"lat": 46.154,
+"lon": 4.773,
+"pop": 1212
+},
+{
+"name": "Écully",
+"insee": "69081",
+"lat": 45.7822,
+"lon": 4.7737,
+"pop": 17944
+},
+{
+"name": "Émeringes",
+"insee": "69082",
+"lat": 46.224,
+"lon": 4.6754,
+"pop": 275
+},
+{
+"name": "Éveux",
+"insee": "69083",
+"lat": 45.8256,
+"lon": 4.6223,
+"pop": 1160
+},
+{
+"name": "Fleurie",
+"insee": "69084",
+"lat": 46.1953,
+"lon": 4.6942,
+"pop": 1382
+},
+{
+"name": "Fleurieu-sur-Saône",
+"insee": "69085",
+"lat": 45.8582,
+"lon": 4.8566,
+"pop": 1597
+},
+{
+"name": "Fleurieux-sur-l'Arbresle",
+"insee": "69086",
+"lat": 45.8406,
+"lon": 4.6484,
+"pop": 2361
+},
+{
+"name": "Fontaines-Saint-Martin",
+"insee": "69087",
+"lat": 45.8445,
+"lon": 4.8521,
+"pop": 3098
+},
+{
+"name": "Fontaines-sur-Saône",
+"insee": "69088",
+"lat": 45.8268,
+"lon": 4.8537,
+"pop": 6957
+},
+{
+"name": "Frontenas",
+"insee": "69090",
+"lat": 45.9186,
+"lon": 4.632,
+"pop": 915
+},
+{
+"name": "Gleizé",
+"insee": "69092",
+"lat": 45.9915,
+"lon": 4.6883,
+"pop": 8035
+},
+{
+"name": "Grandris",
+"insee": "69093",
+"lat": 46.034,
+"lon": 4.4599,
+"pop": 1226
+},
+{
+"name": "Joux",
+"insee": "69102",
+"lat": 45.8895,
+"lon": 4.368,
+"pop": 752
+},
+{
+"name": "Juliénas",
+"insee": "69103",
+"lat": 46.2473,
+"lon": 4.7052,
+"pop": 880
+},
+{
+"name": "Jullié",
+"insee": "69104",
+"lat": 46.244,
+"lon": 4.6632,
+"pop": 492
+},
+{
+"name": "Lacenas",
+"insee": "69105",
+"lat": 45.9867,
+"lon": 4.6447,
+"pop": 1076
+},
+{
+"name": "Lachassagne",
+"insee": "69106",
+"lat": 45.9264,
+"lon": 4.6779,
+"pop": 1332
+},
+{
+"name": "Lamure-sur-Azergues",
+"insee": "69107",
+"lat": 46.053,
+"lon": 4.5088,
+"pop": 1048
+},
+{
+"name": "Lancié",
+"insee": "69108",
+"lat": 46.1739,
+"lon": 4.7295,
+"pop": 1101
+},
+{
+"name": "Lantignié",
+"insee": "69109",
+"lat": 46.1584,
+"lon": 4.6174,
+"pop": 849
+},
+{
+"name": "Légny",
+"insee": "69111",
+"lat": 45.905,
+"lon": 4.5742,
+"pop": 685
+},
+{
+"name": "Lentilly",
+"insee": "69112",
+"lat": 45.8166,
+"lon": 4.6691,
+"pop": 6623
+},
+{
+"name": "Létra",
+"insee": "69113",
+"lat": 45.9767,
+"lon": 4.518,
+"pop": 901
+},
+{
+"name": "Porte des Pierres Dorées",
+"insee": "69114",
+"lat": 45.9628,
+"lon": 4.6509,
+"pop": 4185
+},
+{
+"name": "Limas",
+"insee": "69115",
+"lat": 45.9717,
+"lon": 4.7196,
+"pop": 4750
+},
+{
+"name": "Limonest",
+"insee": "69116",
+"lat": 45.8267,
+"lon": 4.7682,
+"pop": 4012
+},
+{
+"name": "Lissieu",
+"insee": "69117",
+"lat": 45.8582,
+"lon": 4.7496,
+"pop": 3181
+},
+{
+"name": "Lozanne",
+"insee": "69121",
+"lat": 45.853,
+"lon": 4.6846,
+"pop": 3182
+},
+{
+"name": "Lucenay",
+"insee": "69122",
+"lat": 45.9138,
+"lon": 4.7095,
+"pop": 2070
+},
+{
+"name": "Lyon",
+"insee": "69123",
+"lat": 45.758,
+"lon": 4.8351,
+"pop": 519127
+},
+{
+"name": "Marchampt",
+"insee": "69124",
+"lat": 46.1086,
+"lon": 4.5614,
+"pop": 450
+},
+{
+"name": "Marcilly-d'Azergues",
+"insee": "69125",
+"lat": 45.8685,
+"lon": 4.7301,
+"pop": 1066
+},
+{
+"name": "Marcy",
+"insee": "69126",
+"lat": 45.9141,
+"lon": 4.6755,
+"pop": 916
+},
+{
+"name": "Marcy-l'Étoile",
+"insee": "69127",
+"lat": 45.7855,
+"lon": 4.7129,
+"pop": 3778
+},
+{
+"name": "Meaux-la-Montagne",
+"insee": "69130",
+"lat": 46.0444,
+"lon": 4.4219,
+"pop": 223
+},
+{
+"name": "Moiré",
+"insee": "69134",
+"lat": 45.9262,
+"lon": 4.6034,
+"pop": 240
+},
+{
+"name": "Deux-Grosnes",
+"insee": "69135",
+"lat": 46.2379,
+"lon": 4.5631,
+"pop": 1946
+},
+{
+"name": "Montmelas-Saint-Sorlin",
+"insee": "69137",
+"lat": 46.0201,
+"lon": 4.6035,
+"pop": 528
+},
+{
+"name": "Morancé",
+"insee": "69140",
+"lat": 45.8938,
+"lon": 4.7016,
+"pop": 2261
+},
+{
+"name": "Neuville-sur-Saône",
+"insee": "69143",
+"lat": 45.8821,
+"lon": 4.8404,
+"pop": 7812
+},
+{
+"name": "Odenas",
+"insee": "69145",
+"lat": 46.0935,
+"lon": 4.6417,
+"pop": 938
+},
+{
+"name": "Le Perréon",
+"insee": "69151",
+"lat": 46.0691,
+"lon": 4.587,
+"pop": 1500
+},
+{
+"name": "Poleymieux-au-Mont-d'Or",
+"insee": "69153",
+"lat": 45.856,
+"lon": 4.7927,
+"pop": 1412
+},
+{
+"name": "Pollionnay",
+"insee": "69154",
+"lat": 45.7707,
+"lon": 4.6585,
+"pop": 2958
+},
+{
+"name": "Pommiers",
+"insee": "69156",
+"lat": 45.9581,
+"lon": 4.6928,
+"pop": 2618
+},
+{
+"name": "Vindry-sur-Turdine",
+"insee": "69157",
+"lat": 45.8886,
+"lon": 4.4948,
+"pop": 5305
+},
+{
+"name": "Poule-les-Écharmeaux",
+"insee": "69160",
+"lat": 46.1458,
+"lon": 4.4698,
+"pop": 1023
+},
+{
+"name": "Propières",
+"insee": "69161",
+"lat": 46.1909,
+"lon": 4.4503,
+"pop": 484
+},
+{
+"name": "Quincié-en-Beaujolais",
+"insee": "69162",
+"lat": 46.1118,
+"lon": 4.614,
+"pop": 1408
+},
+{
+"name": "Quincieux",
+"insee": "69163",
+"lat": 45.9168,
+"lon": 4.7724,
+"pop": 3679
+},
+{
+"name": "Ranchal",
+"insee": "69164",
+"lat": 46.125,
+"lon": 4.3974,
+"pop": 304
+},
+{
+"name": "Régnié-Durette",
+"insee": "69165",
+"lat": 46.1531,
+"lon": 4.6449,
+"pop": 1151
+},
+{
+"name": "Rivolet",
+"insee": "69167",
+"lat": 46.0084,
+"lon": 4.5829,
+"pop": 585
+},
+{
+"name": "Rochetaillée-sur-Saône",
+"insee": "69168",
+"lat": 45.8427,
+"lon": 4.8396,
+"pop": 1551
+},
+{
+"name": "Ronno",
+"insee": "69169",
+"lat": 45.9845,
+"lon": 4.3902,
+"pop": 658
+},
+{
+"name": "Sain-Bel",
+"insee": "69171",
+"lat": 45.8115,
+"lon": 4.6017,
+"pop": 2566
+},
+{
+"name": "Salles-Arbuissonnas-en-Beaujolais",
+"insee": "69172",
+"lat": 46.0449,
+"lon": 4.6317,
+"pop": 815
+},
+{
+"name": "Sarcey",
+"insee": "69173",
+"lat": 45.8839,
+"lon": 4.5572,
+"pop": 980
+},
+{
+"name": "Les Sauvages",
+"insee": "69174",
+"lat": 45.9245,
+"lon": 4.3695,
+"pop": 626
+},
+{
+"name": "Savigny",
+"insee": "69175",
+"lat": 45.8174,
+"lon": 4.5599,
+"pop": 1995
+},
+{
+"name": "Sourcieux-les-Mines",
+"insee": "69177",
+"lat": 45.7979,
+"lon": 4.6311,
+"pop": 2100
+},
+{
+"name": "Saint-Appolinaire",
+"insee": "69181",
+"lat": 45.9772,
+"lon": 4.4275,
+"pop": 236
+},
+{
+"name": "Saint-Bonnet-des-Bruyères",
+"insee": "69182",
+"lat": 46.2669,
+"lon": 4.4721,
+"pop": 368
+},
+{
+"name": "Saint-Bonnet-le-Troncy",
+"insee": "69183",
+"lat": 46.0781,
+"lon": 4.4172,
+"pop": 307
+},
+{
+"name": "Saint-Clément-de-Vers",
+"insee": "69186",
+"lat": 46.2272,
+"lon": 4.4157,
+"pop": 206
+},
+{
+"name": "Saint-Clément-sur-Valsonne",
+"insee": "69188",
+"lat": 45.926,
+"lon": 4.4585,
+"pop": 900
+},
+{
+"name": "Sainte-Consorce",
+"insee": "69190",
+"lat": 45.7765,
+"lon": 4.6959,
+"pop": 2154
+},
+{
+"name": "Saint-Cyr-au-Mont-d'Or",
+"insee": "69191",
+"lat": 45.8216,
+"lon": 4.8162,
+"pop": 6327
+},
+{
+"name": "Saint-Cyr-le-Chatoux",
+"insee": "69192",
+"lat": 46.0335,
+"lon": 4.5382,
+"pop": 154
+},
+{
+"name": "Saint-Didier-au-Mont-d'Or",
+"insee": "69194",
+"lat": 45.8159,
+"lon": 4.8003,
+"pop": 7435
+},
+{
+"name": "Saint-Didier-sur-Beaujeu",
+"insee": "69196",
+"lat": 46.1453,
+"lon": 4.5341,
+"pop": 603
+},
+{
+"name": "Saint-Étienne-des-Oullières",
+"insee": "69197",
+"lat": 46.0645,
+"lon": 4.6557,
+"pop": 2264
+},
+{
+"name": "Saint-Étienne-la-Varenne",
+"insee": "69198",
+"lat": 46.0765,
+"lon": 4.6188,
+"pop": 784
+},
+{
+"name": "Saint-Forgeux",
+"insee": "69200",
+"lat": 45.8522,
+"lon": 4.4583,
+"pop": 1544
+},
+{
+"name": "Saint-Genis-les-Ollières",
+"insee": "69205",
+"lat": 45.7614,
+"lon": 4.7248,
+"pop": 5439
+},
+{
+"name": "Saint-Georges-de-Reneins",
+"insee": "69206",
+"lat": 46.0587,
+"lon": 4.7164,
+"pop": 4677
+},
+{
+"name": "Saint-Germain-au-Mont-d'Or",
+"insee": "69207",
+"lat": 45.8842,
+"lon": 4.8036,
+"pop": 3124
+},
+{
+"name": "Saint-Germain-Nuelles",
+"insee": "69208",
+"lat": 45.8604,
+"lon": 4.6167,
+"pop": 2246
+},
+{
+"name": "Saint-Igny-de-Vers",
+"insee": "69209",
+"lat": 46.2368,
+"lon": 4.4381,
+"pop": 593
+},
+{
+"name": "Saint-Jean-des-Vignes",
+"insee": "69212",
+"lat": 45.8746,
+"lon": 4.683,
+"pop": 486
+},
+{
+"name": "Saint-Jean-la-Bussière",
+"insee": "69214",
+"lat": 46.0038,
+"lon": 4.3341,
+"pop": 1163
+},
+{
+"name": "Saint-Julien",
+"insee": "69215",
+"lat": 46.0252,
+"lon": 4.648,
+"pop": 969
+},
+{
+"name": "Saint-Julien-sur-Bibost",
+"insee": "69216",
+"lat": 45.7984,
+"lon": 4.5087,
+"pop": 622
+},
+{
+"name": "Saint-Just-d'Avray",
+"insee": "69217",
+"lat": 45.9994,
+"lon": 4.4576,
+"pop": 741
+},
+{
+"name": "Saint-Lager",
+"insee": "69218",
+"lat": 46.1129,
+"lon": 4.6728,
+"pop": 1056
+},
+{
+"name": "Saint-Marcel-l'Éclairé",
+"insee": "69225",
+"lat": 45.8712,
+"lon": 4.4279,
+"pop": 575
+},
+{
+"name": "Saint-Nizier-d'Azergues",
+"insee": "69229",
+"lat": 46.083,
+"lon": 4.4613,
+"pop": 774
+},
+{
+"name": "Sainte-Paule",
+"insee": "69230",
+"lat": 45.9722,
+"lon": 4.5634,
+"pop": 338
+},
+{
+"name": "Saint-Pierre-la-Palud",
+"insee": "69231",
+"lat": 45.7833,
+"lon": 4.6163,
+"pop": 2616
+},
+{
+"name": "Saint-Romain-au-Mont-d'Or",
+"insee": "69233",
+"lat": 45.8355,
+"lon": 4.8224,
+"pop": 1247
+},
+{
+"name": "Saint-Romain-de-Popey",
+"insee": "69234",
+"lat": 45.855,
+"lon": 4.5291,
+"pop": 1725
+},
+{
+"name": "Saint-Vérand",
+"insee": "69239",
+"lat": 45.9234,
+"lon": 4.5208,
+"pop": 1164
+},
+{
+"name": "Saint-Vincent-de-Reins",
+"insee": "69240",
+"lat": 46.0715,
+"lon": 4.3937,
+"pop": 635
+},
+{
+"name": "Taponas",
+"insee": "69242",
+"lat": 46.1238,
+"lon": 4.7648,
+"pop": 914
+},
+{
+"name": "Tarare",
+"insee": "69243",
+"lat": 45.9071,
+"lon": 4.4302,
+"pop": 10893
+},
+{
+"name": "Tassin-la-Demi-Lune",
+"insee": "69244",
+"lat": 45.7637,
+"lon": 4.7521,
+"pop": 23200
+},
+{
+"name": "Ternand",
+"insee": "69245",
+"lat": 45.9508,
+"lon": 4.5181,
+"pop": 762
+},
+{
+"name": "Theizé",
+"insee": "69246",
+"lat": 45.9418,
+"lon": 4.6277,
+"pop": 1278
+},
+{
+"name": "Thizy-les-Bourgs",
+"insee": "69248",
+"lat": 46.0505,
+"lon": 4.3109,
+"pop": 5771
+},
+{
+"name": "La Tour-de-Salvagny",
+"insee": "69250",
+"lat": 45.8086,
+"lon": 4.7129,
+"pop": 4649
+},
+{
+"name": "Valsonne",
+"insee": "69254",
+"lat": 45.9463,
+"lon": 4.4264,
+"pop": 1005
+},
+{
+"name": "Vaulx-en-Velin",
+"insee": "69256",
+"lat": 45.7776,
+"lon": 4.925,
+"pop": 53069
+},
+{
+"name": "Vaux-en-Beaujolais",
+"insee": "69257",
+"lat": 46.0459,
+"lon": 4.5801,
+"pop": 1169
+},
+{
+"name": "Vauxrenard",
+"insee": "69258",
+"lat": 46.2207,
+"lon": 4.6415,
+"pop": 311
+},
+{
+"name": "Vernay",
+"insee": "69261",
+"lat": 46.1639,
+"lon": 4.5279,
+"pop": 124
+},
+{
+"name": "Villefranche-sur-Saône",
+"insee": "69264",
+"lat": 45.9837,
+"lon": 4.726,
+"pop": 36172
+},
+{
+"name": "Ville-sur-Jarnioux",
+"insee": "69265",
+"lat": 45.9693,
+"lon": 4.5942,
+"pop": 828
+},
+{
+"name": "Villeurbanne",
+"insee": "69266",
+"lat": 45.7719,
+"lon": 4.8898,
+"pop": 163684
+},
+{
+"name": "Villié-Morgon",
+"insee": "69267",
+"lat": 46.1612,
+"lon": 4.6621,
+"pop": 2148
+},
+{
+"name": "Genay",
+"insee": "69278",
+"lat": 45.8989,
+"lon": 4.8389,
+"pop": 5585
+},
+{
+"name": "Montanay",
+"insee": "69284",
+"lat": 45.8793,
+"lon": 4.8657,
+"pop": 3308
+},
+{
+"name": "Rillieux-la-Pape",
+"insee": "69286",
+"lat": 45.8265,
+"lon": 4.895,
+"pop": 31389
+},
+{
+"name": "Sathonay-Camp",
+"insee": "69292",
+"lat": 45.8255,
+"lon": 4.8792,
+"pop": 7019
+},
+{
+"name": "Sathonay-Village",
+"insee": "69293",
+"lat": 45.8394,
+"lon": 4.8858,
+"pop": 2412
+},
+{
+"name": "Anglure-sous-Dun",
+"insee": "71008",
+"lat": 46.2359,
+"lon": 4.3694,
+"pop": 143
+},
+{
+"name": "Azé",
+"insee": "71016",
+"lat": 46.4327,
+"lon": 4.7468,
+"pop": 1103
+},
+{
+"name": "Bergesserin",
+"insee": "71030",
+"lat": 46.3972,
+"lon": 4.5599,
+"pop": 195
+},
+{
+"name": "Berzé-le-Châtel",
+"insee": "71031",
+"lat": 46.3936,
+"lon": 4.6776,
+"pop": 54
+},
+{
+"name": "Berzé-la-Ville",
+"insee": "71032",
+"lat": 46.3697,
+"lon": 4.7008,
+"pop": 708
+},
+{
+"name": "Bois-Sainte-Marie",
+"insee": "71041",
+"lat": 46.3345,
+"lon": 4.352,
+"pop": 189
+},
+{
+"name": "Bourgvilain",
+"insee": "71050",
+"lat": 46.3642,
+"lon": 4.6342,
+"pop": 344
+},
+{
+"name": "Buffières",
+"insee": "71065",
+"lat": 46.4324,
+"lon": 4.5392,
+"pop": 273
+},
+{
+"name": "Bussières",
+"insee": "71069",
+"lat": 46.3337,
+"lon": 4.7118,
+"pop": 580
+},
+{
+"name": "Chaintré",
+"insee": "71074",
+"lat": 46.2587,
+"lon": 4.7742,
+"pop": 569
+},
+{
+"name": "Chânes",
+"insee": "71084",
+"lat": 46.2423,
+"lon": 4.7582,
+"pop": 530
+},
+{
+"name": "La Chapelle-de-Guinchay",
+"insee": "71090",
+"lat": 46.2177,
+"lon": 4.7586,
+"pop": 4018
+},
+{
+"name": "La Chapelle-du-Mont-de-France",
+"insee": "71091",
+"lat": 46.3793,
+"lon": 4.543,
+"pop": 189
+},
+{
+"name": "La Chapelle-sous-Dun",
+"insee": "71095",
+"lat": 46.2655,
+"lon": 4.3,
+"pop": 419
+},
+{
+"name": "Charbonnières",
+"insee": "71099",
+"lat": 46.3891,
+"lon": 4.8325,
+"pop": 335
+},
+{
+"name": "Charnay-lès-Mâcon",
+"insee": "71105",
+"lat": 46.3054,
+"lon": 4.7887,
+"pop": 8227
+},
+{
+"name": "Chasselas",
+"insee": "71108",
+"lat": 46.2777,
+"lon": 4.7197,
+"pop": 175
+},
+{
+"name": "Chassigny-sous-Dun",
+"insee": "71110",
+"lat": 46.2372,
+"lon": 4.292,
+"pop": 569
+},
+{
+"name": "Château",
+"insee": "71112",
+"lat": 46.4216,
+"lon": 4.5948,
+"pop": 229
+},
+{
+"name": "Châteauneuf",
+"insee": "71113",
+"lat": 46.2104,
+"lon": 4.2607,
+"pop": 88
+},
+{
+"name": "Châtenay",
+"insee": "71116",
+"lat": 46.2898,
+"lon": 4.3814,
+"pop": 166
+},
+{
+"name": "Chauffailles",
+"insee": "71120",
+"lat": 46.2055,
+"lon": 4.3418,
+"pop": 3638
+},
+{
+"name": "Chevagny-les-Chevrières",
+"insee": "71126",
+"lat": 46.336,
+"lon": 4.7703,
+"pop": 607
+},
+{
+"name": "La Clayette",
+"insee": "71133",
+"lat": 46.2883,
+"lon": 4.3122,
+"pop": 1563
+},
+{
+"name": "Navour-sur-Grosne",
+"insee": "71134",
+"lat": 46.3547,
+"lon": 4.5649,
+"pop": 660
+},
+{
+"name": "Clessé",
+"insee": "71135",
+"lat": 46.4188,
+"lon": 4.8239,
+"pop": 829
+},
+{
+"name": "Cluny",
+"insee": "71137",
+"lat": 46.4284,
+"lon": 4.6653,
+"pop": 4942
+},
+{
+"name": "Coublanc",
+"insee": "71148",
+"lat": 46.1719,
+"lon": 4.2759,
+"pop": 838
+},
+{
+"name": "Crêches-sur-Saône",
+"insee": "71150",
+"lat": 46.24,
+"lon": 4.788,
+"pop": 3198
+},
+{
+"name": "Curtil-sous-Buffières",
+"insee": "71163",
+"lat": 46.4025,
+"lon": 4.526,
+"pop": 95
+},
+{
+"name": "Davayé",
+"insee": "71169",
+"lat": 46.3037,
+"lon": 4.7477,
+"pop": 666
+},
+{
+"name": "Dompierre-les-Ormes",
+"insee": "71178",
+"lat": 46.3543,
+"lon": 4.4802,
+"pop": 893
+},
+{
+"name": "Donzy-le-Pertuis",
+"insee": "71181",
+"lat": 46.4486,
+"lon": 4.7152,
+"pop": 148
+},
+{
+"name": "Fuissé",
+"insee": "71210",
+"lat": 46.2783,
+"lon": 4.7445,
+"pop": 347
+},
+{
+"name": "Germolles-sur-Grosne",
+"insee": "71217",
+"lat": 46.2791,
+"lon": 4.5967,
+"pop": 135
+},
+{
+"name": "Gibles",
+"insee": "71218",
+"lat": 46.3227,
+"lon": 4.3836,
+"pop": 571
+},
+{
+"name": "Hurigny",
+"insee": "71235",
+"lat": 46.3445,
+"lon": 4.7967,
+"pop": 1959
+},
+{
+"name": "Igé",
+"insee": "71236",
+"lat": 46.4071,
+"lon": 4.7353,
+"pop": 897
+},
+{
+"name": "Jalogny",
+"insee": "71240",
+"lat": 46.4143,
+"lon": 4.6349,
+"pop": 399
+},
+{
+"name": "Laizé",
+"insee": "71250",
+"lat": 46.3825,
+"lon": 4.8024,
+"pop": 1155
+},
+{
+"name": "Leynes",
+"insee": "71258",
+"lat": 46.2644,
+"lon": 4.7273,
+"pop": 519
+},
+{
+"name": "Mâcon",
+"insee": "71270",
+"lat": 46.3265,
+"lon": 4.8083,
+"pop": 35177
+},
+{
+"name": "Matour",
+"insee": "71289",
+"lat": 46.3095,
+"lon": 4.4785,
+"pop": 1161
+},
+{
+"name": "Mazille",
+"insee": "71290",
+"lat": 46.3903,
+"lon": 4.6032,
+"pop": 400
+},
+{
+"name": "Milly-Lamartine",
+"insee": "71299",
+"lat": 46.3501,
+"lon": 4.6972,
+"pop": 353
+},
+{
+"name": "Montmelard",
+"insee": "71316",
+"lat": 46.3425,
+"lon": 4.4112,
+"pop": 344
+},
+{
+"name": "Mussy-sous-Dun",
+"insee": "71327",
+"lat": 46.238,
+"lon": 4.335,
+"pop": 327
+},
+{
+"name": "Péronne",
+"insee": "71345",
+"lat": 46.4412,
+"lon": 4.801,
+"pop": 668
+},
+{
+"name": "Pierreclos",
+"insee": "71350",
+"lat": 46.3345,
+"lon": 4.6726,
+"pop": 846
+},
+{
+"name": "Prissé",
+"insee": "71360",
+"lat": 46.3262,
+"lon": 4.749,
+"pop": 1898
+},
+{
+"name": "Pruzilly",
+"insee": "71362",
+"lat": 46.26,
+"lon": 4.698,
+"pop": 321
+},
+{
+"name": "La Roche-Vineuse",
+"insee": "71371",
+"lat": 46.3504,
+"lon": 4.7488,
+"pop": 1570
+},
+{
+"name": "Romanèche-Thorins",
+"insee": "71372",
+"lat": 46.192,
+"lon": 4.7478,
+"pop": 2005
+},
+{
+"name": "Saint-Albain",
+"insee": "71383",
+"lat": 46.4251,
+"lon": 4.8645,
+"pop": 550
+},
+{
+"name": "Saint-Amour-Bellevue",
+"insee": "71385",
+"lat": 46.2392,
+"lon": 4.735,
+"pop": 609
+},
+{
+"name": "Sainte-Cécile",
+"insee": "71397",
+"lat": 46.3846,
+"lon": 4.6297,
+"pop": 283
+},
+{
+"name": "Saint-Gengoux-de-Scissé",
+"insee": "71416",
+"lat": 46.4631,
+"lon": 4.7714,
+"pop": 592
+},
+{
+"name": "Saint-Igny-de-Roche",
+"insee": "71428",
+"lat": 46.1878,
+"lon": 4.303,
+"pop": 789
+},
+{
+"name": "Saint-Léger-sous-la-Bussière",
+"insee": "71441",
+"lat": 46.3127,
+"lon": 4.558,
+"pop": 290
+},
+{
+"name": "Saint-Martin-Belle-Roche",
+"insee": "71448",
+"lat": 46.3806,
+"lon": 4.8569,
+"pop": 1385
+},
+{
+"name": "Saint-Maurice-de-Satonnay",
+"insee": "71460",
+"lat": 46.4058,
+"lon": 4.7817,
+"pop": 505
+},
+{
+"name": "Saint-Pierre-le-Vieux",
+"insee": "71469",
+"lat": 46.2888,
+"lon": 4.5232,
+"pop": 378
+},
+{
+"name": "Saint-Point",
+"insee": "71470",
+"lat": 46.3362,
+"lon": 4.6205,
+"pop": 363
+},
+{
+"name": "Saint-Racho",
+"insee": "71473",
+"lat": 46.2632,
+"lon": 4.3702,
+"pop": 158
+},
+{
+"name": "Saint-Symphorien-d'Ancelles",
+"insee": "71481",
+"lat": 46.1924,
+"lon": 4.7706,
+"pop": 1131
+},
+{
+"name": "Saint-Vérand",
+"insee": "71487",
+"lat": 46.2539,
+"lon": 4.7288,
+"pop": 155
+},
+{
+"name": "La Salle",
+"insee": "71494",
+"lat": 46.4079,
+"lon": 4.8597,
+"pop": 506
+},
+{
+"name": "Sancé",
+"insee": "71497",
+"lat": 46.3399,
+"lon": 4.8323,
+"pop": 2151
+},
+{
+"name": "Senozan",
+"insee": "71513",
+"lat": 46.3953,
+"lon": 4.8644,
+"pop": 1135
+},
+{
+"name": "Serrières",
+"insee": "71518",
+"lat": 46.3095,
+"lon": 4.6681,
+"pop": 300
+},
+{
+"name": "Sologny",
+"insee": "71525",
+"lat": 46.3743,
+"lon": 4.6739,
+"pop": 572
+},
+{
+"name": "Solutré-Pouilly",
+"insee": "71526",
+"lat": 46.2948,
+"lon": 4.7272,
+"pop": 331
+},
+{
+"name": "Tancon",
+"insee": "71533",
+"lat": 46.2014,
+"lon": 4.2616,
+"pop": 570
+},
+{
+"name": "Tramayes",
+"insee": "71545",
+"lat": 46.3069,
+"lon": 4.6013,
+"pop": 1070
+},
+{
+"name": "Trambly",
+"insee": "71546",
+"lat": 46.3301,
+"lon": 4.5336,
+"pop": 394
+},
+{
+"name": "Trivy",
+"insee": "71547",
+"lat": 46.3933,
+"lon": 4.4877,
+"pop": 261
+},
+{
+"name": "Varennes-lès-Mâcon",
+"insee": "71556",
+"lat": 46.2681,
+"lon": 4.8068,
+"pop": 588
+},
+{
+"name": "Varennes-sous-Dun",
+"insee": "71559",
+"lat": 46.2789,
+"lon": 4.3392,
+"pop": 519
+},
+{
+"name": "Vergisson",
+"insee": "71567",
+"lat": 46.3094,
+"lon": 4.7117,
+"pop": 222
+},
+{
+"name": "Verosvres",
+"insee": "71571",
+"lat": 46.3939,
+"lon": 4.4448,
+"pop": 423
+},
+{
+"name": "Verzé",
+"insee": "71574",
+"lat": 46.3834,
+"lon": 4.7403,
+"pop": 875
+},
+{
+"name": "Vinzelles",
+"insee": "71583",
+"lat": 46.2666,
+"lon": 4.777,
+"pop": 758
+},
+{
+"name": "Viré",
+"insee": "71584",
+"lat": 46.4437,
+"lon": 4.8483,
+"pop": 1225
+},
+{
+"name": "Fleurville",
+"insee": "71591",
+"lat": 46.4428,
+"lon": 4.8788,
+"pop": 492
+}
+]
