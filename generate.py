@@ -755,6 +755,21 @@ def weekend_range(today: date) -> tuple[date, date]:
     return friday, friday + timedelta(days=2)
 
 
+def weekend_label(today: date) -> str:
+    """« du 21 au 23 novembre », « du 28 novembre au 1er décembre » : dates du
+    week-end (vendredi → dimanche) en cours ou à venir, pour les titres des
+    pages communes (21/11/2026 : titres datés, comme Vivop ; Google montre
+    une page fraîche pour « que faire à X ce week-end »)."""
+    friday = today - timedelta(days=today.weekday() - 4) if today.weekday() >= 4 else \
+        today + timedelta(days=4 - today.weekday())
+    sunday = friday + timedelta(days=2)
+    def day(d: date) -> str:
+        return "1er" if d.day == 1 else str(d.day)
+    if friday.month == sunday.month:
+        return f"du {day(friday)} au {day(sunday)} {MONTHS[sunday.month - 1]}"
+    return f"du {day(friday)} {MONTHS[friday.month - 1]} au {day(sunday)} {MONTHS[sunday.month - 1]}"
+
+
 def overlaps(event: dict, first: date, last: date) -> bool:
     return wall_time(event["start_date"]).date() <= last and end_of(event).date() >= first
 
@@ -1447,8 +1462,11 @@ def commune_page(name: str, events: list[dict], communes: dict[str, list[dict]],
         facts.append(f"{free_count} gratuites")
     if kids_count:
         facts.append(f"{kids_count} en famille")
+    wk_label = weekend_label(today)
+    wk_count = len(weekend_list) + (len(today_list) if today.weekday() >= 4 else 0)
+    wk_fact = f"{wk_count} ce week-end ({wk_label}), " if wk_count else ""
     intro = (f"Concerts, marchés, spectacles, expositions, fêtes… Toutes les sorties à {name} "
-             f"et autour, mises à jour chaque jour : {', '.join(facts)}.")
+             f"et autour, mises à jour chaque jour : {wk_fact}{', '.join(facts)}.")
     url = f"{BASE_URL}/{commune_path(name)}"
     market_link = (f'<section class="section"><div class="town-links"><a class="town-link" href="{root}{market_path(name)}">'
                    f'🧺 Marché {e(of_town(name))} : jours et horaires</a></div></section>'
@@ -1470,19 +1488,20 @@ def commune_page(name: str, events: list[dict], communes: dict[str, list[dict]],
     body = f"""  <section class="ev-hero town-hero"><div class="ev-hero-inner">
     <a class="back" href="{root}ville/">← Toutes les communes</a>
     <p class="kicker">Agenda des sorties</p>
-    <h1>Que faire à {e(name)} ?</h1>
+    <h1>Que faire à {e(name)} ce week‑end ?</h1>
+    <p class="kicker">{e(cap(wk_label))}</p>
     <p class="lead">{e(intro)}</p>
     <div class="hero-actions">{play_cta()}</div>
   </div></section>
   {market_link}
   {block("Aujourd'hui", f"Aujourd'hui à {name}", today_list)}
-  {block("Du vendredi au dimanche", f"Ce week-end à {name}", weekend_list)}
+  {block(cap(wk_label), f"Ce week-end à {name}", weekend_list)}
   {block("Les 7 prochains jours", "Cette semaine", week_list)}
   {block("Expositions, animations sur plusieurs jours", "En ce moment", long_ones[:20])}
   {block("Et ensuite", "Plus tard", later)}
   {near_html}"""
     return layout(
-        f"Que faire à {name} ce week-end ? Sorties, marchés, concerts – Wavents",
+        f"Que faire à {name} ce week-end ({wk_label}) ? Sorties, marchés, concerts – Wavents",
         body,
         description=intro,
         url=url,
