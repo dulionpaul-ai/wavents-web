@@ -26,7 +26,25 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  # Deux horaires pour « juste après minuit » (22:20 et 23:20 UTC, été comme
+  # hiver) : seul celui qui tombe vers minuit à Paris régénère (22/11/2026,
+  # bande passante Supabase : l'autre relisait toute la base pour rien).
+  gate:
+    runs-on: ubuntu-latest
+    outputs:
+      run: ${{ steps.g.outputs.run }}
+    steps:
+      - id: g
+        run: |
+          h=$(TZ=Europe/Paris date +%H)
+          if [ "${{ github.event_name }}" = "schedule" ] && { [ "${{ github.event.schedule }}" = "20 22 * * *" ] || [ "${{ github.event.schedule }}" = "20 23 * * *" ]; } && [ "$h" != "00" ] && [ "$h" != "01" ]; then
+            echo "Horaire de minuit de l'autre saison ($h h à Paris) : rien à faire"; echo "run=0" >> "$GITHUB_OUTPUT"
+          else
+            echo "run=1" >> "$GITHUB_OUTPUT"
+          fi
   build-deploy:
+    needs: gate
+    if: needs.gate.outputs.run == '1'
     runs-on: ubuntu-latest
     timeout-minutes: 15
     environment:
