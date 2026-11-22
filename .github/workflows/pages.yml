@@ -37,7 +37,7 @@ jobs:
       - id: g
         run: |
           h=$(TZ=Europe/Paris date +%H)
-          if [ "${{ github.event_name }}" = "schedule" ] && { [ "${{ github.event.schedule }}" = "20 22 * * *" ] || [ "${{ github.event.schedule }}" = "20 23 * * *" ]; } && [ "$h" != "00" ] && [ "$h" != "01" ]; then
+          if [ "${{ github.event_name }}" = "schedule" ] && { [ "${{ github.event.schedule }}" = "20 22 * * *" ] || [ "${{ github.event.schedule }}" = "20 23 * * *" ]; } && [ "$h" != "00" ]; then
             echo "Horaire de minuit de l'autre saison ($h h à Paris) : rien à faire"; echo "run=0" >> "$GITHUB_OUTPUT"
           else
             echo "run=1" >> "$GITHUB_OUTPUT"
