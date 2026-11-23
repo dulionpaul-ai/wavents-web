@@ -260,7 +260,7 @@ def more_photos(event: dict) -> str:
     urls = [u for u in (event.get("additional_photo_urls") or []) if isinstance(u, str) and u.startswith("http")]
     if not urls:
         return ""
-    thumbs = "".join(f'<a class="ev-photo" href="{e(u)}" target="_blank" rel="noopener">'
+    thumbs = "".join(f'<a class="ev-photo" href="{e(u)}" data-zoom target="_blank" rel="noopener">'
                      f'<img src="{e(u)}" alt="Photo {i + 2} : {e(event["title"])}" loading="lazy"></a>'
                      for i, u in enumerate(urls[:6]))
     return f'<div class="panel"><h2>Photos</h2><div class="ev-photos">{thumbs}</div></div>'
@@ -721,7 +721,8 @@ def cover(event: dict, root: str) -> str:
     if not src:
         return f'<div class="ev-cover">{media(event, root)}</div>'
     bg = thumb(src, 200).replace("'", "%27").replace('"', "%22").replace(")", "%29").replace("(", "%28")
-    return f'<div class="ev-cover fit" style="--bg:url(\'{e(bg)}\')">{media(event, root, width=900)}</div>'
+    return (f'<a class="ev-cover fit" href="{e(src)}" data-zoom style="--bg:url(\'{e(bg)}\')" '
+            f'aria-label="Agrandir la photo">{media(event, root, width=900)}</a>')
 
 
 def card(event: dict, series: dict[str, list[dict]], root: str = "", *, size: str = "") -> str:

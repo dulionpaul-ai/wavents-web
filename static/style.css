@@ -908,3 +908,16 @@ a.fest-related .fest-more { color: var(--deep); font-weight: 700; margin-top: 4p
 .ev-cover.fit::before { content: ""; position: absolute; inset: -30px; background: var(--bg) center / cover no-repeat;
   filter: blur(26px) brightness(.82) saturate(1.1); }
 .ev-cover.fit img { object-fit: contain; }
+
+/* Agrandissement des photos de la fiche (23/11/2026). */
+a.ev-cover { display: block; cursor: zoom-in; }
+.ev-photo { cursor: zoom-in; }
+.zoom-box { position: fixed; inset: 0; z-index: 1000; background: rgba(4,14,28,.94); display: flex; align-items: center; justify-content: center; }
+.zoom-box[hidden] { display: none; }
+.zoom-box img { max-width: 96vw; max-height: 92vh; object-fit: contain; border-radius: 6px; }
+.zoom-box button { position: absolute; border: 0; background: rgba(255,255,255,.14); color: #fff; font-size: 2rem; line-height: 1;
+  width: 48px; height: 48px; border-radius: 50%; cursor: pointer; }
+.zoom-close { top: 14px; right: 14px; }
+.zoom-prev { left: 10px; top: 50%; transform: translateY(-50%); }
+.zoom-next { right: 10px; top: 50%; transform: translateY(-50%); }
+.zoom-box button[hidden] { display: none; }

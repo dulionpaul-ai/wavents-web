@@ -618,3 +618,48 @@
     }
   })();
 })();
+
+// Photos de la fiche agrandies au clic (Paul, 23/11/2026, comme dans
+// l'appli) : plein écran, flèches et glisser entre les photos, Échap ou clic
+// pour fermer. Sans JavaScript, le lien ouvre l'image.
+(function () {
+  var links = Array.prototype.slice.call(document.querySelectorAll("a[data-zoom]"));
+  if (!links.length) return;
+  var urls = links.map(function (a) { return a.getAttribute("href"); });
+  var box = document.createElement("div");
+  box.className = "zoom-box";
+  box.hidden = true;
+  box.innerHTML = '<img alt=""><button class="zoom-close" aria-label="Fermer">×</button>' +
+    '<button class="zoom-prev" aria-label="Photo précédente">‹</button><button class="zoom-next" aria-label="Photo suivante">›</button>';
+  document.body.appendChild(box);
+  var img = box.querySelector("img"), i = 0, x0 = null;
+  function show(n) {
+    i = (n + urls.length) % urls.length;
+    img.src = urls[i];
+    box.querySelector(".zoom-prev").hidden = box.querySelector(".zoom-next").hidden = urls.length < 2;
+  }
+  function close() { box.hidden = true; document.body.style.overflow = ""; }
+  links.forEach(function (a, n) {
+    a.addEventListener("click", function (ev) {
+      ev.preventDefault();
+      show(n); box.hidden = false; document.body.style.overflow = "hidden";
+    });
+  });
+  box.addEventListener("click", function (ev) {
+    if (ev.target.closest(".zoom-prev")) return show(i - 1);
+    if (ev.target.closest(".zoom-next")) return show(i + 1);
+    close();
+  });
+  document.addEventListener("keydown", function (ev) {
+    if (box.hidden) return;
+    if (ev.key === "Escape") close();
+    if (ev.key === "ArrowLeft") show(i - 1);
+    if (ev.key === "ArrowRight") show(i + 1);
+  });
+  box.addEventListener("touchstart", function (ev) { x0 = ev.touches[0].clientX; }, { passive: true });
+  box.addEventListener("touchend", function (ev) {
+    if (x0 === null) return;
+    var dx = ev.changedTouches[0].clientX - x0; x0 = null;
+    if (Math.abs(dx) > 50 && urls.length > 1) { ev.preventDefault(); show(dx < 0 ? i + 1 : i - 1); }
+  });
+})();
