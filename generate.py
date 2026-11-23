@@ -61,7 +61,7 @@ AGENDA_DAY_PREVIEW = 12  # cartes affichées par jour avant « Voir les autres s
 FIELDS = (
     "id,title,description,category_id,location_name,address,latitude,longitude,"
     "start_date,end_date,start_time_known,end_time_known,price_type,price_amount,price_confirmed,"
-    "image_url,website_url,for_kids,source,published_at,recurring_weekdays,opening_hours,"
+    "image_url,additional_photo_urls,website_url,for_kids,source,published_at,recurring_weekdays,opening_hours,"
     # Intérieur / extérieur (script 211 du dépôt Wavents, 30/10/2026).
     "setting,setting_sure,"
     # Organisateur lu dans la description, pour la recherche (script 258, 23/11/2026).
@@ -252,6 +252,18 @@ def real_image(event: dict) -> str | None:
     (« data:image/svg+xml… ») qu'un scraper aurait prises pour une photo."""
     url = event.get("image_url") or ""
     return url if url.startswith("http") else None
+
+
+def more_photos(event: dict) -> str:
+    """Photos en plus de la principale (affiche, visuel), comme dans l'appli
+    (Paul, 23/11/2026) : vignettes entières qui ouvrent l'image."""
+    urls = [u for u in (event.get("additional_photo_urls") or []) if isinstance(u, str) and u.startswith("http")]
+    if not urls:
+        return ""
+    thumbs = "".join(f'<a class="ev-photo" href="{e(u)}" target="_blank" rel="noopener">'
+                     f'<img src="{e(u)}" alt="Photo {i + 2} : {e(event["title"])}" loading="lazy"></a>'
+                     for i, u in enumerate(urls[:6]))
+    return f'<div class="panel"><h2>Photos</h2><div class="ev-photos">{thumbs}</div></div>'
 
 
 def image_for(event: dict, root: str = "") -> str:
@@ -1200,6 +1212,7 @@ def event_page(event: dict, neighbours: list[dict], series: dict[str, list[dict]
     <div class="ev-main">
       <div class="actions">{''.join(actions)}</div>
       {f'<div class="panel"><h2>À propos</h2><div class="description">{e(description).replace(chr(10), "<br>")}</div></div>' if description else NO_DESCRIPTION}
+      {more_photos(event)}
       {dates_html}
     </div>
     <aside class="ev-side">
