@@ -89,3 +89,19 @@ body.print-page { font-family: Nunito, system-ui, sans-serif; color: var(--ink);
   .sheet-wrap { padding: 0; }
   .sheet { width: 210mm; height: 297mm; aspect-ratio: auto; box-shadow: none; border-radius: 0; margin: 0; break-inside: avoid; }
 }
+
+/* Kit séjour (23/11/2026) : chevalet A4 plié en deux (moitié du haut à
+   l'envers, se lit des deux côtés), ou deux affichettes A5 à couper. */
+.s-cut-fold { display: none; }
+.is-tent .s-card:first-child { transform: rotate(180deg); }
+.is-tent .s-card:first-child::before { top: auto; bottom: 0; }
+.is-tent .s-cut-scissors { display: none; }
+.is-tent .s-cut-fold { display: inline; position: absolute; left: auto; right: 4cqw; top: -2.2cqw; font-size: 2.8cqw; line-height: 1;
+  background: #fff; padding: 0 1cqw; color: #7D97A9; font-weight: 700; }
+.pb-formats { display: flex; gap: 14px; flex-wrap: wrap; font-weight: 700; }
+.pb-formats label { display: inline-flex; align-items: center; gap: 6px; }
+.pb-addr { font-size: .85rem; color: #1E8E3E; margin: 4px 0 0; }
+.welcome-msg { max-width: 794px; margin: 0 auto 32px; padding: 18px 20px; background: #fff; border-radius: 18px; }
+.welcome-msg h2 { font-size: 1.15rem; margin: 0 0 6px; color: var(--deep); }
+.welcome-msg textarea { width: 100%; box-sizing: border-box; font: inherit; padding: 10px; border-radius: 12px;
+  border: 1px solid #CFDCE6; margin: 8px 0; resize: vertical; }

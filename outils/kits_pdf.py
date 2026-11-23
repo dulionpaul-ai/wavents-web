@@ -35,7 +35,12 @@ def main() -> None:
     base = f"http://127.0.0.1:{server.server_port}/"
     jobs = [(f"affiche/{g.slugify(n)}/", ROOT / "static" / "affiche" / "pdf" / f"wavents-affiche-{g.slugify(n)}.pdf")
             for n in g.AFFICHE_COMMUNES]
-    jobs.append(("sejour/imprimer/", ROOT / "static" / "sejour" / "wavents-sejour.pdf"))
+    # Kit séjour (23/11/2026) : chevalet à plier (format par défaut de la page)
+    # et deux affichettes A5.
+    jobs.append(("sejour/imprimer/", ROOT / "static" / "sejour" / "wavents-sejour-chevalet.pdf"))
+    jobs.append(("sejour/imprimer/?f=affichettes", ROOT / "static" / "sejour" / "wavents-sejour.pdf"))
+    if len(sys.argv) > 2 and sys.argv[2] == "sejour":
+        jobs = [j for j in jobs if j[0].startswith("sejour/")]
     with sync_playwright() as p:
         browser = p.chromium.launch()
         for path, out in jobs:

@@ -55,3 +55,13 @@ jours à 40 km) et `ville/<ville>/quand-il-pleut/` pour chaque ville de plus de
 2 000 habitants (`communes_zone.json`) qui a au moins 6 sorties à l'abri à
 moins de 10 km (`rain_pages`, `RAIN_*`) : 111 villes le 23/11. Dans le plan
 du site (partie communes) et le pied de page.
+
+Kit séjour refait le 23/11/2026 (Paul) : `sejour/imprimer/` propose un
+chevalet A4 à plier en deux (par défaut, `wavents-sejour-chevalet.pdf`) ou
+deux affichettes A5 (`?f=affichettes`, `wavents-sejour.pdf`), le nom de
+l'hébergement et son adresse (facultatifs, jamais enregistrés ; géocodage
+data.geopf.fr dans le navigateur, QR fait sur place par qrcode-generator) :
+le QR ouvre alors `sejour/?ref=sejour&p=lat,lon&n=nom`, triée autour de
+l'hébergement avec « Bienvenue ! Avec les compliments de … ». Message
+d'accueil à copier pour Airbnb et Booking (`?ref=accueil`). PDF refaits par
+`outils/kits_pdf.py site sejour`.

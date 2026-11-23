@@ -3208,31 +3208,96 @@ def sejour_card(root: str) -> str:
 
 
 def sejour_print_page() -> str:
-    """Carte de chambre A5, deux par feuille A4 (à couper au milieu). Nom de
-    l'hébergement facultatif, tapé avant d'imprimer (jamais enregistré)."""
+    """Kit séjour à imprimer (20/11, refait le 23/11/2026 avec Paul) : chevalet
+    A4 à plier en deux (par défaut, se lit des deux côtés) ou deux petites
+    affichettes A5 à scotcher. Nom de l'hébergement et adresse facultatifs,
+    tapés avant d'imprimer (jamais enregistrés) : avec l'adresse, le QR ouvre
+    la page triée autour de l'hébergement (?p=lat,lon&n=nom). Message
+    d'accueil à copier pour Airbnb et Booking."""
     root = "../../"
-    field = ('<label class="pb-field">Ton hébergement (facultatif) <input id="host-name" type="text" maxlength="40" '
-             'placeholder="Gîte des Vignes" autocomplete="organization"></label>')
-    sheet = f"""<main class="sheet-wrap"><div class="sheet sejour-sheet" aria-label="Deux cartes A5 sur une feuille A4">
+    field = ('<div class="pb-formats" role="radiogroup" aria-label="Format">'
+             '<label><input type="radio" name="fmt" value="chevalet" checked> Chevalet à plier</label>'
+             '<label><input type="radio" name="fmt" value="affichettes"> 2 affichettes A5</label></div>'
+             '<label class="pb-field">Ton hébergement (facultatif) <input id="host-name" type="text" maxlength="40" '
+             'placeholder="Gîte des Vignes" autocomplete="organization"></label>'
+             '<label class="pb-field">Son adresse (facultatif : le QR ouvrira les sorties autour) '
+             '<input id="host-addr" type="text" maxlength="120" placeholder="12 rue du Port, Belleville" '
+             'autocomplete="street-address"></label><p class="pb-addr" id="host-addr-ok" hidden></p>')
+    message = ('<section class="welcome-msg no-print"><h2>Tu loues sur Airbnb ou Booking&nbsp;?</h2>'
+               '<p>Rien à imprimer : copie cette phrase dans ton message d\'accueil ou ton livret.</p>'
+               '<textarea id="welcome-text" readonly rows="3">Pour savoir ce qui se passe autour pendant votre séjour '
+               '(fêtes, concerts, marchés, sorties en famille), tout est ici, mis à jour chaque jour : '
+               'https://wavents.fr/sejour/?ref=accueil</textarea>'
+               '<button class="pb-btn" type="button" id="welcome-copy" data-goatcounter-click="copier-message-accueil">'
+               'Copier</button></section>')
+    sheet = f"""<main class="sheet-wrap"><div class="sheet sejour-sheet is-tent" aria-label="Kit séjour à imprimer">
   {sejour_card(root)}
-  <div class="s-cut" aria-hidden="true"><span>✂</span></div>
+  <div class="s-cut" aria-hidden="true"><span class="s-cut-scissors">✂</span><span class="s-cut-fold">plier ici</span></div>
   {sejour_card(root)}
 </div></main>
+{message}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
 <script>
 (function () {{
-  var input = document.getElementById("host-name");
-  if (!input) return;
-  input.addEventListener("input", function () {{
-    var v = input.value.trim();
+  var sheet = document.querySelector(".sejour-sheet");
+  var pdf = document.querySelector('a[download]');
+  var pdfs = {{ chevalet: "{root}sejour/wavents-sejour-chevalet.pdf", affichettes: "{root}sejour/wavents-sejour.pdf" }};
+  function setFmt(v) {{
+    sheet.classList.toggle("is-tent", v === "chevalet");
+    if (pdf) pdf.href = pdfs[v];
+    var r = document.querySelector('input[name="fmt"][value="' + v + '"]'); if (r) r.checked = true;
+  }}
+  document.querySelectorAll('input[name="fmt"]').forEach(function (r) {{
+    r.addEventListener("change", function () {{ setFmt(r.value); }});
+  }});
+  if (/[?&]f=affichettes/.test(location.search)) setFmt("affichettes"); else setFmt("chevalet");
+  var name = document.getElementById("host-name"), addr = document.getElementById("host-addr");
+  var ok = document.getElementById("host-addr-ok"), coords = null, timer = null;
+  var base = "https://wavents.fr/sejour/?ref=sejour";
+  function qr() {{
+    var url = base;
+    if (coords) url += "&p=" + coords[0].toFixed(4) + "," + coords[1].toFixed(4);
+    var n = name.value.trim(); if (coords && n) url += "&n=" + encodeURIComponent(n);
+    document.querySelectorAll(".s-qr img").forEach(function (img) {{
+      if (!coords || !window.qrcode) {{ img.src = "{root}sejour/qr.svg"; return; }}
+      var q = window.qrcode(0, "M"); q.addData(url); q.make();
+      img.src = "data:image/svg+xml;charset=utf-8," + encodeURIComponent(q.createSvgTag({{ cellSize: 4, margin: 0, scalable: true }}));
+    }});
+  }}
+  name.addEventListener("input", function () {{
+    var v = name.value.trim();
     document.querySelectorAll(".s-host").forEach(function (p) {{ p.hidden = !v; }});
     document.querySelectorAll(".s-host-name").forEach(function (b) {{ b.textContent = v; }});
+    qr();
+  }});
+  addr.addEventListener("input", function () {{
+    clearTimeout(timer);
+    timer = setTimeout(function () {{
+      var q = addr.value.trim();
+      if (q.length < 5) {{ coords = null; ok.hidden = true; qr(); return; }}
+      fetch("https://data.geopf.fr/geocodage/search?limit=1&q=" + encodeURIComponent(q))
+        .then(function (r) {{ return r.json(); }})
+        .then(function (d) {{
+          var f = d.features && d.features[0];
+          if (!f) {{ coords = null; ok.textContent = "Adresse introuvable : le QR ouvre les sorties autour de Belleville."; ok.hidden = false; qr(); return; }}
+          coords = [f.geometry.coordinates[1], f.geometry.coordinates[0]];
+          ok.textContent = "✓ Le QR ouvrira les sorties autour de : " + f.properties.label; ok.hidden = false; qr();
+        }})
+        .catch(function () {{ coords = null; ok.hidden = true; qr(); }});
+    }}, 500);
+  }});
+  var copy = document.getElementById("welcome-copy"), text = document.getElementById("welcome-text");
+  if (copy) copy.addEventListener("click", function () {{
+    text.select();
+    (navigator.clipboard ? navigator.clipboard.writeText(text.value) : Promise.reject()).catch(function () {{ document.execCommand("copy"); }});
+    copy.textContent = "Copié ✓"; setTimeout(function () {{ copy.textContent = "Copier"; }}, 2000);
   }});
 }})();
 </script>
 """
-    return (PRINT_HEAD.format(title="Carte « Que faire autour d'ici cette semaine ? » – Wavents",
-                              description="Carte à imprimer pour les chambres d'hôtes, gîtes et campings.", root=root)
-            + _print_bar(root, "../", "Les sorties de la semaine", f"{root}sejour/wavents-sejour.pdf", field)
+    return (PRINT_HEAD.format(title="Kit séjour « Que faire autour d'ici cette semaine ? » – Wavents",
+                              description="Chevalet et affichettes à imprimer pour les gîtes, chambres d'hôtes, hôtels et campings.", root=root)
+            + _print_bar(root, "../", "Les sorties de la semaine", f"{root}sejour/wavents-sejour-chevalet.pdf", field)
             + sheet + _print_tail(root))
 
 
@@ -3246,8 +3311,8 @@ def sejour_page(upcoming: list[dict], series: dict[str, list[dict]], now: dateti
              "Belleville-en-Beaujolais\u00a0: fêtes, concerts, marchés, visites, sorties en famille. "
              "Mises à jour chaque jour. Bon séjour\u00a0!")
     after = ('<section class="section prose kit-foot"><h2>Tu accueilles des vacanciers&nbsp;?</h2>'
-             '<p>Gîte, chambres d\'hôtes, camping, office de tourisme : <a href="imprimer/">imprime la carte à QR code</a> '
-             'pour tes chambres ou ton accueil. Gratuit, et toujours à jour.</p></section>')
+             '<p>Gîte, chambres d\'hôtes, camping, office de tourisme : <a href="imprimer/">imprime le chevalet à QR code</a> '
+             'pour tes chambres ou ton accueil, ou copie le message d\'accueil pour Airbnb et Booking. Gratuit, et toujours à jour.</p></section>')
     page, _ = theme_page("sejour", "Que faire autour de chez nous cette semaine ?",
                          "Que faire autour de chez nous cette semaine ?", "Pendant ton séjour",
                          lambda ev: True, 6, upcoming, series, now, radius=SEJOUR_RADIUS_KM, intro=intro,

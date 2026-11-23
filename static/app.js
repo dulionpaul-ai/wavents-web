@@ -401,6 +401,22 @@
         () => { chip.textContent = label; window.alert("Position non disponible : autorise la localisation pour trier par distance."); },
         { maximumAge: 600000, timeout: 10000 });
     }));
+    // QR propre à un hébergement (kit séjour, 23/11/2026) : ?p=lat,lon&n=nom,
+    // la liste se trie d'office autour de lui, avec son nom en accueil.
+    const qs = new URLSearchParams(location.search);
+    const hp = (qs.get("p") || "").split(",").map(Number);
+    const nearChip = $('.chip[data-ttoggle="near"]', themeList);
+    if (nearChip && hp.length === 2 && hp.every((v) => Number.isFinite(v) && Math.abs(v) <= 180)) {
+      sortNear(nearChip, { latitude: hp[0], longitude: hp[1] });
+      const host = (qs.get("n") || "").trim().slice(0, 40);
+      const lead = $(".town-hero .lead");
+      if (host && lead) {
+        const welcome = document.createElement("p");
+        welcome.className = "lead host-welcome";
+        welcome.textContent = `Bienvenue ! Avec les compliments de ${host} : les sorties les plus proches d'abord.`;
+        lead.before(welcome);
+      }
+    }
     $$('.chip[data-ttoggle]:not([data-ttoggle="near"])', themeList).forEach((chip) => chip.addEventListener("click", () => {
       const key = chip.dataset.ttoggle;
       st[key] = !st[key];
