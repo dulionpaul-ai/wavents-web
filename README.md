@@ -48,3 +48,10 @@ l'appli dans un cadre de téléphone (accueil et `/app/`). La police
 d'icônes est réduite aux icônes de `MS_ICONS` (`generate.py`) : toute
 nouvelle icône doit y être ajoutée. Leaflet n'est chargé que sur les
 pages qui ont une carte (`id="map"` ou `id="mini-map"`).
+
+Pages « Que faire quand il pleut » (23/11/2026, Paul, idée vue chez Yatoo) :
+`quand-il-pleut/` (sorties en intérieur, sûr ou probable, des 14 prochains
+jours à 40 km) et `ville/<ville>/quand-il-pleut/` pour chaque ville de plus de
+2 000 habitants (`communes_zone.json`) qui a au moins 6 sorties à l'abri à
+moins de 10 km (`rain_pages`, `RAIN_*`) : 111 villes le 23/11. Dans le plan
+du site (partie communes) et le pied de page.

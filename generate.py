@@ -611,6 +611,7 @@ def layout(title: str, body: str, *, description: str, url: str, image: str | No
           <li><a href="{root}brocantes/">Brocantes</a></li>
           <li><a href="{root}gratuit/">Sorties gratuites</a></li>
           <li><a href="{root}enfants/">En famille</a></li>
+          <li><a href="{root}quand-il-pleut/">Quand il pleut</a></li>
         </ul></div>
         <div class="footer-col"><h2>Outils</h2><ul>
           <li><a href="{root}ajouter/">Ajouter un événement</a></li>
@@ -1626,18 +1627,62 @@ THEMES = [
      "Gratuit", is_free, 14),
     ("enfants", "Sorties en famille et avec les enfants dans le Beaujolais", "Sorties en famille",
      "En famille", lambda ev: bool(ev.get("for_kids")), 21),
+    # Jours de pluie (Paul, 23/11/2026, idée vue chez Yatoo) : sorties en
+    # intérieur (sûr ou probable), et une page par ville (rain_pages).
+    ("quand-il-pleut", "Que faire quand il pleut dans le Beaujolais ?", "Que faire quand il pleut ?",
+     "À l'abri", lambda ev: ev.get("setting") == "interieur", 14),
 ]
+
+# Pages « Que faire quand il pleut à <ville> » : villes de plus de RAIN_MIN_POP
+# habitants (communes_zone.json) avec au moins RAIN_MIN_EVENTS sorties à
+# l'abri à moins de RAIN_KM km dans les 14 jours.
+RAIN_KM = 10
+RAIN_MIN_POP = 2000
+RAIN_MIN_EVENTS = 6
+
+
+def rain_pages(out: Path, upcoming: list[dict], series: dict[str, list[dict]], now: datetime) -> list[str]:
+    """« Que faire quand il pleut à <ville> ? » (Paul, 23/11/2026) : une page
+    par ville assez grande, sous ville/<ville>/quand-il-pleut/. Rend les
+    adresses écrites (pour le plan du site)."""
+    zone_file = Path(__file__).parent / "communes_zone.json"
+    if not zone_file.exists():
+        return []
+    keep = next(t[4] for t in THEMES if t[0] == "quand-il-pleut")
+    horizon = now.date() + timedelta(days=14)
+    paths = []
+    for c in json.loads(zone_file.read_text(encoding="utf-8")):
+        if (c.get("pop") or 0) < RAIN_MIN_POP:
+            continue
+        center = (c["lat"], c["lon"])
+        n = sum(1 for ev in upcoming if keep(ev) and wall_time(ev["start_date"]).date() <= horizon
+                and distance_km(ev["latitude"], ev["longitude"], center) <= RAIN_KM)
+        if n < RAIN_MIN_EVENTS:
+            continue
+        path = f"{commune_path(c['name'])}quand-il-pleut/"
+        page, _ = theme_page("quand-il-pleut", f"Que faire quand il pleut à {c['name']} ?",
+                             f"Que faire à {c['name']} quand il pleut ?", "À l'abri", keep, 14,
+                             upcoming, series, now, radius=RAIN_KM, center=center, path=path, place=c["name"])
+        (out / path).mkdir(parents=True, exist_ok=True)
+        (out / path / "index.html").write_text(page, encoding="utf-8")
+        paths.append(path)
+    return paths
 
 
 def theme_page(slug: str, page_title: str, h1: str, kicker: str, keep, days: int | None,
                upcoming: list[dict], series: dict[str, list[dict]], now: datetime, *,
                radius: int = THEME_RADIUS_KM, intro: str | None = None, extra_head: str = "",
-               near_chip: bool = False, after: str = "") -> tuple[str, int]:
+               near_chip: bool = False, after: str = "", center: tuple[float, float] = HOME,
+               path: str | None = None, place: str | None = None) -> tuple[str, int]:
     """Options (20/11/2026, page /sejour/) : rayon, accroche, en-tête en plus
-    (noindex), pastille « Près de moi », section ajoutée en fin de liste."""
-    root = "../"
+    (noindex), pastille « Près de moi », section ajoutée en fin de liste.
+    `center`, `path`, `place` (23/11/2026) : la même page autour d'une ville
+    (« Que faire quand il pleut à Villefranche »), à l'adresse `path`."""
+    path = path or f"{slug}/"
+    depth = path.strip("/").count("/") + 1
+    root = "../" * depth
     today = now.date()
-    pool = [ev for ev in upcoming if distance_km(ev["latitude"], ev["longitude"]) <= radius]
+    pool = [ev for ev in upcoming if distance_km(ev["latitude"], ev["longitude"], center) <= radius]
     if slug == "ce-week-end":
         first, last = weekend_range(today)
         items = [ev for ev in pool if overlaps(ev, first, last)]
@@ -1705,7 +1750,7 @@ def theme_page(slug: str, page_title: str, h1: str, kicker: str, keep, days: int
         seen = set()
         for ev in sorted(ordered, key=lambda ev: (
                 ev.get("category_id") == "marche", is_long(ev), not real_image(ev), not ev.get("featured"),
-                round(distance_km(ev["latitude"], ev["longitude"]) / 8), ev["start_date"])):
+                round(distance_km(ev["latitude"], ev["longitude"], center) / 8), ev["start_date"])):
             key = re.sub(r"[^a-z0-9]", "", fold(ev["title"]))[:14]
             if key in seen or ev.get("category_id") == "marche" or is_long(ev):
                 continue
@@ -1757,9 +1802,11 @@ def theme_page(slug: str, page_title: str, h1: str, kicker: str, keep, days: int
                f'<p class="t-empty" hidden>Aucune sortie avec ces filtres.</p></div>')
     others = "".join(
         f'<a class="town-link" href="{root}{t[0]}/">{e(t[2])}</a>' for t in THEMES if t[0] != slug)
-    intro = intro or (f"{len(ordered)} sorties {span} dans le Beaujolais, le Val de Saône et le nord de Lyon "
-                      f"(à moins de {radius} km de Belleville), mises à jour chaque jour.")
-    url = f"{BASE_URL}/{slug}/"
+    where = (f"à moins de {radius} km de {place}" if place else
+             f"dans le Beaujolais, le Val de Saône et le nord de Lyon (à moins de {radius} km de Belleville)")
+    what = "sorties à l'abri, en intérieur," if slug == "quand-il-pleut" else "sorties"
+    intro = intro or f"{len(ordered)} {what} {span} {where}, mises à jour chaque jour."
+    url = f"{BASE_URL}/{path}"
     item_list = {
         "@context": "https://schema.org",
         "@type": "ItemList",
@@ -1787,7 +1834,7 @@ def theme_page(slug: str, page_title: str, h1: str, kicker: str, keep, days: int
         description=intro,
         url=url,
         extra_head=f'<script type="application/ld+json">{json.dumps(item_list, ensure_ascii=False)}</script>{extra_head}',
-        depth=1,
+        depth=depth,
         page_class="town-page",
     ), len(ordered)
 
@@ -3495,8 +3542,19 @@ def main() -> int:
     (out / "marche" / "index.html").write_text(markets_index(markets), encoding="utf-8")
 
     theme_counts: dict[str, int] = {}
+    rain_paths = rain_pages(out, upcoming, series, now)
+    print(f"{len(rain_paths)} pages « quand il pleut » par ville")
+    rain_towns = sorted(((p.split("/")[1], p) for p in rain_paths), key=lambda t: t[0])
+    zone_names = {slugify(c["name"]): c["name"] for c in json.loads(
+        (Path(__file__).parent / "communes_zone.json").read_text(encoding="utf-8"))} if rain_paths else {}
+    rain_after = ('<section class="section"><div class="section-head"><div><p class="kicker">Par ville</p>'
+                  '<h2>Quand il pleut près de chez toi</h2></div></div><div class="town-links">'
+                  + "".join(f'<a class="town-link" href="../{p}">{e(zone_names.get(slug_, slug_))}</a>'
+                            for slug_, p in sorted(rain_towns, key=lambda t: fold(zone_names.get(t[0], t[0]))))
+                  + '</div></section>') if rain_paths else ""
     for slug, page_title, h1, kicker, keep, days in THEMES:
-        page, count = theme_page(slug, page_title, h1, kicker, keep, days, upcoming, series, now)
+        page, count = theme_page(slug, page_title, h1, kicker, keep, days, upcoming, series, now,
+                                 after=rain_after if slug == "quand-il-pleut" else "")
         theme_counts[slug] = count
         (out / slug).mkdir(exist_ok=True)
         (out / slug / "index.html").write_text(page, encoding="utf-8")
@@ -3543,7 +3601,8 @@ def main() -> int:
     # sorties), et sitemap.xml devient l'index des quatre.
     parts = {
         "pages": [f"{BASE_URL}/", f"{BASE_URL}/ville/", f"{BASE_URL}/marche/"] + extra_pages,
-        "communes": [f"{BASE_URL}/{commune_path(name)}" for name in list(communes) + around_names],
+        "communes": [f"{BASE_URL}/{commune_path(name)}" for name in list(communes) + around_names]
+                    + [f"{BASE_URL}/{p}" for p in rain_paths],
         "marches": [f"{BASE_URL}/{market_path(town)}" for town in markets],
         "sorties": [f"{BASE_URL}/{event_path(ev)}" for ev in events if canonical_ids[ev["id"]] == ev["id"]],
     }
