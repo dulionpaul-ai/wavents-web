@@ -254,6 +254,32 @@ def real_image(event: dict) -> str | None:
     return url if url.startswith("http") else None
 
 
+LINK_RE = re.compile(r'(https?://[^\s<>«»"]+|www\.[^\s<>«»"]+)|([\w.+-]+@[\w-]+(?:\.[\w-]+)+)'
+                     r'|((?:\+33\s?|0)[1-9](?:[\s.]?\d{2}){4})', re.I)
+
+
+def linkify(text: str) -> str:
+    """Description en HTML, liens, e-mails et téléphones cliquables (Paul,
+    23/11/2026, comme dans l'appli) ; la ponctuation finale reste du texte."""
+    out, last = [], 0
+    for m in LINK_RE.finditer(text):
+        raw, end = m.group(0), m.end()
+        if m.group(1):
+            trimmed = raw.rstrip(".,;:!?)]")
+            end -= len(raw) - len(trimmed)
+            raw = trimmed
+            href = raw if raw.lower().startswith("http") else "https://" + raw
+            link = f'<a href="{e(href)}" rel="nofollow noopener" target="_blank">{e(raw)}</a>'
+        elif m.group(2):
+            link = f'<a href="mailto:{e(raw)}">{e(raw)}</a>'
+        else:
+            link = f'<a href="tel:{re.sub(r"[\s.]", "", raw)}">{e(raw)}</a>'
+        out.append(e(text[last:m.start()]) + link)
+        last = end
+    out.append(e(text[last:]))
+    return "".join(out).replace("\n", "<br>")
+
+
 def more_photos(event: dict) -> str:
     """Photos en plus de la principale (affiche, visuel), comme dans l'appli
     (Paul, 23/11/2026) : vignettes entières qui ouvrent l'image."""
@@ -1224,7 +1250,7 @@ def event_page(event: dict, neighbours: list[dict], series: dict[str, list[dict]
   <section class="section ev-body">
     <div class="ev-main">
       <div class="actions">{''.join(actions)}</div>
-      {f'<div class="panel"><h2>À propos</h2><div class="description">{e(description).replace(chr(10), "<br>")}</div></div>' if description else NO_DESCRIPTION}
+      {f'<div class="panel"><h2>À propos</h2><div class="description">{linkify(description)}</div></div>' if description else NO_DESCRIPTION}
       {more_photos(event)}
       {dates_html}
     </div>
