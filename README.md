@@ -65,3 +65,7 @@ le QR ouvre alors `sejour/?ref=sejour&p=lat,lon&n=nom`, triée autour de
 l'hébergement avec « Bienvenue ! Avec les compliments de … ». Message
 d'accueil à copier pour Airbnb et Booking (`?ref=accueil`). PDF refaits par
 `outils/kits_pdf.py site sejour`.
+Depuis le soir du 23/11 : deux styles (« photos d'ici », « vague Wavents »)
+× trois formats (chevalet, deux affichettes A5, page A4 pour le livret
+d'accueil), `?f=` et `?s=` ; texte pour les touristes (vouvoiement, à quoi
+sert la page, 3 étapes). Six PDF `wavents-sejour-<format>-<style>.pdf`.

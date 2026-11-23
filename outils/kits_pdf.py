@@ -37,8 +37,11 @@ def main() -> None:
             for n in g.AFFICHE_COMMUNES]
     # Kit séjour (23/11/2026) : chevalet à plier (format par défaut de la page)
     # et deux affichettes A5.
-    jobs.append(("sejour/imprimer/", ROOT / "static" / "sejour" / "wavents-sejour-chevalet.pdf"))
-    jobs.append(("sejour/imprimer/?f=affichettes", ROOT / "static" / "sejour" / "wavents-sejour.pdf"))
+    # Deux styles × trois formats (23/11/2026) ; les anciens noms
+    # (wavents-sejour.pdf, wavents-sejour-chevalet.pdf) sont des copies.
+    for f in ("chevalet", "affichettes", "page"):
+        for st in ("photos", "vague"):
+            jobs.append((f"sejour/imprimer/?f={f}&s={st}", ROOT / "static" / "sejour" / f"wavents-sejour-{f}-{st}.pdf"))
     if len(sys.argv) > 2 and sys.argv[2] == "sejour":
         jobs = [j for j in jobs if j[0].startswith("sejour/")]
     with sync_playwright() as p:

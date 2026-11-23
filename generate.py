@@ -3192,18 +3192,33 @@ def affiches_index() -> str:
 
 
 def sejour_card(root: str) -> str:
+    """Face du kit séjour pour les vacanciers (refaite le 23/11/2026 avec
+    Paul : dire à un touriste à quoi ça sert, le vouvoyer). Un seul dessin,
+    deux styles (classe de la feuille) : « photos » (vraies photos d'ici,
+    3 étapes) et « vague » (couleurs de l'appli, gros QR)."""
+    photos = "".join(f'<div style="background-image:url({root}categories/{n}.jpg)"></div>'
+                     for n in ("fete", "marche", "concert"))
     return f"""<article class="s-card">
-    <div class="s-head"><div class="s-brand"><img src="{root}img/pin.png" alt="" width="56" height="56"><span>Wavents</span></div>
-    <p class="s-host" hidden>Avec les compliments de <b class="s-host-name"></b></p></div>
-    <h1 class="s-title">Que faire autour d'ici <em>cette semaine</em>&nbsp;?</h1>
-    <div class="s-row">
-      <div class="p-qr s-qr"><img src="{root}sejour/qr.svg" alt="QR code vers les sorties de la semaine"><b>Scanne-moi</b></div>
-      <div class="s-text">
-        <p>Fêtes, concerts, marchés, visites, sorties en famille : tout ce qui se passe près d'ici, mis à jour chaque jour.</p>
-        <p class="s-free">Gratuit, sans compte, rien à installer.</p>
-        <p class="p-url">wavents.fr/sejour</p>
+    <div class="s-photos" aria-hidden="true">{photos}</div>
+    <div class="s-body">
+      <div class="s-head"><div class="s-brand"><img src="{root}img/pin.png" alt="" width="56" height="56"><span>Wavents</span></div>
+        <p class="s-host" hidden>Avec les compliments de <b class="s-host-name"></b></p></div>
+      <h1 class="s-title">Que faire autour d'ici <em>cette semaine</em>&nbsp;?</h1>
+      <p class="s-what">L'agenda de <b>tout ce qui se passe autour de votre hébergement</b>&nbsp;: fêtes de village,
+        marchés, dégustations, concerts, sorties en famille. Avec l'heure, le lieu et l'itinéraire.</p>
+      <p class="s-free">Gratuit · sans compte · rien à installer</p>
+      <p class="s-pills"><span>🎉 Fêtes</span><span>🎵 Concerts</span><span>🧺 Marchés</span><span>🏰 Visites</span><span>👨‍👩‍👧 En famille</span></p>
+      <div class="s-row">
+        <div class="s-qr"><img src="{root}sejour/qr.svg" alt="QR code vers les sorties de la semaine"><b>Scannez-moi</b></div>
+        <div class="s-side">
+          <ol class="s-steps"><li><b>1</b>Scannez</li><li><b>2</b>Choisissez une sortie près d'ici</li><li><b>3</b>Itinéraire en un geste</li></ol>
+          <p class="s-url">wavents.fr/sejour</p>
+          <p class="s-bon">Bon séjour&nbsp;!</p>
+        </div>
       </div>
     </div>
+    <svg class="s-wave" viewBox="0 0 794 90" preserveAspectRatio="none" aria-hidden="true"><path d="M0,30 C150,60 300,0 470,25 C600,45 700,20 794,30 L794,90 L0,90 Z" fill="#fff"/></svg>
+    <p class="s-foot"><b>wavents.fr/sejour</b> Gratuit, sans compte, rien à installer</p>
   </article>"""
 
 
@@ -3215,22 +3230,28 @@ def sejour_print_page() -> str:
     la page triée autour de l'hébergement (?p=lat,lon&n=nom). Message
     d'accueil à copier pour Airbnb et Booking."""
     root = "../../"
-    field = ('<div class="pb-formats" role="radiogroup" aria-label="Format">'
+    field = ('<div class="pb-formats" role="radiogroup" aria-label="Style">'
+             '<span class="pb-k">Style</span>'
+             '<label><input type="radio" name="sty" value="photos" checked> Photos d\'ici</label>'
+             '<label><input type="radio" name="sty" value="vague"> Vague Wavents</label></div>'
+             '<div class="pb-formats" role="radiogroup" aria-label="Format">'
+             '<span class="pb-k">Format</span>'
              '<label><input type="radio" name="fmt" value="chevalet" checked> Chevalet à plier</label>'
-             '<label><input type="radio" name="fmt" value="affichettes"> 2 affichettes A5</label></div>'
-             '<label class="pb-field">Ton hébergement (facultatif) <input id="host-name" type="text" maxlength="40" '
+             '<label><input type="radio" name="fmt" value="affichettes"> 2 affichettes A5</label>'
+             '<label><input type="radio" name="fmt" value="page"> Page A4 (livret d\'accueil)</label></div>'
+             '<label class="pb-field">Votre hébergement (facultatif) <input id="host-name" type="text" maxlength="40" '
              'placeholder="Gîte des Vignes" autocomplete="organization"></label>'
              '<label class="pb-field">Son adresse (facultatif : le QR ouvrira les sorties autour) '
              '<input id="host-addr" type="text" maxlength="120" placeholder="12 rue du Port, Belleville" '
              'autocomplete="street-address"></label><p class="pb-addr" id="host-addr-ok" hidden></p>')
-    message = ('<section class="welcome-msg no-print"><h2>Tu loues sur Airbnb ou Booking&nbsp;?</h2>'
-               '<p>Rien à imprimer : copie cette phrase dans ton message d\'accueil ou ton livret.</p>'
+    message = ('<section class="welcome-msg no-print"><h2>Vous louez sur Airbnb ou Booking&nbsp;?</h2>'
+               '<p>Rien à imprimer : copiez cette phrase dans votre message d\'accueil ou votre livret numérique.</p>'
                '<textarea id="welcome-text" readonly rows="3">Pour savoir ce qui se passe autour pendant votre séjour '
                '(fêtes, concerts, marchés, sorties en famille), tout est ici, mis à jour chaque jour : '
                'https://wavents.fr/sejour/?ref=accueil</textarea>'
                '<button class="pb-btn" type="button" id="welcome-copy" data-goatcounter-click="copier-message-accueil">'
                'Copier</button></section>')
-    sheet = f"""<main class="sheet-wrap"><div class="sheet sejour-sheet is-tent" aria-label="Kit séjour à imprimer">
+    sheet = f"""<main class="sheet-wrap"><div class="sheet sejour-sheet fmt-chevalet st-photos" aria-label="Kit séjour à imprimer">
   {sejour_card(root)}
   <div class="s-cut" aria-hidden="true"><span class="s-cut-scissors">✂</span><span class="s-cut-fold">plier ici</span></div>
   {sejour_card(root)}
@@ -3241,16 +3262,21 @@ def sejour_print_page() -> str:
 (function () {{
   var sheet = document.querySelector(".sejour-sheet");
   var pdf = document.querySelector('a[download]');
-  var pdfs = {{ chevalet: "{root}sejour/wavents-sejour-chevalet.pdf", affichettes: "{root}sejour/wavents-sejour.pdf" }};
-  function setFmt(v) {{
-    sheet.classList.toggle("is-tent", v === "chevalet");
-    if (pdf) pdf.href = pdfs[v];
-    var r = document.querySelector('input[name="fmt"][value="' + v + '"]'); if (r) r.checked = true;
+  var cur = {{ fmt: "chevalet", sty: "photos" }};
+  var qs = new URLSearchParams(location.search);
+  function apply() {{
+    sheet.className = "sheet sejour-sheet fmt-" + cur.fmt + " st-" + cur.sty;
+    if (pdf) pdf.href = "{root}sejour/wavents-sejour-" + cur.fmt + "-" + cur.sty + ".pdf";
+    ["fmt", "sty"].forEach(function (k) {{
+      var r = document.querySelector('input[name="' + k + '"][value="' + cur[k] + '"]'); if (r) r.checked = true;
+    }});
   }}
-  document.querySelectorAll('input[name="fmt"]').forEach(function (r) {{
-    r.addEventListener("change", function () {{ setFmt(r.value); }});
+  document.querySelectorAll('input[name="fmt"], input[name="sty"]').forEach(function (r) {{
+    r.addEventListener("change", function () {{ cur[r.name] = r.value; apply(); }});
   }});
-  if (/[?&]f=affichettes/.test(location.search)) setFmt("affichettes"); else setFmt("chevalet");
+  if (/^(chevalet|affichettes|page)$/.test(qs.get("f") || "")) cur.fmt = qs.get("f");
+  if (/^(photos|vague)$/.test(qs.get("s") || "")) cur.sty = qs.get("s");
+  apply();
   var name = document.getElementById("host-name"), addr = document.getElementById("host-addr");
   var ok = document.getElementById("host-addr-ok"), coords = null, timer = null;
   var base = "https://wavents.fr/sejour/?ref=sejour";
@@ -3297,7 +3323,7 @@ def sejour_print_page() -> str:
 """
     return (PRINT_HEAD.format(title="Kit séjour « Que faire autour d'ici cette semaine ? » – Wavents",
                               description="Chevalet et affichettes à imprimer pour les gîtes, chambres d'hôtes, hôtels et campings.", root=root)
-            + _print_bar(root, "../", "Les sorties de la semaine", f"{root}sejour/wavents-sejour-chevalet.pdf", field)
+            + _print_bar(root, "../", "Les sorties de la semaine", f"{root}sejour/wavents-sejour-chevalet-photos.pdf", field)
             + sheet + _print_tail(root))
 
 
