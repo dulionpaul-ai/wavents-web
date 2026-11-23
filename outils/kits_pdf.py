@@ -39,7 +39,7 @@ def main() -> None:
     # et deux affichettes A5.
     # Deux styles × trois formats (23/11/2026) ; les anciens noms
     # (wavents-sejour.pdf, wavents-sejour-chevalet.pdf) sont des copies.
-    for f in ("chevalet", "affichettes", "page"):
+    for f in ("chevalet", "page"):
         for st in ("photos", "vague"):
             jobs.append((f"sejour/imprimer/?f={f}&s={st}", ROOT / "static" / "sejour" / f"wavents-sejour-{f}-{st}.pdf"))
     if len(sys.argv) > 2 and sys.argv[2] == "sejour":

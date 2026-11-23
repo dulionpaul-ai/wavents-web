@@ -3120,7 +3120,7 @@ def _print_bar(root: str, back: str, back_label: str, pdf: str, extra: str = "")
             f'<div class="pb-actions">{extra}<button class="pb-btn" type="button" onclick="window.print()" '
             f'data-goatcounter-click="imprimer">🖨 Imprimer</button>'
             f'<a class="pb-btn ghost" href="{pdf}" download data-goatcounter-click="telecharger-pdf">Télécharger le PDF</a></div>'
-            f'<p class="pb-note">Format A4, sans marge à régler : « Imprimer » puis « Enregistrer en PDF » ou ton imprimante.</p></div>')
+            f'<p class="pb-note">Format A4, sans marge à régler : « Imprimer », puis l\'imprimante ou « Enregistrer en PDF ».</p></div>')
 
 
 def _print_tail(root: str) -> str:
@@ -3236,9 +3236,10 @@ def sejour_print_page() -> str:
              '<label><input type="radio" name="sty" value="vague"> Vague Wavents</label></div>'
              '<div class="pb-formats" role="radiogroup" aria-label="Format">'
              '<span class="pb-k">Format</span>'
-             '<label><input type="radio" name="fmt" value="chevalet" checked> Chevalet à plier</label>'
-             '<label><input type="radio" name="fmt" value="affichettes"> 2 affichettes A5</label>'
-             '<label><input type="radio" name="fmt" value="page"> Page A4 (livret d\'accueil)</label></div>'
+             '<label><input type="radio" name="fmt" value="chevalet" checked> Chevalet ou 2 affichettes</label>'
+             '<label><input type="radio" name="fmt" value="page"> Page A4 (livret d\'accueil)</label>'
+             '<span class="pb-hint" id="fmt-hint">Une feuille A4 : pliez-la en deux pour un chevalet qui tient debout, '
+             'ou coupez-la sur le pointillé pour deux affichettes.</span></div>'
              '<label class="pb-field">Votre hébergement (facultatif) <input id="host-name" type="text" maxlength="40" '
              'placeholder="Gîte des Vignes" autocomplete="organization"></label>'
              '<label class="pb-field">Son adresse (facultatif : le QR ouvrira les sorties autour) '
@@ -3253,7 +3254,7 @@ def sejour_print_page() -> str:
                'Copier</button></section>')
     sheet = f"""<main class="sheet-wrap"><div class="sheet sejour-sheet fmt-chevalet st-photos" aria-label="Kit séjour à imprimer">
   {sejour_card(root)}
-  <div class="s-cut" aria-hidden="true"><span class="s-cut-scissors">✂</span><span class="s-cut-fold">plier ici</span></div>
+  <div class="s-cut" aria-hidden="true"><span class="s-cut-scissors">✂</span><span class="s-cut-fold">plier ou couper ici</span></div>
   {sejour_card(root)}
 </div></main>
 {message}
@@ -3267,6 +3268,7 @@ def sejour_print_page() -> str:
   function apply() {{
     sheet.className = "sheet sejour-sheet fmt-" + cur.fmt + " st-" + cur.sty;
     if (pdf) pdf.href = "{root}sejour/wavents-sejour-" + cur.fmt + "-" + cur.sty + ".pdf";
+    var hint = document.getElementById("fmt-hint"); if (hint) hint.hidden = cur.fmt !== "chevalet";
     ["fmt", "sty"].forEach(function (k) {{
       var r = document.querySelector('input[name="' + k + '"][value="' + cur[k] + '"]'); if (r) r.checked = true;
     }});
@@ -3274,7 +3276,8 @@ def sejour_print_page() -> str:
   document.querySelectorAll('input[name="fmt"], input[name="sty"]').forEach(function (r) {{
     r.addEventListener("change", function () {{ cur[r.name] = r.value; apply(); }});
   }});
-  if (/^(chevalet|affichettes|page)$/.test(qs.get("f") || "")) cur.fmt = qs.get("f");
+  // « affichettes » : même feuille que le chevalet (Paul, 23/11/2026).
+  if (qs.get("f") === "page") cur.fmt = "page";
   if (/^(photos|vague)$/.test(qs.get("s") || "")) cur.sty = qs.get("s");
   apply();
   var name = document.getElementById("host-name"), addr = document.getElementById("host-addr");
