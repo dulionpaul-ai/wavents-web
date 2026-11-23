@@ -712,6 +712,18 @@ def media(event: dict, root: str, css: str = "", width: int = 600) -> str:
     return f'<img class="{css}" src="{e(small)}" alt="" loading="lazy" onerror="{e(retry)}">'
 
 
+def cover(event: dict, root: str) -> str:
+    """Photo principale de la fiche, toujours entière (Paul, 23/11/2026 :
+    une affiche en hauteur était coupée) : posée sur un fond flou de la même
+    image, quel que soit son format. Photo de catégorie : recadrée comme
+    avant."""
+    src = real_image(event)
+    if not src:
+        return f'<div class="ev-cover">{media(event, root)}</div>'
+    bg = thumb(src, 200).replace("'", "%27").replace('"', "%22").replace(")", "%29").replace("(", "%28")
+    return f'<div class="ev-cover fit" style="--bg:url(\'{e(bg)}\')">{media(event, root, width=900)}</div>'
+
+
 def card(event: dict, series: dict[str, list[dict]], root: str = "", *, size: str = "") -> str:
     emoji, label, color = category(event)
     start = wall_time(event["start_date"])
@@ -1197,7 +1209,7 @@ def event_page(event: dict, neighbours: list[dict], series: dict[str, list[dict]
     <div class="ev-hero-inner">
       <a class="back" href="{root}#agenda">← Tout l'agenda</a>
       <div class="ev-head">
-        <div class="ev-cover-wrap">{date_chip(event)}<div class="ev-cover">{media(event, root)}</div></div>
+        <div class="ev-cover-wrap">{date_chip(event)}{cover(event, root)}</div>
         <div class="ev-title">
           <p class="cat-pill big">{emoji} {e(label)}</p>
           <h1>{e(event['title'])}</h1>

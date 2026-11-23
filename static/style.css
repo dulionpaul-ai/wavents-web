@@ -902,3 +902,9 @@ a.fest-related .fest-more { color: var(--deep); font-weight: 700; margin-top: 4p
 .ev-photos { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 10px; }
 .ev-photo { display: block; border-radius: 14px; overflow: hidden; background: rgba(6,95,187,.06); aspect-ratio: 3 / 4; }
 .ev-photo img { width: 100%; height: 100%; object-fit: contain; display: block; }
+
+/* Photo principale toujours entière (23/11/2026) : la photo sur un fond flou
+   d'elle-même, quel que soit son format (affiches en hauteur). */
+.ev-cover.fit::before { content: ""; position: absolute; inset: -30px; background: var(--bg) center / cover no-repeat;
+  filter: blur(26px) brightness(.82) saturate(1.1); }
+.ev-cover.fit img { object-fit: contain; }
