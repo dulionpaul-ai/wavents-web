@@ -63,7 +63,9 @@ FIELDS = (
     "start_date,end_date,start_time_known,end_time_known,price_type,price_amount,price_confirmed,"
     "image_url,website_url,for_kids,source,published_at,recurring_weekdays,opening_hours,"
     # Intérieur / extérieur (script 211 du dépôt Wavents, 30/10/2026).
-    "setting,setting_sure"
+    "setting,setting_sure,"
+    # Organisateur lu dans la description, pour la recherche (script 258, 23/11/2026).
+    "organizer"
 )
 # Police d'icônes réduite aux seules icônes utilisées (audit du 20/11/2026 :
 # 503 Ko sur chaque page avant, 4,5 Ko après). Toute nouvelle icône passée à
@@ -711,7 +713,7 @@ def card(event: dict, series: dict[str, list[dict]], root: str = "", *, size: st
         badges.append('<span class="badge kids">En famille</span>')
     if recurring:
         badges.append(f'<span class="badge series">{e(recurring)}</span>')
-    search = fold(f"{event['title']} {commune_of(event)} {event.get('location_name') or ''} {label}")
+    search = fold(f"{event['title']} {commune_of(event)} {event.get('location_name') or ''} {label} {event.get('organizer') or ''}")
     return f"""<a class="card {size}" href="{root}{event_path(event)}" data-cat="{e(event.get('category_id') or '')}" data-free="{1 if is_free(event) else 0}" data-kids="{1 if event.get('for_kids') else 0}" data-q="{e(search)}" style="--cat:{color}">
   <div class="card-media">{media(event, root)}{date_chip(event)}<span class="cat-pill">{emoji} {e(label)}</span></div>
   <div class="card-body"><h3>{e(event['title'])}</h3><p class="card-meta">{e(meta)}</p><div class="badges">{''.join(badges)}</div></div>
@@ -740,7 +742,7 @@ def row_card(event: dict, series: dict[str, list[dict]], root: str = "") -> str:
         badges.append('<span class="badge free">Gratuit</span>')
     if event.get("for_kids"):
         badges.append('<span class="badge kids">En famille</span>')
-    search = fold(f"{event['title']} {commune_of(event)} {event.get('location_name') or ''} {label}")
+    search = fold(f"{event['title']} {commune_of(event)} {event.get('location_name') or ''} {label} {event.get('organizer') or ''}")
     return f"""<a class="row-card" href="{root}{event_path(event)}" data-cat="{e(event.get('category_id') or '')}" data-free="{1 if is_free(event) else 0}" data-kids="{1 if event.get('for_kids') else 0}" data-q="{e(search)}" data-lat="{event['latitude']:.3f}" data-lon="{event['longitude']:.3f}" style="--cat:{color}">
   <span class="row-media">{media(event, root, width=200)}</span>
   <span class="row-body"><span class="cat-chip">{emoji} {e(label)}</span><b>{e(event['title'])}</b><span class="row-date">{e(meta)}</span>{f'<span class="badges">{"".join(badges)}</span>' if badges else ''}</span>
