@@ -1176,7 +1176,7 @@ def event_page(event: dict, neighbours: list[dict], series: dict[str, list[dict]
     maps = f"https://www.google.com/maps/dir/?api=1&destination={lat},{lon}"
     image = image_for(event, root)
 
-    actions = [f'<a class="btn btn-sun" href="event.ics" rel="nofollow" download="wavents-{event["id"][:8]}.ics" data-goatcounter-click="clic-agenda">📅 Ajouter à mon agenda</a>',
+    actions = [f'<a class="btn btn-sun" href="event.ics" rel="nofollow" download="wavents-{event["id"][:8]}.ics" data-goatcounter-click="clic-agenda">📅 + Agenda</a>',
                f'<a class="btn btn-ghost" href="{maps}" target="_blank" rel="noopener" data-goatcounter-click="clic-itineraire">🧭 Y aller</a>',
                '<button class="btn btn-ghost" data-share data-goatcounter-click="clic-partager">🔗 Partager</button>']
     if (event.get("website_url") or "").startswith("http"):
