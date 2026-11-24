@@ -269,6 +269,7 @@
         default: return ["0000", "9999"];
       }
     };
+    window.wvRange = range;
     const count = $("#count");
     const empty = $("#empty");
     const expanded = new Set();
@@ -546,15 +547,19 @@
       });
       const markers = data.points.map((p) => {
         const cat = data.cats[p.c] || data.cats.associatif_autre;
-        return L.marker([p.la, p.lo], { icon: pinIcon(cat), cat: p.c, kids: p.k === 1, free: p.f === 1 })
+        return L.marker([p.la, p.lo], { icon: pinIcon(cat), cat: p.c, kids: p.k === 1, free: p.f === 1, from: p.s || "", to: p.e || p.s || "" })
           .bindPopup(`<div class="wv-pop"><b>${esc(p.t)}</b><small>${esc(p.d)} · ${esc(p.p)}</small><a href="${p.u}">Voir la sortie →</a></div>`);
       });
       // Mêmes filtres que l'agenda (catégorie, En famille, Gratuit).
       const show = () => {
         const st = window.wvAgenda || {};
+        // Même période que la liste (« Quand ? ») : sorties qui ont lieu
+        // au moins un jour de la période.
+        const [from, to] = window.wvRange ? window.wvRange() : ["0000", "9999"];
         clusters.clearLayers();
         clusters.addLayers(markers.filter((m) => (!st.cat || m.options.cat === st.cat)
-          && (!st.kids || m.options.kids) && (!st.free || m.options.free)));
+          && (!st.kids || m.options.kids) && (!st.free || m.options.free)
+          && m.options.from <= to && m.options.to >= from));
       };
       window.wvMap = map;
       window.wvMapShow = show;

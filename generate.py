@@ -994,6 +994,7 @@ def home_page(events: list[dict], all_upcoming: list[dict], now: datetime) -> st
             "la": round(ev["latitude"], 5), "lo": round(ev["longitude"], 5),
             "d": cap(day_label(wall_time(ev["start_date"]))), "p": commune_of(ev),
             "u": event_path(ev), "k": 1 if ev.get("for_kids") else 0, "f": 1 if is_free(ev) else 0,
+            "s": wall_time(ev["start_date"]).date().isoformat(), "e": end_of(ev).date().isoformat(),
         }
         for ev in shown
     ]
