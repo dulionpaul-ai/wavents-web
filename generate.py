@@ -983,7 +983,7 @@ def home_page(events: list[dict], all_upcoming: list[dict], now: datetime) -> st
         on = " is-on" if index == 0 else ""
         day_tabs.append(f'<button class="day-tab{on}" data-day="{index}"><b>{e(short)}</b><small>{len(items)}</small></button>')
         day_sections.append(
-            f'<section class="day{on}" data-day="{index}"><h3 class="day-title">{e(label)}</h3>'
+            f'<section class="day{on}" data-day="{index}" data-date="{day.isoformat()}"><h3 class="day-title">{e(label)}</h3>'
             f'<div class="grid">{"".join(card(ev, series) for ev in items)}</div>'
             f'<div class="day-more"><button class="btn btn-ghost" data-more>Voir les autres sorties</button></div></section>'
         )
@@ -1070,6 +1070,7 @@ def home_page(events: list[dict], all_upcoming: list[dict], now: datetime) -> st
     <div class="filters" id="filters">
       <label class="search"><span>🔍</span><input type="search" id="q" placeholder="Un village, un concert, un loto…" autocomplete="off"></label>
       <div class="chips">
+        <label class="chip chip-when is-on"><span aria-hidden="true">📅</span><select id="when" aria-label="Quand ?"><option value="today">Aujourd'hui</option><option value="tomorrow">Demain</option><option value="weekend">Ce week-end</option><option value="week" selected>7 prochains jours</option><option value="all">Toutes les dates</option></select></label>
         <button class="chip is-on" data-cat="">Tout</button>
         <button class="chip toggle" data-toggle="kids">{_icon("child_care")} En famille</button>
         <button class="chip toggle" data-toggle="free">{_icon("money_off")} Gratuit</button>
@@ -1080,7 +1081,6 @@ def home_page(events: list[dict], all_upcoming: list[dict], now: datetime) -> st
     <div class="view-toggle" role="group" aria-label="Affichage"><button class="vt is-on" data-view="list" aria-pressed="true">📋 Liste</button><button class="vt" data-view="map" aria-pressed="false" data-goatcounter-click="clic-vue-carte">🗺️ Carte</button></div>
     <div class="search-results" id="search-results" hidden aria-live="polite"></div>
     <div class="map-wrap" id="carte" hidden><div class="map-box"><div id="map" role="region" aria-label="Carte des événements"></div><div class="map-search" role="search"><span aria-hidden="true">🔍</span><input type="search" id="map-q" placeholder="Aller à une ville…" autocomplete="off" aria-label="Aller à une ville sur la carte"><ul class="map-sugg" hidden></ul></div></div></div>
-    <div class="day-tabs" role="tablist">{''.join(day_tabs)}</div>
     <div class="agenda">{''.join(day_sections)}</div>
     <p class="empty" id="empty" hidden>Aucune sortie ne correspond. Essaie un autre filtre&nbsp;!</p>
   </section>

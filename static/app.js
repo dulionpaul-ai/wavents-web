@@ -251,10 +251,24 @@
       const cols = grid ? getComputedStyle(grid).gridTemplateColumns : "none";
       return cols && cols !== "none" ? Math.max(1, cols.trim().split(/\s+/).length) : 2;
     };
-    const state = { cat: "", free: false, kids: false, q: "", day: "0" };
+    const state = { cat: "", free: false, kids: false, q: "", when: "week" };
     window.wvAgenda = state;
     const days = $$(".agenda .day");
-    const tabs = $$(".day-tab");
+    // Filtre « Quand ? » comme dans l'appli (Paul, 24/11/2026 : les onglets
+    // de jours étaient pénibles) : les jours choisis s'affichent à la suite.
+    const iso = (d) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+    const range = () => {
+      const t = new Date(); t.setHours(0, 0, 0, 0);
+      const plus = (n) => { const d = new Date(t); d.setDate(d.getDate() + n); return iso(d); };
+      const wd = t.getDay(); // 0 = dimanche
+      switch (state.when) {
+        case "today": return [plus(0), plus(0)];
+        case "tomorrow": return [plus(1), plus(1)];
+        case "weekend": return wd === 0 ? [plus(0), plus(0)] : wd >= 5 ? [plus(0), plus(7 - wd)] : [plus(5 - wd), plus(7 - wd)];
+        case "week": return [plus(0), plus(6)];
+        default: return ["0000", "9999"];
+      }
+    };
     const count = $("#count");
     const empty = $("#empty");
     const expanded = new Set();
@@ -266,32 +280,28 @@
 
     const apply = () => {
       const filtering = state.cat || state.free || state.kids || state.q;
-      const PREVIEW = ROWS * perRow();
-      let total = 0, firstWithResults = null;
+      const [from, to] = range();
+      const shownDays = days.filter((d) => d.dataset.date >= from && d.dataset.date <= to);
+      // Un seul jour : 3 rangées ; plusieurs : 1 rangée par jour, puis « Voir ».
+      const PREVIEW = (shownDays.length > 1 ? 1 : ROWS) * perRow();
+      let total = 0;
       days.forEach((d) => {
         const key = d.dataset.day;
+        const inRange = shownDays.includes(d);
         let n = 0;
         $$("[data-cat]", d).forEach((c) => {
-          const ok = matches(c);
+          const ok = inRange && matches(c);
           if (ok) n++;
           c.hidden = !ok || (!expanded.has(key) && n > PREVIEW);
         });
         total += n;
-        if (n && firstWithResults === null) firstWithResults = key;
-        const tab = tabs.find((t) => t.dataset.day === key);
-        if (tab) { tab.hidden = n === 0; $("small", tab).textContent = n; }
         const more = $(".day-more", d);
         if (more) {
           more.hidden = expanded.has(key) || n <= PREVIEW;
           $("button", more).textContent = `Voir les ${n - PREVIEW} autres sorties`;
         }
-        d.dataset.count = n;
+        d.classList.toggle("is-on", n > 0);
       });
-      // Jour affiché : celui choisi, ou le premier qui a des résultats.
-      const current = days.find((d) => d.dataset.day === state.day);
-      if (!current || current.dataset.count === "0") state.day = firstWithResults ?? "0";
-      days.forEach((d) => d.classList.toggle("is-on", d.dataset.day === state.day));
-      tabs.forEach((t) => t.classList.toggle("is-on", t.dataset.day === state.day));
       if (empty) empty.hidden = total > 0;
       if (count) count.textContent = filtering ? `${total} sortie${total > 1 ? "s" : ""} trouvée${total > 1 ? "s" : ""}` : "";
       if (window.wvMapShow) window.wvMapShow();
@@ -300,7 +310,7 @@
     // Liste ou carte (accueil simplifié, 24/11/2026) : une seule barre de
     // filtres pour les deux.
     const mapWrap = $("#carte");
-    const listParts = [$(".day-tabs"), $(".agenda")].filter(Boolean);
+    const listParts = [$(".agenda")].filter(Boolean);
     $$(".vt[data-view]").forEach((btn) => btn.addEventListener("click", () => {
       const map = btn.dataset.view === "map";
       $$(".vt[data-view]").forEach((b) => { b.classList.toggle("is-on", b === btn); b.setAttribute("aria-pressed", b === btn); });
@@ -323,11 +333,13 @@
 
     let resizeTimer;
     window.addEventListener("resize", () => { clearTimeout(resizeTimer); resizeTimer = setTimeout(apply, 200); });
-    tabs.forEach((tab) => tab.addEventListener("click", () => {
-      state.day = tab.dataset.day;
+    const when = $("#when");
+    if (when) when.addEventListener("change", () => {
+      state.when = when.value;
+      when.classList.toggle("is-on", state.when !== "all");
+      expanded.clear();
       apply();
-      tab.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "center" });
-    }));
+    });
     $$("[data-more]").forEach((btn) => btn.addEventListener("click", () => {
       expanded.add(btn.closest(".day").dataset.day);
       apply();
@@ -349,7 +361,7 @@
     // (data/recherche.json) n'est chargée qu'à la première frappe.
     const q = $("#q");
     const results = $("#search-results");
-    const agendaParts = [$(".day-tabs"), $(".agenda"), $("#filters .chips"), empty].filter(Boolean);
+    const agendaParts = [$(".agenda"), $("#filters .chips"), empty].filter(Boolean);
     let index = null, loading = null;
     const loadIndex = () => loading || (loading = fetch("data/recherche.json")
       .then((r) => r.json()).then((rows) => { index = rows; return rows; }).catch(() => (index = [])));
