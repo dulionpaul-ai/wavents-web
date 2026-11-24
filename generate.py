@@ -1586,7 +1586,9 @@ def commune_page(name: str, events: list[dict], communes: dict[str, list[dict]],
   {block("Les 7 prochains jours", "Cette semaine", week_list)}
   {block("Expositions, animations sur plusieurs jours", "En ce moment", long_ones[:20])}
   {block("Et ensuite", "Plus tard", later)}
-  {near_html}"""
+  <!--pluie-->
+  {near_html}
+  {town_letter(root, "commune", name if not around else "")}"""
     return layout(
         f"Que faire à {name} ce week-end ({wk_label}) ? Sorties, marchés, concerts – Wavents",
         body,
@@ -3726,6 +3728,14 @@ def main() -> int:
     theme_counts: dict[str, int] = {}
     rain_paths = rain_pages(out, upcoming, series, now)
     print(f"{len(rain_paths)} pages « quand il pleut » par ville")
+    # Lien depuis la page de la commune (pages communes étoffées, 24/11/2026).
+    for rp in rain_paths:
+        town_index = out / rp / ".." / "index.html"
+        if town_index.exists():
+            html_text = town_index.read_text(encoding="utf-8")
+            town_index.write_text(html_text.replace("<!--pluie-->", (
+                '<section class="section"><div class="town-links"><a class="town-link" href="quand-il-pleut/">'
+                "☔ S'il pleut : les sorties à l'abri</a></div></section>"), 1), encoding="utf-8")
     rain_towns = sorted(((p.split("/")[1], p) for p in rain_paths), key=lambda t: t[0])
     zone_names = {slugify(c["name"]): c["name"] for c in json.loads(
         (Path(__file__).parent / "communes_zone.json").read_text(encoding="utf-8"))} if rain_paths else {}
