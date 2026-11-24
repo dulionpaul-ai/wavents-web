@@ -280,6 +280,26 @@ def linkify(text: str) -> str:
     return "".join(out).replace("\n", "<br>")
 
 
+def search_index(events: list[dict], canonical_ids: dict, now: datetime) -> str:
+    """[chemin, titre, ligne date · commune · catégorie, texte de recherche]
+    pour chaque sortie à venir (une par série), triées par date."""
+    today = now.date()
+    rows = []
+    for ev in sorted(events, key=lambda ev: ev["start_date"]):
+        if canonical_ids.get(ev["id"], ev["id"]) != ev["id"]:
+            continue
+        end = wall_time(ev.get("end_date") or ev["start_date"]).date()
+        if end < today:
+            continue
+        _, label, _ = category(ev)
+        start = wall_time(ev["start_date"])
+        when = day_label(max(start.date(), today)) if not is_long(ev) else f"jusqu'au {day_label(end)}"
+        meta = " · ".join(p for p in (cap(when), commune_of(ev), label) if p)
+        q = fold(f"{ev['title']} {commune_of(ev)} {ev.get('location_name') or ''} {label} {ev.get('organizer') or ''}")
+        rows.append([event_path(ev), ev["title"], meta, q])
+    return json.dumps(rows, ensure_ascii=False, separators=(",", ":"))
+
+
 def more_photos(event: dict) -> str:
     """Photos en plus de la principale (affiche, visuel), comme dans l'appli
     (Paul, 23/11/2026) : vignettes entières qui ouvrent l'image."""
@@ -1055,6 +1075,7 @@ def home_page(events: list[dict], all_upcoming: list[dict], now: datetime) -> st
       </div>
       <p class="result-count" id="count" aria-live="polite"></p>
     </div>
+    <div class="search-results" id="search-results" hidden aria-live="polite"></div>
     <div class="day-tabs" role="tablist">{''.join(day_tabs)}</div>
     <div class="agenda">{''.join(day_sections)}</div>
     <p class="empty" id="empty" hidden>Aucune sortie ne correspond. Essaie un autre filtre&nbsp;!</p>
@@ -3636,6 +3657,10 @@ def main() -> int:
     (out / "index.html").write_text(home_page(events, upcoming, now), encoding="utf-8")
     (out / "data").mkdir(exist_ok=True)
     (out / "data" / "carte.json").write_text(json.dumps(HOME_MAP_POINTS, ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
+    # Recherche sur toutes les sorties à venir (Paul, 24/11/2026 : « je veux
+    # toutes les poteries, peu importe les dates ») : chargée seulement quand
+    # on tape dans la recherche de l'accueil.
+    (out / "data" / "recherche.json").write_text(search_index(events, canonical_ids, now), encoding="utf-8")
 
     # Fiches plus en ligne : une page plutôt qu'une 404 (25/10/2026).
     live_ids = {ev["id"] for ev in events}

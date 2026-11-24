@@ -317,8 +317,37 @@
       chip.classList.toggle("is-on", state[key]);
       apply();
     }));
+    // Recherche (Paul, 24/11/2026) : sur toutes les sorties à venir, sans
+    // tenir compte des jours ni des filtres (« si je cherche poterie, je veux
+    // toutes les poteries, peu importe les dates »). La liste complète
+    // (data/recherche.json) n'est chargée qu'à la première frappe.
     const q = $("#q");
-    if (q) q.addEventListener("input", () => { state.q = fold(q.value.trim()); apply(); });
+    const results = $("#search-results");
+    const agendaParts = [$(".day-tabs"), $(".agenda"), $("#filters .chips"), empty].filter(Boolean);
+    let index = null, loading = null;
+    const loadIndex = () => loading || (loading = fetch("data/recherche.json")
+      .then((r) => r.json()).then((rows) => { index = rows; return rows; }).catch(() => (index = [])));
+    const esc = (t) => t.replace(/[&<>"]/g, (ch) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[ch]));
+    const searchAll = () => {
+      const words = fold(q.value.trim()).split(/\s+/).filter(Boolean);
+      const on = words.join("").length >= 2;
+      agendaParts.forEach((el) => { el.hidden = on; });
+      if (!results) return;
+      results.hidden = !on;
+      if (!on) { if (count) count.textContent = ""; apply(); return; }
+      if (!index) { results.innerHTML = '<p class="sr-wait">Recherche…</p>'; loadIndex().then(searchAll); return; }
+      const found = index.filter((r) => words.every((w) => r[3].includes(w)));
+      if (count) count.textContent = `${found.length} sortie${found.length > 1 ? "s" : ""} trouvée${found.length > 1 ? "s" : ""}, toutes dates`;
+      const shown = found.slice(0, 80);
+      results.innerHTML = shown.length
+        ? `<ul class="sr-list">${shown.map((r) => `<li><a href="${esc(r[0])}"><b>${esc(r[1])}</b><span>${esc(r[2])}</span></a></li>`).join("")}</ul>`
+          + (found.length > shown.length ? `<p class="sr-more">Et ${found.length - shown.length} autres : précise ta recherche (un village, un mois…).</p>` : "")
+        : '<p class="sr-none">Aucune sortie ne correspond. Essaie un autre mot&nbsp;!</p>';
+    };
+    if (q) {
+      q.addEventListener("focus", loadIndex, { once: true });
+      q.addEventListener("input", searchAll);
+    }
 
     /* Tuile « Pour les enfants » : active le filtre Enfants */
     $$("[data-filter-kids]").forEach((tile) => tile.addEventListener("click", (ev) => {
