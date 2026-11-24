@@ -952,3 +952,12 @@ a.ev-cover { display: block; cursor: zoom-in; }
 @media (min-width: 900px) {
   .chips { flex-wrap: wrap; overflow: visible; -webkit-mask-image: none; mask-image: none; }
 }
+
+/* Liste des sorties d'un même endroit sur la carte (24/11/2026). */
+.wv-pop-list b { display: block; margin-bottom: 6px; }
+.wv-pop-list ul { list-style: none; margin: 0; padding: 0; max-height: 260px; overflow-y: auto; }
+.wv-pop-list li a { display: block; padding: 6px 0; border-top: 1px solid #E3EEF3; text-decoration: none; color: #10233A; }
+.wv-pop-list li a span { display: block; font-weight: 700; }
+.wv-pop-list li a small { color: #5A6B7B; }
+/* Carte plus haut sur téléphone (Paul, 24/11/2026) : sans le visuel du téléphone. */
+@media (max-width: 700px) { .home .hero-visual { display: none; } }

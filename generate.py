@@ -546,8 +546,6 @@ def json_ld(event: dict) -> str:
     }
     if end:
         data["endDate"] = end.replace(tzinfo=PARIS).isoformat() if event.get("end_time_known") else end.date().isoformat()
-    if event.get("organizer"):
-        data["organizer"] = {"@type": "Organization", "name": event["organizer"]}
     if event.get("price_amount") and event.get("price_type") != "free":
         data["offers"] = {"@type": "Offer", "price": event["price_amount"], "priceCurrency": "EUR",
                           "url": booking_url(event) or f"{BASE_URL}/{event_path(event)}"}
@@ -782,9 +780,9 @@ def media(event: dict, root: str, css: str = "", width: int = 600) -> str:
     src = image_for(event, root)
     small = thumb(src, width)
     if small == src:
-        return f'<img class="{css}" src="{e(src)}" alt="" loading="lazy" onerror="{fallback(event, root)}">'
+        return f'<img class="{css}" src="{e(src)}" alt="{e(event['title'])}" loading="lazy" onerror="{fallback(event, root)}">'
     retry = f"this.onerror=function(){{{fallback(event, root)}}};this.src='{src}'"
-    return f'<img class="{css}" src="{e(small)}" alt="" loading="lazy" onerror="{e(retry)}">'
+    return f'<img class="{css}" src="{e(small)}" alt="{e(event['title'])}" loading="lazy" onerror="{e(retry)}">'
 
 
 def cover(event: dict, root: str) -> str:
@@ -1054,20 +1052,9 @@ def home_page(events: list[dict], all_upcoming: list[dict], now: datetime) -> st
     </svg>
   </section>
 
-  <div class="band">
-  <div class="band-sun" aria-hidden="true"></div>
-  <section class="section" id="week-end">
-    <div class="section-head reveal">
-      <div><p class="kicker">{e(cap(weekend_dates))}</p><h2>{weekend_title}</h2></div>
-      <div class="scroller-nav"><button data-scroll="-1" aria-label="Précédent">←</button><button data-scroll="1" aria-label="Suivant">→</button></div>
-    </div>
-    <div class="scroller reveal">{''.join(card(ev, series, size="big") for ev in weekend) or '<p class="empty">Rien de prévu pour l’instant : reviens bientôt !</p>'}</div>
-  </section>
-
-  </div>
 
   <section class="section" id="agenda">
-    <div class="section-head reveal"><div><p class="kicker">Mis à jour chaque jour</p><h2>L'agenda des {HOME_DAYS} prochains jours</h2></div></div>
+    <div class="section-head reveal"><div><p class="kicker">Mis à jour chaque jour</p><h2>Les sorties près de chez toi</h2></div></div>
     <div class="filters" id="filters">
       <label class="search"><span>🔍</span><input type="search" id="q" placeholder="Un village, un concert, un loto…" autocomplete="off"></label>
       <div class="chips">
@@ -1079,12 +1066,23 @@ def home_page(events: list[dict], all_upcoming: list[dict], now: datetime) -> st
       </div>
       <p class="result-count" id="count" aria-live="polite"></p>
     </div>
-    <div class="view-toggle" role="group" aria-label="Affichage"><button class="vt is-on" data-view="list" aria-pressed="true">📋 Liste</button><button class="vt" data-view="map" aria-pressed="false" data-goatcounter-click="clic-vue-carte">🗺️ Carte</button></div>
+    <div class="view-toggle" role="group" aria-label="Affichage"><button class="vt is-on" data-view="map" aria-pressed="true">🗺️ Carte</button><button class="vt" data-view="list" aria-pressed="false" data-goatcounter-click="clic-vue-liste">📋 Liste</button></div>
     <div class="search-results" id="search-results" hidden aria-live="polite"></div>
-    <div class="map-wrap" id="carte" hidden><div class="map-box"><div id="map" role="region" aria-label="Carte des événements"></div><div class="map-search" role="search"><span aria-hidden="true">🔍</span><input type="search" id="map-q" placeholder="Aller à une ville…" autocomplete="off" aria-label="Aller à une ville sur la carte"><ul class="map-sugg" hidden></ul></div></div></div>
-    <div class="agenda">{''.join(day_sections)}</div>
+    <div class="map-wrap" id="carte"><div class="map-box"><div id="map" role="region" aria-label="Carte des événements"></div><div class="map-search" role="search"><span aria-hidden="true">🔍</span><input type="search" id="map-q" placeholder="Aller à une ville…" autocomplete="off" aria-label="Aller à une ville sur la carte"><ul class="map-sugg" hidden></ul></div></div></div>
+    <div class="agenda by-map">{''.join(day_sections)}</div>
     <p class="empty" id="empty" hidden>Aucune sortie ne correspond. Essaie un autre filtre&nbsp;!</p>
   </section>
+
+  <div class="band">
+  <div class="band-sun" aria-hidden="true"></div>
+  <section class="section" id="week-end">
+    <div class="section-head reveal">
+      <div><p class="kicker">{e(cap(weekend_dates))}</p><h2>{weekend_title}</h2></div>
+      <div class="scroller-nav"><button data-scroll="-1" aria-label="Précédent">←</button><button data-scroll="1" aria-label="Suivant">→</button></div>
+    </div>
+    <div class="scroller reveal">{''.join(card(ev, series, size="big") for ev in weekend) or '<p class="empty">Rien de prévu pour l’instant : reviens bientôt !</p>'}</div>
+  </section>
+  </div>
 
 {lettre_section("", "accueil")}
 {orga_section()}
@@ -1177,7 +1175,7 @@ def gone_page(event: dict, town_page: str | None, nearby: list[dict] | None = No
             f'<p class="kicker">Sortie terminée</p><h1>{e(title)}</h1><p class="lead">{e(message)}</p></div></section>'
             f'{grid}{letter}')
     return layout(f"{title} — Wavents", body, description=message, url=url,
-                  extra_head='<meta name="robots" content="noindex">', depth=2)
+                  depth=2)
 
 
 def setting_label(event: dict) -> str | None:

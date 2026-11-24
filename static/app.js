@@ -517,7 +517,7 @@
       if (started) return;
       started = true;
       const L = window.L;
-      const map = L.map(mapEl, { scrollWheelZoom: false, zoomControl: true }).setView(data.home, 11);
+      const map = L.map(mapEl, { scrollWheelZoom: true, wheelPxPerZoomLevel: 90, zoomControl: true }).setView(data.home, 11);
       tiles().addTo(map);
       map.on("focus", () => map.scrollWheelZoom.enable());
       map.on("blur", () => map.scrollWheelZoom.disable());
@@ -534,7 +534,10 @@
       const clusters = L.markerClusterGroup({
         maxClusterRadius: 56,
         showCoverageOnHover: false,
-        spiderfyOnMaxZoom: true,
+        // Beaucoup de sorties au même endroit (Paul, 24/11/2026 : l'éventail
+        // était illisible) : une liste à la place, voir « clusterclick ».
+        spiderfyOnMaxZoom: false,
+        zoomToBoundsOnClick: false,
         iconCreateFunction: (cluster) => {
           const tally = {};
           cluster.getAllChildMarkers().forEach((m) => { tally[m.options.cat] = (tally[m.options.cat] || 0) + 1; });
@@ -547,7 +550,7 @@
       });
       const markers = data.points.map((p) => {
         const cat = data.cats[p.c] || data.cats.associatif_autre;
-        return L.marker([p.la, p.lo], { icon: pinIcon(cat), cat: p.c, kids: p.k === 1, free: p.f === 1, from: p.s || "", to: p.e || p.s || "" })
+        return L.marker([p.la, p.lo], { icon: pinIcon(cat), cat: p.c, kids: p.k === 1, free: p.f === 1, from: p.s || "", to: p.e || p.s || "", pop: p })
           .bindPopup(`<div class="wv-pop"><b>${esc(p.t)}</b><small>${esc(p.d)} · ${esc(p.p)}</small><a href="${p.u}">Voir la sortie →</a></div>`);
       });
       // Mêmes filtres que l'agenda (catégorie, En famille, Gratuit).
@@ -561,6 +564,18 @@
           && (!st.kids || m.options.kids) && (!st.free || m.options.free)
           && m.options.from <= to && m.options.to >= from));
       };
+      clusters.on("clusterclick", (ev) => {
+        const cl = ev.layer;
+        const b = cl.getBounds();
+        const tight = map.distance(b.getSouthWest(), b.getNorthEast()) < 120;
+        if (!tight && map.getZoom() < map.getMaxZoom() - 1) { map.fitBounds(b.pad(0.3)); return; }
+        const items = cl.getAllChildMarkers().map((m) => m.options.pop)
+          .sort((a, c) => (a.s + a.t).localeCompare(c.s + c.t));
+        L.popup({ maxWidth: 300, className: "wv-list-pop", autoPanPaddingTopLeft: L.point(10, 190) }).setLatLng(cl.getLatLng())
+          .setContent(`<div class="wv-pop-list"><b>${items.length} sorties ici</b><ul>${items.map((p) =>
+            `<li><a href="${p.u}"><span>${esc(p.t)}</span><small>${esc(p.d)}</small></a></li>`).join("")}</ul></div>`)
+          .openOn(map);
+      });
       window.wvMap = map;
       window.wvMapShow = show;
       show();
