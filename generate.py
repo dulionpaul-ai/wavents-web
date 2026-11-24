@@ -1174,7 +1174,17 @@ def gone_page(event: dict, town_page: str | None, nearby: list[dict] | None = No
     body = (f'<section class="ev-hero town-hero"><div class="ev-hero-inner"><a class="back" href="../../">← Tout l\'agenda</a>'
             f'<p class="kicker">Sortie terminée</p><h1>{e(title)}</h1><p class="lead">{e(message)}</p></div></section>'
             f'{grid}{letter}')
-    return layout(f"{title} — Wavents", body, description=message, url=url,
+    # Même format de titre que les fiches à venir (audit Bing, 24/11/2026 :
+    # « quine loto — Wavents », sans ville ni date, se classe mal).
+    page_title = title
+    if town:
+        page_title += f" – {town}"
+    try:
+        start_day = wall_time(event["start_date"]).date()
+        page_title += f"{',' if town else ' –'} {day_label(start_day)} {start_day.year}"
+    except Exception:  # noqa: BLE001 - fiche sans date lisible
+        pass
+    return layout(f"{page_title} (terminé) | Wavents", body, description=message, url=url,
                   depth=2)
 
 
