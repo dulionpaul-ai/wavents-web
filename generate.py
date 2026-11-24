@@ -2359,7 +2359,11 @@ def festival_page(fest: dict, upcoming: list[dict], series: dict[str, list[dict]
             ]},
         ],
     }
-    image = next((real_image(ev) for ev in items if real_image(ev)), None)
+    # Aperçu de partage fixe (24/11/2026, Paul) : la première affiche venue
+    # donnait n'importe quoi (une vente d'huîtres en aperçu des marchés de
+    # Noël). Image propre à la page si `og_image` (1200 × 630, dans static/),
+    # sinon l'image Wavents de l'accueil.
+    image = f"{BASE_URL}/{fest['og_image']}" if fest.get("og_image") else f"{BASE_URL}/img/og.png?v=3"
     intro = (f"{fest['name']} {year}, {fest.get('when', span).lower() if fest.get('when') else span} : "
              "c'est quoi, où, et tout le programme jour par jour, mis à jour chaque jour.")
     lead = fest["lead"]
