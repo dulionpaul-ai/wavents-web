@@ -252,6 +252,7 @@
       return cols && cols !== "none" ? Math.max(1, cols.trim().split(/\s+/).length) : 2;
     };
     const state = { cat: "", free: false, kids: false, q: "", day: "0" };
+    window.wvAgenda = state;
     const days = $$(".agenda .day");
     const tabs = $$(".day-tab");
     const count = $("#count");
@@ -293,7 +294,32 @@
       tabs.forEach((t) => t.classList.toggle("is-on", t.dataset.day === state.day));
       if (empty) empty.hidden = total > 0;
       if (count) count.textContent = filtering ? `${total} sortie${total > 1 ? "s" : ""} trouvée${total > 1 ? "s" : ""}` : "";
+      if (window.wvMapShow) window.wvMapShow();
     };
+
+    // Liste ou carte (accueil simplifié, 24/11/2026) : une seule barre de
+    // filtres pour les deux.
+    const mapWrap = $("#carte");
+    const listParts = [$(".day-tabs"), $(".agenda")].filter(Boolean);
+    $$(".vt[data-view]").forEach((btn) => btn.addEventListener("click", () => {
+      const map = btn.dataset.view === "map";
+      $$(".vt[data-view]").forEach((b) => { b.classList.toggle("is-on", b === btn); b.setAttribute("aria-pressed", b === btn); });
+      if (mapWrap) mapWrap.hidden = !map;
+      listParts.forEach((el) => el.classList.toggle("by-map", map));
+      if (map && window.wvMap) setTimeout(() => window.wvMap.invalidateSize(), 50);
+    }));
+
+    // Recherche du haut de page : envoie vers l'agenda.
+    const heroQ = $("#hero-q");
+    if (heroQ) heroQ.closest("form").addEventListener("submit", (ev) => {
+      ev.preventDefault();
+      const target = $("#q");
+      if (!target) return;
+      target.value = heroQ.value;
+      target.dispatchEvent(new Event("input"));
+      heroQ.blur();
+      $("#agenda").scrollIntoView({ behavior: "smooth" });
+    });
 
     let resizeTimer;
     window.addEventListener("resize", () => { clearTimeout(resizeTimer); resizeTimer = setTimeout(apply, 200); });
@@ -508,20 +534,20 @@
       });
       const markers = data.points.map((p) => {
         const cat = data.cats[p.c] || data.cats.associatif_autre;
-        return L.marker([p.la, p.lo], { icon: pinIcon(cat), cat: p.c, kids: p.k === 1 })
+        return L.marker([p.la, p.lo], { icon: pinIcon(cat), cat: p.c, kids: p.k === 1, free: p.f === 1 })
           .bindPopup(`<div class="wv-pop"><b>${esc(p.t)}</b><small>${esc(p.d)} · ${esc(p.p)}</small><a href="${p.u}">Voir la sortie →</a></div>`);
       });
-      const show = (cat, kids) => {
+      // Mêmes filtres que l'agenda (catégorie, En famille, Gratuit).
+      const show = () => {
+        const st = window.wvAgenda || {};
         clusters.clearLayers();
-        clusters.addLayers(markers.filter((m) => (!cat || m.options.cat === cat) && (!kids || m.options.kids)));
+        clusters.addLayers(markers.filter((m) => (!st.cat || m.options.cat === st.cat)
+          && (!st.kids || m.options.kids) && (!st.free || m.options.free)));
       };
-      show("");
+      window.wvMap = map;
+      window.wvMapShow = show;
+      show();
       map.addLayer(clusters);
-      // Filtres sous la carte : une catégorie à la fois (« Tout » pour revenir).
-      $$(".map-chip").forEach((chip) => chip.addEventListener("click", () => {
-        $$(".map-chip").forEach((c) => c.classList.toggle("is-on", c === chip));
-        show(chip.dataset.mapCat || "", "mapKids" in chip.dataset);
-      }));
 
       // Aller à une ville (Paul, 30/09) : d'abord les communes qui ont des
       // sorties sur la carte, puis les autres via geo.api.gouv.fr.
@@ -639,6 +665,8 @@
   var closed = false;
   try { closed = localStorage.getItem('wv_qr_closed') === '1'; } catch (e) {}
   if (closed) { card.classList.add('closed'); return; }
+  // Une seule fois par navigateur (accueil simplifié, 24/11/2026).
+  try { localStorage.setItem('wv_qr_closed', '1'); } catch (e) {}
   setTimeout(function () { card.classList.add('show'); }, 2000);
   card.querySelector('.qr-close').addEventListener('click', function () {
     card.classList.add('closed');

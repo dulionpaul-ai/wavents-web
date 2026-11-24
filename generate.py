@@ -993,7 +993,7 @@ def home_page(events: list[dict], all_upcoming: list[dict], now: datetime) -> st
             "t": ev["title"], "c": ev.get("category_id") or "associatif_autre",
             "la": round(ev["latitude"], 5), "lo": round(ev["longitude"], 5),
             "d": cap(day_label(wall_time(ev["start_date"]))), "p": commune_of(ev),
-            "u": event_path(ev), "k": 1 if ev.get("for_kids") else 0,
+            "u": event_path(ev), "k": 1 if ev.get("for_kids") else 0, "f": 1 if is_free(ev) else 0,
         }
         for ev in shown
     ]
@@ -1033,6 +1033,9 @@ def home_page(events: list[dict], all_upcoming: list[dict], now: datetime) -> st
         <p class="eyebrow"><span class="pulse"></span> {len(all_upcoming)} événements à venir en ce moment</p>
         <h1>Suis la vague&nbsp;: <span class="sunny">ne rate plus rien près de chez toi</span></h1>
         <p class="lead">Wavents trouve chaque jour des concerts, marchés, animations, brocantes… dans le Beaujolais et le nord de Lyon (pour l'instant&nbsp;!).</p>
+        <form class="hero-search" role="search" action="#agenda" onsubmit="return false">
+          <label><span aria-hidden="true">🔍</span><input type="search" id="hero-q" placeholder="Un village, un concert, un loto…" autocomplete="off" aria-label="Chercher une sortie"></label>
+        </form>
         <div class="hero-actions">
           <a class="btn btn-sun" href="#week-end">Voir ce week-end</a>
           <div class="store-row">{play_cta()}</div>
@@ -1050,13 +1053,6 @@ def home_page(events: list[dict], all_upcoming: list[dict], now: datetime) -> st
     </svg>
   </section>
 
-  <section class="stats">
-    <div class="stat reveal" style="--c:#065FBB"><b data-count="{len(all_upcoming)}">{len(all_upcoming)}</b><span>événements à venir</span></div>
-    <div class="stat reveal" style="--c:#0B81E1"><b data-count="{len(communes)}">{len(communes)}</b><span>communes couvertes</span></div>
-    <div class="stat reveal" style="--c:#01A9D8"><b data-count="{len(sources)}">{len(sources)}</b><span>agendas suivis chaque jour</span></div>
-    <div class="stat reveal" style="--c:#FF8A1E"><b>0 €</b><span>gratuit, sans pub</span></div>
-  </section>
-
   <div class="band">
   <div class="band-sun" aria-hidden="true"></div>
   <section class="section" id="week-end">
@@ -1067,29 +1063,6 @@ def home_page(events: list[dict], all_upcoming: list[dict], now: datetime) -> st
     <div class="scroller reveal">{''.join(card(ev, series, size="big") for ev in weekend) or '<p class="empty">Rien de prévu pour l’instant : reviens bientôt !</p>'}</div>
   </section>
 
-  {f'''<section class="section">
-    <div class="section-head reveal">
-      <div><p class="kicker">Expos, animations, festivals</p><h2>En ce moment</h2></div>
-      <div class="scroller-nav"><button data-scroll="-1" aria-label="Précédent">←</button><button data-scroll="1" aria-label="Suivant">→</button></div>
-    </div>
-    <div class="scroller reveal">{''.join(card(ev, series) for ev in ongoing[:18])}</div>
-  </section>''' if ongoing else ''}
-  </div>
-
-{lettre_section("", "accueil")}
-{demos_section()}
-  <section class="section">
-    <div class="section-head reveal"><div><p class="kicker">Envie de quoi ?</p><h2>Par catégorie</h2></div></div>
-    <div class="cat-grid reveal">{cat_tiles}</div>
-  </section>
-
-  <div class="band band-map">
-  <div class="band-sun" aria-hidden="true"></div>
-  <section class="section map-section" id="carte">
-    <div class="section-head reveal"><div><p class="kicker">{len(shown)} sorties dans les {HOME_DAYS} prochains jours</p><h2>Sur la carte</h2></div></div>
-    <div class="map-wrap reveal"><div class="map-box"><div id="map" role="region" aria-label="Carte des événements"></div><div class="map-search" role="search"><span aria-hidden="true">🔍</span><input type="search" id="map-q" placeholder="Aller à une ville…" autocomplete="off" aria-label="Aller à une ville sur la carte"><ul class="map-sugg" hidden></ul></div></div>
-    <div class="map-legend" role="group" aria-label="Filtrer la carte"><button class="map-chip is-on" data-map-cat="">Tout</button><button class="map-chip" data-map-kids style="--cat:#E91E63">{_icon("child_care")} En famille</button>{''.join(f'<button class="map-chip" data-map-cat="{cid}" style="--cat:{c}">{em} {l}</button>' for cid, (em, l, c) in CATEGORIES.items() if counts.get(cid))}</div></div>
-  </section>
   </div>
 
   <section class="section" id="agenda">
@@ -1104,47 +1077,16 @@ def home_page(events: list[dict], all_upcoming: list[dict], now: datetime) -> st
       </div>
       <p class="result-count" id="count" aria-live="polite"></p>
     </div>
+    <div class="view-toggle" role="group" aria-label="Affichage"><button class="vt is-on" data-view="list" aria-pressed="true">📋 Liste</button><button class="vt" data-view="map" aria-pressed="false" data-goatcounter-click="clic-vue-carte">🗺️ Carte</button></div>
     <div class="search-results" id="search-results" hidden aria-live="polite"></div>
+    <div class="map-wrap" id="carte" hidden><div class="map-box"><div id="map" role="region" aria-label="Carte des événements"></div><div class="map-search" role="search"><span aria-hidden="true">🔍</span><input type="search" id="map-q" placeholder="Aller à une ville…" autocomplete="off" aria-label="Aller à une ville sur la carte"><ul class="map-sugg" hidden></ul></div></div></div>
     <div class="day-tabs" role="tablist">{''.join(day_tabs)}</div>
     <div class="agenda">{''.join(day_sections)}</div>
     <p class="empty" id="empty" hidden>Aucune sortie ne correspond. Essaie un autre filtre&nbsp;!</p>
   </section>
 
+{lettre_section("", "accueil")}
 {orga_section()}
-  <section class="section how">
-    <div class="section-head reveal center"><div><p class="kicker">Comment ça marche</p><h2>Ton agenda local, sans effort</h2></div></div>
-    <div class="how-grid">
-      <div class="how-card reveal" style="--c:#01BAEF"><span class="how-num">🔎</span><h3>On fouille pour toi</h3><p>Wavents trouve les événements des mairies, offices de tourisme, salles de spectacle, associations, billetteries… de la région. L'outil s'étend chaque jour avec de nouvelles zones et de nouvelles sources.</p></div>
-      <div class="how-card reveal" style="--c:#FF8A1E"><span class="how-num">🪄</span><h3>On trie et on vérifie</h3><p>Doublons fusionnés, catégories, prix, « en famille » : tout est rangé pour que tu trouves en deux secondes ce qui t'intéresse.</p></div>
-      <div class="how-card reveal" style="--c:#FFD66B"><span class="how-num">🔔</span><h3>Tu ne rates plus rien</h3><p>Favoris, rappels avant l'événement et notifications quand ça bouge près de chez toi, dans les catégories que tu aimes.</p></div>
-    </div>
-  </section>
-
-  <section class="section feedback">
-    <div class="feedback-card reveal">
-      <span class="feedback-emoji" aria-hidden="true">🫵</span>
-      <div>
-        <p class="kicker">On compte sur toi</p>
-        <h2>Aide-nous à rendre Wavents parfaite</h2>
-        <p>On veut l'appli la plus parfaite possible. Un bug, un événement qui manque ou qui est faux, une idée&nbsp;? Dis-le-nous, on lit tout.</p>
-        <div class="hero-actions"><a class="btn btn-sun" href="mailto:hello@wavents.fr?subject=Mon%20retour%20sur%20Wavents" data-goatcounter-click="clic-retour">✉️ Envoyer un retour</a></div>
-      </div>
-    </div>
-  </section>
-
-  <section class="section kofi-section"><div class="reveal">{kofi_box("accueil")}</div></section>
-
-  <section class="section app-band" id="appli">
-    <div class="app-band-inner reveal">
-      <img src="img/logo-256.png" alt="" width="140" height="140" class="float">
-      <div>
-        <p class="kicker light">L'appli Wavents</p>
-        <h2>Toutes tes sorties, dans ta poche.</h2>
-        <p>La carte, les filtres, les favoris, les rappels et les notifs. Tu organises un événement&nbsp;? Prends l'affiche en photo : l'IA remplit la fiche pour toi.</p>
-        <div class="hero-actions">{play_cta('light')}<a class="btn btn-light" href="#agenda">Parcourir l'agenda</a></div>
-      </div>
-    </div>
-  </section>
   {data_script}"""
     return layout(
         "Wavents : agenda des sorties dans le Beaujolais et le nord de Lyon (concerts, marchés, brocantes)",
