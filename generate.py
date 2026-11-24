@@ -65,7 +65,7 @@ FIELDS = (
     # Intérieur / extérieur (script 211 du dépôt Wavents, 30/10/2026).
     "setting,setting_sure,"
     # Organisateur lu dans la description, pour la recherche (script 258, 23/11/2026).
-    "organizer"
+    "organizer,source_url"
 )
 # Police d'icônes réduite aux seules icônes utilisées (audit du 20/11/2026 :
 # 503 Ko sur chaque page avant, 4,5 Ko après). Toute nouvelle icône passée à
@@ -236,7 +236,13 @@ def commune_of(event: dict) -> str:
     if town.isupper() or town.islower():
         words = re.split(r"([ -])", town.lower())
         town = "".join(w if (w in SMALL_WORDS and i) or w in " -" else w.capitalize() for i, w in enumerate(words))
-    return town[:40]
+    # Jamais coupé au milieu d'un mot (24/11/2026 : « … / Centre cult »,
+    # « Charnay-Lès-Mâcon Le ») ; un nom trop long s'arrête au mot entier et
+    # ne finit pas par un article ou une barre.
+    if len(town) > 40:
+        town = town[:40].rsplit(" ", 1)[0]
+    town = re.sub(r"(\s+(le|la|les|l'|du|de|des|et|/|-))+$", "", town, flags=re.I).strip(" -/,")
+    return town
 
 
 def category(event: dict) -> tuple[str, str, str]:
@@ -369,6 +375,27 @@ def price_label(event: dict) -> str:
     if not event.get("price_confirmed"):
         return "Prix non communiqué"
     return "Gratuit" if event.get("price_type") == "free" else "Payant"
+
+
+# Billetteries (Paul, 24/11/2026) : nos sources restent privées (c'est
+# notre avantage sur la concurrence), on n'affiche donc plus le lien du
+# site d'origine ; seul un lien de réservation (places, billets) est montré.
+TICKETING = ("digitick.", "helloasso.", "billetweb.", "billetreduc.", "ticketac.", "weezevent.",
+             "mapado.", "themisweb.", "fnacspectacles.", "ticketmaster.", "seetickets.", "eventbrite.",
+             "shotgun.live", "yurplan.", "festik.", "francebillet.", "placeminute.", "billetterie.",
+             "tickets.", "ticketing.", "infomaniak.events", "dice.fm", "ticketmaster.fr")
+
+
+def booking_url(event: dict) -> str | None:
+    """Lien de réservation de l'événement, s'il pointe vers une billetterie."""
+    for key in ("website_url", "source_url"):
+        link = (event.get(key) or "").strip()
+        if not link.startswith("http"):
+            continue
+        host = link.split("//", 1)[-1].split("/", 1)[0].lower()
+        if any(t in host for t in TICKETING) or "/billetterie" in link.lower():
+            return link
+    return None
 
 
 def is_free(event: dict) -> bool:
@@ -519,9 +546,11 @@ def json_ld(event: dict) -> str:
     }
     if end:
         data["endDate"] = end.replace(tzinfo=PARIS).isoformat() if event.get("end_time_known") else end.date().isoformat()
+    if event.get("organizer"):
+        data["organizer"] = {"@type": "Organization", "name": event["organizer"]}
     if event.get("price_amount") and event.get("price_type") != "free":
         data["offers"] = {"@type": "Offer", "price": event["price_amount"], "priceCurrency": "EUR",
-                          "url": event.get("website_url") or f"{BASE_URL}/{event_path(event)}"}
+                          "url": booking_url(event) or f"{BASE_URL}/{event_path(event)}"}
     elif is_free(event):
         # Prix « recommandé » par Google pour les résultats enrichis d'événements.
         data["offers"] = {"@type": "Offer", "price": 0, "priceCurrency": "EUR",
@@ -1152,7 +1181,17 @@ NO_DESCRIPTION = ('<div class="panel soft"><h2>À propos</h2><p class="descripti
                   'encore donné plus de détails. Toutes les infos pratiques sont juste à côté 👉</p></div>')
 
 
-def gone_page(event: dict, town_page: str | None) -> str:
+def town_letter(root: str, canal: str, town: str) -> str:
+    """Lettre du jeudi en bas de fiche, commune déjà remplie (24/11/2026)."""
+    return (f'<section class="section lettre-section"><div class="lettre-card"><span class="feedback-emoji lettre-emoji" aria-hidden="true">💌</span>'
+            f'<div class="lettre-body"><p class="kicker">La lettre du jeudi</p>'
+            f'<h2>Ne rate plus les sorties{" à " + e(town) if town else ""}</h2>'
+            f'<p>Chaque jeudi, les sorties du week-end près de chez toi, dans ta boîte mail. Rien à installer.</p>'
+            f'{lettre_form(root, canal, commune=town)}</div></div></section>')
+
+
+def gone_page(event: dict, town_page: str | None, nearby: list[dict] | None = None,
+              series: dict[str, list[dict]] | None = None) -> str:
     """Page d'une fiche plus en ligne. Doublon retiré : redirection vers la
     fiche gardée (même sortie). Sortie passée ou retirée : page courte, non
     indexée (Google la retire sans erreur 404), avec un lien vers les
@@ -1176,8 +1215,24 @@ def gone_page(event: dict, town_page: str | None) -> str:
                else "Cette fiche n'est plus en ligne (annulée, ou retirée après vérification).")
     links = (f'<a href="../../{town_page}">Les prochaines sorties à {e(commune_page_name(event) or "")}</a> · '
              if town_page else "")
-    body = (f'<section class="section prose"><h1>{e(title)}</h1><p>{e(message)}</p>'
-            f'<p>{links}<a href="../../">Toutes les sorties près de chez toi</a></p></section>')
+    # Plus un cul-de-sac (Paul, 24/11/2026 : la fiche la plus vue du mois
+    # était terminée) : les prochaines sorties de la commune, en cartes, et
+    # la lettre du jeudi avec la commune déjà remplie.
+    town = commune_page_name(event) or ""
+    picks = (nearby or [])[:6]
+    grid = ""
+    if picks:
+        heading = f"Les prochaines sorties à {e(town)}" if town and town_page else "Les prochaines sorties près de chez toi"
+        grid = (f'<section class="section"><div class="section-head"><div><p class="kicker">Ne rate pas la prochaine</p>'
+                f'<h2>{heading}</h2></div></div>'
+                f'<div class="grid">{"".join(card(ev, series or {}, "../../") for ev in picks)}</div>'
+                f'<p class="gone-more">{links}<a href="../../">Toutes les sorties près de chez toi</a></p></section>')
+    else:
+        grid = f'<section class="section prose"><p>{links}<a href="../../">Toutes les sorties près de chez toi</a></p></section>'
+    letter = town_letter("../../", "fiche-terminee", town)
+    body = (f'<section class="ev-hero town-hero"><div class="ev-hero-inner"><a class="back" href="../../">← Tout l\'agenda</a>'
+            f'<p class="kicker">Sortie terminée</p><h1>{e(title)}</h1><p class="lead">{e(message)}</p></div></section>'
+            f'{grid}{letter}')
     return layout(f"{title} — Wavents", body, description=message, url=url,
                   extra_head='<meta name="robots" content="noindex">', depth=2)
 
@@ -1226,8 +1281,10 @@ def event_page(event: dict, neighbours: list[dict], series: dict[str, list[dict]
     actions = [f'<a class="btn btn-sun" href="event.ics" rel="nofollow" download="wavents-{event["id"][:8]}.ics" data-goatcounter-click="clic-agenda">📅 + Agenda</a>',
                f'<a class="btn btn-ghost" href="{maps}" target="_blank" rel="noopener" data-goatcounter-click="clic-itineraire">🧭 Y aller</a>',
                '<button class="btn btn-ghost" data-share data-goatcounter-click="clic-partager">🔗 Partager</button>']
-    if (event.get("website_url") or "").startswith("http"):
-        actions.append(f'<a class="btn btn-ghost" href="{e(event["website_url"])}" rel="nofollow noopener" target="_blank" data-goatcounter-click="clic-site-organisateur">🌐 Site de l\'organisateur</a>')
+    booking = booking_url(event)
+    if booking:
+        actions.insert(0, f'<a class="btn btn-sun" href="{e(booking)}" rel="nofollow noopener" target="_blank" data-goatcounter-click="clic-reserver">🎟 Réserver</a>')
+        actions[1] = actions[1].replace("btn btn-sun", "btn btn-ghost", 1)
 
     # Marchés : toutes les dates du même marché ; autres événements qui
     # reviennent (atelier, séance, stage…, même titre, lieu et description) :
@@ -1287,7 +1344,8 @@ def event_page(event: dict, neighbours: list[dict], series: dict[str, list[dict]
     </aside>
     <div class="ev-kofi">{kofi_box("fiche")}</div>
   </section>
-  {near_html}"""
+  {near_html}
+  {town_letter(root, "fiche", commune_page_name(event) or "")}"""
     return layout(
         f"{page_title} | Wavents",
         body,
@@ -2644,9 +2702,10 @@ LETTRE_NOTE = ("Une lettre par semaine, le jeudi, gratuite. Tu confirmes ton adr
                "désinscris en un clic. Ton adresse ne sert qu'à ça.")
 
 
-def lettre_form(root: str, canal: str, *, rayon: bool = False) -> str:
+def lettre_form(root: str, canal: str, *, rayon: bool = False, commune: str = "") -> str:
     """Formulaire d'inscription à la lettre du jeudi (static/lettre.js,
     fonction lettre_inscrire du dépôt Wavents, script SQL 239)."""
+    commune_value = f' value="{e(commune)}"' if commune else ""
     rayon_html = ("" if not rayon else
                   '<label class="lettre-f lettre-rayon"><span>Jusqu\'à</span><select name="rayon">'
                   '<option value="10">10 km</option><option value="20" selected>20 km</option>'
@@ -2657,7 +2716,8 @@ def lettre_form(root: str, canal: str, *, rayon: bool = False) -> str:
             '<label class="lettre-f"><span>Ton e-mail</span><input type="email" name="email" required '
             'autocomplete="email" inputmode="email" placeholder="toi@exemple.fr" maxlength="254"></label>'
             '<label class="lettre-f"><span>Ta commune</span><input name="commune" required autocomplete="address-level2" '
-            f'placeholder="Belleville, Beaujeu…" maxlength="80" list="lettre-communes-{e(canal)}">'
+            f'placeholder="Belleville, Beaujeu…" maxlength="80" list="lettre-communes-{e(canal)}"'
+            f'{commune_value}>'
             f'<datalist id="lettre-communes-{e(canal)}"></datalist></label>'
             f'{rayon_html}</div>'
             '<input name="site_web" tabindex="-1" autocomplete="off" class="piege" aria-hidden="true">'
@@ -3665,6 +3725,10 @@ def main() -> int:
     # Fiches plus en ligne : une page plutôt qu'une 404 (25/10/2026).
     live_ids = {ev["id"] for ev in events}
     communes_now = group_by_commune(upcoming)
+    # Repli des fiches terminées hors commune connue : les sorties à venir
+    # près de Belleville, avec une vraie photo d'abord.
+    weekend_fallback = sorted([x for x in upcoming if not is_long(x) and distance_km(x["latitude"], x["longitude"]) <= 15],
+                              key=lambda x: (not real_image(x), x["start_date"]))[:6]
     gone = 0
     for ev in fetch_gone_events():
         folder = out / event_path(ev)
@@ -3672,8 +3736,11 @@ def main() -> int:
             continue
         town = commune_page_name(ev)
         folder.mkdir(parents=True, exist_ok=True)
+        nearby = [x for x in communes_now.get(town, []) if not is_long(x)] if town in communes_now else []
+        if len(nearby) < 3:
+            nearby = weekend_fallback
         (folder / "index.html").write_text(
-            gone_page(ev, commune_path(town) if town in communes_now else None), encoding="utf-8")
+            gone_page(ev, commune_path(town) if town in communes_now else None, nearby, series), encoding="utf-8")
         gone += 1
     print(f"{gone} pages de fiches plus en ligne")
 
