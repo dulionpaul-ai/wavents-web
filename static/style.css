@@ -452,6 +452,9 @@ h1, h2, h3 { font-family: var(--display); line-height: 1.08; letter-spacing: -.0
 .facts span { font-size: 1.3rem; width: 44px; height: 44px; flex: none; display: grid; place-items: center; background: color-mix(in srgb, var(--cat, var(--wave)) 14%, var(--card)); border-radius: 14px; }
 .facts p { margin: 0; }
 .facts b { display: block; font-size: .75rem; text-transform: uppercase; letter-spacing: .06em; color: var(--ink-soft); font-weight: 700; }
+.report-link { display: flex; justify-content: center; align-items: center; gap: 8px; margin: -6px 0 20px; padding: 10px 12px; font-family: var(--display); font-weight: 700; font-size: .95rem; color: var(--deep); text-decoration: none; border-radius: 14px; text-align: center; }
+.report-link:hover, .report-link:focus-visible { background: color-mix(in srgb, var(--wave) 10%, transparent); text-decoration: underline; }
+@media (prefers-color-scheme: dark) { .report-link { color: var(--wave); } }
 .mini-map-panel { padding: 0; overflow: hidden; }
 #mini-map { height: 240px; }
 .app-promo { display: flex; flex-wrap: wrap; gap: 14px; align-items: center; background: linear-gradient(135deg, #E8F7FB, #FFF3C4); color: #0A2A3D; }

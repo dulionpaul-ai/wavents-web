@@ -1207,6 +1207,17 @@ def setting_fact(event: dict) -> str:
     return f'<div><span>{icon}</span><p><b>Intérieur / extérieur</b>{e(label)}</p></div>'
 
 
+def report_link(event: dict, url: str, when: str) -> str:
+    """Lien « Une info à corriger ? Dis-le-nous » sous Quand/Où/Prix (24/11/2026,
+    même libellé que l'appli) : un mail prérempli vers hello@wavents.fr, avec
+    le titre, la date et le lien de la fiche."""
+    subject = f"Correction : {event['title']} ({when})"
+    body = (f"Fiche : {url}\n\nQuelle info est fausse ? (ex : le prix affiché, l'adresse...)\n\n")
+    href = f"mailto:hello@wavents.fr?subject={quote(subject)}&body={quote(body)}"
+    return (f'<a class="report-link" href="{e(href)}" rel="nofollow" data-goatcounter-click="clic-corriger">'
+            '<span aria-hidden="true">✏️</span> Une info à corriger ? Dis-le-nous</a>')
+
+
 def event_page(event: dict, neighbours: list[dict], series: dict[str, list[dict]],
                town_page: str | None = None, canonical: str | None = None,
                repeats: list[dict] | None = None) -> str:
@@ -1290,6 +1301,7 @@ def event_page(event: dict, neighbours: list[dict], series: dict[str, list[dict]
         {setting_fact(event)}
         <div><span>💶</span><p><b>Prix</b>{e(price_label(event))}</p></div>
       </div>
+      {report_link(event, url, when)}
       <div class="panel mini-map-panel"><div id="mini-map" data-lat="{lat}" data-lon="{lon}" data-color="{color}" data-icon="{re.sub(r"<[^>]+>", "", emoji)}"></div></div>
       <div class="panel app-promo"><img src="{root}img/logo-256.png" alt="" width="56" height="56"><p><b>Ne rate plus rien près de chez toi</b>Favoris, rappels et notifs avec l'appli Wavents.</p>{play_cta('small')}</div>
     </aside>
