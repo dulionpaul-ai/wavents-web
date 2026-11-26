@@ -2932,6 +2932,12 @@ def jeu_moi_page() -> str:
           <p class="lettre-note">Ton nom et ton téléphone sont transmis seulement au partenaire qui offre le lot, pour fixer ta séance.</p>
         </form>
       </div>
+      <div id="moi-fin" hidden>
+        <p id="moi-chance"></p>
+        <h3 id="moi-gagnants-titre">Les gagnants</h3>
+        <ul class="jeu-gagnants" id="moi-gagnants"></ul>
+        <p style="margin-top:16px"><a class="btn btn-sun" href="../">Voir les autres jeux</a></p>
+      </div>
       <div id="moi-contenu" hidden>
         <div class="jeu-ticket"><small id="moi-sous"></small><b id="moi-tickets"></b></div>
         <p id="moi-amis"></p>
@@ -2949,6 +2955,37 @@ def jeu_moi_page() -> str:
     return layout("Ma participation – Wavents", body, description="Ta participation à un jeu Wavents.",
                   url=f"{BASE_URL}/gagner/moi/", depth=2, page_class="town-page",
                   extra_head='<meta name="robots" content="noindex">' + JEU_CSS)
+
+
+def jeux_index_page() -> str:
+    """/gagner/ : les jeux, le plus récent en premier (statut lu dans la base)."""
+    root = "../"
+    cartes = "".join(
+        f'<a class="panel jeu-carte" href="{e(j["slug"])}/" data-slug="{e(j["slug"])}">'
+        f'<img src="{root}{e(j["image"])}" alt="" loading="lazy">'
+        f'<span class="jeu-carte-txt"><span class="kicker">{e(j["kicker"])}</span><b>{e(j["titre"])}</b>'
+        f'<span>{e(j["accroche"])}</span><span class="jeu-etat"></span></span></a>'
+        for j in reversed(JEUX))
+    body = f"""  <section class="ev-hero town-hero"><div class="ev-hero-inner">
+    <a class="back" href="{root}">← Wavents</a>
+    <p class="kicker">Gratuit, sans achat</p>
+    <h1>Les jeux Wavents</h1>
+    <p class="lead">Des sorties et des cadeaux à gagner près de chez toi, offerts par les commerçants et les organisateurs du coin.</p>
+  </div></section>
+  <main class="section jeu-page" id="jeux-liste" data-supabase="{SUPABASE_URL}" data-key="{SUPABASE_ANON_KEY}">
+    {cartes}
+    <div class="panel"><p>Pour être prévenu des prochains jeux, installe l'appli ou inscris-toi à la lettre du jeudi.</p>
+      <div class="jeu-suivre"><a class="btn btn-sun" href="{root}app/?ref=jeux">📲 L'appli Wavents</a><a class="btn btn-ghost" href="{root}lettre/?c=jeux">💌 La lettre du jeudi</a></div></div>
+  </main>
+  <script src="{root}jeu.js" defer></script>"""
+    css = JEU_CSS.replace("</style>", """.jeu-carte { display: flex; gap: 14px; align-items: center; text-decoration: none; color: inherit; }
+.jeu-carte img { width: 110px; height: 110px; object-fit: cover; border-radius: 16px; flex: none; }
+.jeu-carte-txt { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.jeu-carte-txt b { font-size: 1.15rem; } .jeu-etat { font-weight: 800; color: var(--blue); }
+</style>""")
+    return layout("Les jeux Wavents : à gagner près de chez toi – Wavents", body,
+                  description="Les jeux Wavents : des sorties et des cadeaux à gagner dans le Beaujolais et le Val de Saône. Gratuit, sans achat.",
+                  url=f"{BASE_URL}/gagner/", depth=1, page_class="town-page", extra_head=css)
 
 
 def jeu_reglement_page(jeu: dict) -> str:
@@ -3999,7 +4036,7 @@ def main() -> int:
         ensure_ascii=False), encoding="utf-8")
     (out / "data" / "communes.json").write_text(json.dumps(fetch_lettre_communes(), ensure_ascii=False), encoding="utf-8")
     # Jeux concours (26/11/2026) : page de chaque jeu, son règlement, « ma
-    # participation » (/gagner/moi/), et /gagner/ qui renvoie au dernier jeu.
+    # participation » (/gagner/moi/), et /gagner/, la liste des jeux.
     (out / "gagner" / "moi").mkdir(parents=True, exist_ok=True)
     (out / "gagner" / "moi" / "index.html").write_text(jeu_moi_page(), encoding="utf-8")
     for jeu in JEUX:
@@ -4007,12 +4044,7 @@ def main() -> int:
         (out / "gagner" / jeu["slug"] / "index.html").write_text(jeu_page(jeu), encoding="utf-8")
         (out / "gagner" / jeu["slug"] / "reglement" / "index.html").write_text(jeu_reglement_page(jeu), encoding="utf-8")
     if JEUX:
-        dernier = JEUX[-1]["slug"]
-        (out / "gagner" / "index.html").write_text(
-            f'<!doctype html><meta charset="utf-8"><meta name="robots" content="noindex">'
-            f'<meta http-equiv="refresh" content="0; url={dernier}/">'
-            f'<script>location.replace("{dernier}/" + location.search)</script>'
-            f'<a href="{dernier}/">Le jeu en cours</a>', encoding="utf-8")
+        (out / "gagner" / "index.html").write_text(jeux_index_page(), encoding="utf-8")
     (out / "a-propos").mkdir(exist_ok=True)
     (out / "a-propos" / "index.html").write_text(about_page(upcoming, communes), encoding="utf-8")
     (out / "faq").mkdir(exist_ok=True)

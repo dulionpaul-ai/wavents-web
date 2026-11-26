@@ -167,6 +167,20 @@
     });
   }
 
+  // --- Liste des jeux (/gagner/) -------------------------------------------------
+  var liste = $("jeux-liste");
+  if (liste) {
+    Array.prototype.forEach.call(liste.querySelectorAll(".jeu-carte"), function (carte) {
+      rpc(liste, "jeu_public", { p_slug: carte.dataset.slug }).then(function (j) {
+        if (!j || !j.ok) return;
+        var etat = carte.querySelector(".jeu-etat");
+        var reste = Math.ceil((new Date(j.fin) - new Date()) / 86400000);
+        etat.textContent = j.statut === "ouvert" ? "⏳ Plus que " + reste + " jour" + (reste > 1 ? "s" : "")
+          : j.statut === "a_venir" ? "Bientôt" : j.statut === "ferme" ? "Terminé : tirage le " + jour(j.tirage_le) : "Terminé";
+      }).catch(function () {});
+    });
+  }
+
   // --- Ma participation ----------------------------------------------------------
   var moi = $("jeu-moi");
   function montrerLot(p) {
@@ -219,7 +233,21 @@
           $("moi-titre").textContent = "Tu as gagné, " + p.prenom + " ! 🎉";
           montrerLot(p);
         } else {
-          say(status2, p.expire ? "Le délai pour récupérer ton lot est passé : il a été remis en jeu." : "Le tirage a eu lieu : pas cette fois… Merci d'avoir joué !", "");
+          say(status2, p.expire ? "Le délai pour récupérer ton lot est passé : il a été remis en jeu." : "Le tirage a eu lieu. Merci d'avoir joué !", "");
+          $("moi-titre").textContent = "Pas cette fois, " + p.prenom + "…";
+          if (p.chance != null && !p.expire) {
+            var c = Number(p.chance);
+            $("moi-chance").textContent = "Avec " + tickets(p.tickets) + ", tu avais "
+              + (c < 1 ? "moins de 1 %" : (c < 10 ? String(Math.round(c * 10) / 10).replace(".", ",") : Math.round(c)) + " %") + " de chances d'être tiré au sort. Peut-être la prochaine fois !";
+          }
+          var gs = p.gagnants || [];
+          $("moi-gagnants-titre").hidden = !gs.length;
+          $("moi-gagnants").innerHTML = gs.map(function (g) {
+            var li = document.createElement("li");
+            li.textContent = "🎉 " + g.prenom + (g.initiale ? " " + g.initiale + "." : "");
+            return li.outerHTML;
+          }).join("");
+          $("moi-fin").hidden = false;
         }
       } else if (!p.confirme) {
         say(status2, p.statut === "ouvert" ? "Pas encore confirmée : clique sur le lien du mail reçu pour être dans le tirage." : "Le jeu est terminé, et cette participation n'avait pas été confirmée.", "err");
