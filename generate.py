@@ -2834,9 +2834,8 @@ JEU_CSS = """<style>
 .jeu-lien { display: flex; gap: 8px; }
 .jeu-lien input { flex: 1; min-width: 0; font: inherit; font-size: .9rem; border: 1.5px solid var(--line); border-radius: 12px; padding: 10px 12px; background: var(--card); color: var(--ink); }
 .jeu-suivre { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-top: 8px; }
-.jeu-prevenu { text-align: center; margin-top: 18px; padding: 16px; border-radius: 20px; background: color-mix(in srgb, var(--wave) 10%, var(--card)); border: 1.5px solid var(--line); }
+.jeu-prevenu { text-align: center; margin: 18px 0 20px; padding: 18px 16px; border-radius: 20px; background: color-mix(in srgb, var(--wave) 10%, var(--card)); border: 1.5px solid var(--line); }
 .jeu-prevenu p { margin: 0 0 6px; line-height: 1.5; } .jeu-reseaux { margin-top: 10px !important; font-size: .92rem; color: var(--ink-soft); }
-.panel > .jeu-prevenu:only-child { margin-top: 0; border: 0; padding: 0; background: none; }
 .jeu-gagnants { list-style: none; padding: 0; margin: 10px 0 0; display: grid; gap: 10px; }
 .jeu-gagnants li { padding: 14px 18px; border-radius: 18px; background: var(--card); border: 1.5px solid var(--line); font-weight: 800; font-size: 1.1rem; }
 .jeu-regle { line-height: 1.6; } .jeu-regle h2 { margin-top: 22px !important; }
@@ -2907,7 +2906,7 @@ def jeu_page(jeu: dict) -> str:
       </div>
       <p><b>📩 Un mail vient de partir&nbsp;: clique dedans pour valider ta participation.</b> Il contient aussi le lien pour revoir tes tickets.</p>
     </div>
-    <div class="panel" id="jeu-bas">{jeu_suivre(root)}</div>
+    {jeu_suivre(root)}
   </main>
   <script src="{root}jeu.js" defer></script>"""
     return layout(f"{jeu['titre']} : {jeu['partenaire']} – Wavents", body,
@@ -2982,7 +2981,7 @@ def jeux_index_page() -> str:
   </div></section>
   <main class="section jeu-page" id="jeux-liste" data-supabase="{SUPABASE_URL}" data-key="{SUPABASE_ANON_KEY}">
     {cartes}
-    <div class="panel">{jeu_suivre(root)}</div>
+    {jeu_suivre(root)}
   </main>
   <script src="{root}jeu.js" defer></script>"""
     css = JEU_CSS.replace("</style>", """.jeu-carte { display: flex; gap: 14px; align-items: center; text-decoration: none; color: inherit; }
