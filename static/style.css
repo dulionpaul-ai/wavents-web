@@ -455,6 +455,26 @@ h1, h2, h3 { font-family: var(--display); line-height: 1.08; letter-spacing: -.0
 .report-link { display: flex; justify-content: center; align-items: center; gap: 8px; margin: -6px 0 20px; padding: 10px 12px; font-family: var(--display); font-weight: 700; font-size: .95rem; color: var(--deep); text-decoration: none; border-radius: 14px; text-align: center; }
 .report-link:hover, .report-link:focus-visible { background: color-mix(in srgb, var(--wave) 10%, transparent); text-decoration: underline; }
 @media (prefers-color-scheme: dark) { .report-link { color: var(--wave); } }
+/* Formulaire de signalement (static/signaler.js, 26/11/2026). */
+.report-dlg { border: 0; border-radius: 22px; padding: 0; width: min(440px, calc(100vw - 32px)); background: var(--card); color: var(--ink); box-shadow: 0 20px 60px rgba(10,42,61,.3); }
+.report-dlg::backdrop { background: rgba(10,42,61,.45); }
+.report-form { padding: 22px 20px 16px; display: flex; flex-direction: column; gap: 10px; }
+.report-form h2 { margin: 0; font-family: var(--display); color: var(--deep); font-size: 1.3rem; }
+.report-sub { margin: 0 0 4px; color: var(--ink-soft); font-size: .95rem; }
+.report-opt { display: flex; gap: 10px; align-items: flex-start; padding: 10px 12px; border: 1.5px solid var(--line); border-radius: 14px; cursor: pointer; }
+.report-opt:has(input:checked) { border-color: var(--blue); background: color-mix(in srgb, var(--wave) 8%, transparent); }
+.report-opt input { margin-top: 3px; accent-color: var(--blue); }
+.report-opt b { display: block; font-family: var(--display); }
+.report-opt small { display: block; color: var(--ink-soft); }
+.report-text { font: inherit; padding: 10px 12px; border: 1.5px solid var(--line); border-radius: 14px; resize: vertical; background: var(--card); color: var(--ink); }
+.report-pot { position: absolute; left: -9999px; width: 1px; height: 1px; opacity: 0; }
+.report-status { margin: 0; min-height: 1.2em; color: var(--pin); font-size: .9rem; }
+.report-btns { display: flex; gap: 10px; justify-content: flex-end; }
+.report-btns button { font-family: var(--display); font-weight: 800; font-size: 1rem; padding: 10px 18px; border-radius: 999px; border: 0; cursor: pointer; }
+.report-cancel { background: transparent; color: var(--deep); }
+.report-send { background: var(--blue); color: #fff; }
+.report-send:disabled { opacity: .6; }
+.report-mail { margin: 4px 0 0; font-size: .85rem; color: var(--ink-soft); text-align: center; }
 .mini-map-panel { padding: 0; overflow: hidden; }
 #mini-map { height: 240px; }
 .app-promo { display: flex; flex-wrap: wrap; gap: 14px; align-items: center; background: linear-gradient(135deg, #E8F7FB, #FFF3C4); color: #0A2A3D; }

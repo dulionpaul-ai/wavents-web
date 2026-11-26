@@ -1222,8 +1222,13 @@ def report_link(event: dict, url: str, when: str) -> str:
     subject = f"Correction : {event['title']} ({when})"
     body = (f"Fiche : {url}\n\nQuelle info est fausse ? (ex : le prix affiché, l'adresse...)\n\n")
     href = f"mailto:hello@wavents.fr?subject={quote(subject)}&body={quote(body)}"
-    return (f'<a class="report-link" href="{e(href)}" rel="nofollow" data-goatcounter-click="clic-corriger">'
-            '<span aria-hidden="true">✏️</span> Une info à corriger ? Dis-le-nous</a>')
+    # Depuis le 26/11/2026 (Paul) : le lien ouvre un vrai signalement
+    # (static/signaler.js, table reports, traité comme ceux de l'appli) ; le
+    # mail reste la solution sans JavaScript.
+    return (f'<a class="report-link" href="{e(href)}" rel="nofollow" data-goatcounter-click="clic-corriger" '
+            f'data-event="{e(event["id"])}" data-supabase="{SUPABASE_URL}" data-key="{SUPABASE_ANON_KEY}">'
+            '<span aria-hidden="true">✏️</span> Une info à corriger ? Dis-le-nous</a>'
+            '<script src="/signaler.js" defer></script>')
 
 
 def event_page(event: dict, neighbours: list[dict], series: dict[str, list[dict]],
