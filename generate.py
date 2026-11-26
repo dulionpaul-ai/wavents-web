@@ -72,7 +72,7 @@ FIELDS = (
 # _icon() ou à la mini-carte (« place ») doit être ajoutée ici, sinon elle
 # s'affiche en toutes lettres. Ordre alphabétique exigé par Google Fonts.
 MS_ICONS = {"brush", "celebration", "child_care", "explore", "groups", "money_off", "museum", "music_note",
-            "phone_iphone", "place", "sell", "casino", "sports_soccer", "storefront", "theater_comedy"}
+            "phone_iphone", "place", "sell", "sports_soccer", "storefront", "theater_comedy"}
 MS_ICON_NAMES = ",".join(sorted(MS_ICONS))
 
 
@@ -80,6 +80,11 @@ def _icon(name: str) -> str:
     assert name in MS_ICONS, f"icône {name} absente de MS_ICONS"
     return f'<span class="ms" aria-hidden="true">{name}</span>'
 
+
+# Boule de loto « 7 » (26/11/2026) : aucune icône Material ne la montre ; même
+# dessin que la police WaventsIcons de l'appli (tools/icone_loto.py).
+LOTO_ICON = ('<span class="ms ms-svg" aria-hidden="true"><svg viewBox="0 0 960 960" fill="currentColor">'
+             '<path transform="matrix(1 0 0 -1 0 960)" d="M880 480Q880 400 850 327Q819 253 763 197Q707 141 633 110Q560 80 480 80Q400 80 327 110Q253 141 197 197Q141 253 110 327Q80 400 80 480Q80 560 110 633Q141 707 197 763Q253 819 327 850Q400 880 480 880Q560 880 633 850Q707 819 763 763Q819 707 850 633Q880 560 880 480ZM399 245Q425 245 441.0 254.0Q457 263 467 283L636 595Q645 612 651.5 627.5Q658 643 658 664Q658 689 641.5 702.0Q625 715 601 715H354Q329 715 315.5 702.5Q302 690 302 666Q302 641 315.5 628.5Q329 616 354 616H539V651L356 320Q345 300 347.0 282.5Q349 265 363.0 255.0Q377 245 399 245Z"/></svg></span>')
 
 # id -> (icône, libellé, couleur) : mêmes icônes Material et mêmes couleurs
 # que l'appli (lib/models/category.dart), pour qu'on se sente au même endroit.
@@ -94,7 +99,7 @@ CATEGORIES = {
     "atelier": (_icon("brush"), "Atelier", "#8D6E63"),
     "visite": (_icon("explore"), "Visite", "#1E88E5"),
     # Loto (26/11/2026, script 276 du dépôt de l'appli).
-    "loto": (_icon("casino"), "Loto", "#3949AB"),
+    "loto": (LOTO_ICON, "Loto", "#3949AB"),
     "associatif_autre": (_icon("groups"), "Associatif", "#00BFA5"),
 }
 CATEGORY_PHOTO = {
