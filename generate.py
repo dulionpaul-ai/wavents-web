@@ -72,7 +72,7 @@ FIELDS = (
 # _icon() ou à la mini-carte (« place ») doit être ajoutée ici, sinon elle
 # s'affiche en toutes lettres. Ordre alphabétique exigé par Google Fonts.
 MS_ICONS = {"brush", "celebration", "child_care", "explore", "groups", "money_off", "museum", "music_note",
-            "phone_iphone", "place", "sell", "sports_soccer", "storefront", "theater_comedy"}
+            "phone_iphone", "place", "sell", "casino", "sports_soccer", "storefront", "theater_comedy"}
 MS_ICON_NAMES = ",".join(sorted(MS_ICONS))
 
 
@@ -93,12 +93,14 @@ CATEGORIES = {
     "culture": (_icon("museum"), "Culture", "#7C4DFF"),
     "atelier": (_icon("brush"), "Atelier", "#8D6E63"),
     "visite": (_icon("explore"), "Visite", "#1E88E5"),
+    # Loto (26/11/2026, script 276 du dépôt de l'appli).
+    "loto": (_icon("casino"), "Loto", "#3949AB"),
     "associatif_autre": (_icon("groups"), "Associatif", "#00BFA5"),
 }
 CATEGORY_PHOTO = {
     "concert": "concert", "fete": "fete", "marche": "marche", "brocante": "brocante", "spectacle": "spectacle",
     "sport": "sport", "culture": "culture", "atelier": "atelier", "visite": "visite",
-    "associatif_autre": "associatif",
+    "loto": "loto", "associatif_autre": "associatif",
 }
 DAYS = ["lundi", "mardi", "mercredi", "jeudi", "vendredi", "samedi", "dimanche"]
 DAYS_SHORT = ["lun.", "mar.", "mer.", "jeu.", "ven.", "sam.", "dim."]
@@ -696,6 +698,7 @@ def layout(title: str, body: str, *, description: str, url: str, image: str | No
           <li><a href="{root}ce-week-end/">Ce week-end dans le Beaujolais</a></li>
           <li><a href="{root}marches/">Marchés</a></li>
           <li><a href="{root}brocantes/">Brocantes</a></li>
+          <li><a href="{root}lotos/">Lotos</a></li>
           <li><a href="{root}gratuit/">Sorties gratuites</a></li>
           <li><a href="{root}enfants/">En famille</a></li>
           <li><a href="{root}quand-il-pleut/">Quand il pleut</a></li>
@@ -1721,6 +1724,8 @@ THEMES = [
      "Marchés", lambda ev: ev.get("category_id") == "marche", 14),
     ("brocantes", "Brocantes et vide-greniers dans le Beaujolais", "Brocantes et vide-greniers",
      "Brocantes", lambda ev: ev.get("category_id") == "brocante", 45),
+    ("lotos", "Lotos dans le Beaujolais, l'Ain et le Val de Saône", "Les lotos près de chez toi",
+     "Lotos", lambda ev: ev.get("category_id") == "loto", 45),
     ("gratuit", "Sorties gratuites dans le Beaujolais", "Sorties gratuites",
      "Gratuit", is_free, 14),
     ("enfants", "Sorties en famille et avec les enfants dans le Beaujolais", "Sorties en famille",
@@ -1864,7 +1869,7 @@ def theme_page(slug: str, page_title: str, h1: str, kicker: str, keep, days: int
     # Pastilles : catégories présentes (sauf pages d'une seule catégorie),
     # Gratuit et Enfants (sauf sur leur propre page).
     chips = []
-    if slug not in ("marches", "brocantes"):
+    if slug not in ("marches", "brocantes", "lotos"):
         counts: dict[str, int] = {}
         for ev in ordered:
             counts[ev.get("category_id") or "associatif_autre"] = counts.get(ev.get("category_id") or "associatif_autre", 0) + 1
