@@ -2825,7 +2825,7 @@ JEU_CSS = """<style>
 .jeu-ok { text-align: center; }
 .jeu-ticket { display: inline-block; margin: 6px auto 16px; padding: 14px 26px; border-radius: 20px; background: var(--card);
   border: 2px dashed var(--blue); }
-.jeu-ticket b { display: block; font-size: 2rem; color: var(--blue); line-height: 1.1; }
+.jeu-ticket b { display: block; font-size: clamp(1.4rem, 6.5vw, 2rem); color: var(--blue); line-height: 1.1; white-space: nowrap; }
 .jeu-ticket small { color: var(--ink-soft); font-weight: 700; }
 .jeu-plus { text-align: left; border-radius: 20px; padding: 16px 18px; margin: 0 0 16px;
   background: color-mix(in srgb, var(--sun) 22%, var(--card)); border: 1.5px solid var(--line); }
