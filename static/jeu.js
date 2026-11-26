@@ -69,7 +69,7 @@
       $("jeu-go").href = "#jeu-ok";
       $("jeu-ok").hidden = false;
       $("jeu-ok-titre").textContent = deja ? "Tu participes déjà, " + p.prenom + " ! 🎉" : "C'est noté, " + p.prenom + " ! 🎉";
-      $("jeu-ok-num").textContent = "Participation n° " + p.numero;
+      $("jeu-ok-num").textContent = deja ? "🎟️ Tu es dans le jeu" : "🎟️ 1 ticket";
       partage($("jeu-partager"), $("jeu-lien"), page.dataset.base + "/gagner/" + slug + "/?p=" + p.code, titre);
     };
 
@@ -99,7 +99,7 @@
         $("jeu-ferme-texte").textContent = "Bravo à eux, et merci à tous les participants ! D'autres jeux arrivent bientôt.";
         $("jeu-gagnants").innerHTML = j.gagnants.map(function (g) {
           var li = document.createElement("li");
-          li.textContent = "🎉 " + g.prenom + " (participation n° " + g.numero + ")";
+          li.textContent = "🎉 " + g.prenom + (g.initiale ? " " + g.initiale + "." : "");
           return li.outerHTML;
         }).join("");
       }
@@ -150,7 +150,7 @@
       }).then(function (res) {
         btn.disabled = false;
         if (res && res.ok && !res.deja) {
-          var p = { jeton: res.jeton, numero: res.numero, code: res.code, prenom: res.prenom };
+          var p = { jeton: res.jeton, code: res.code, prenom: res.prenom };
           store("wv-jeu-" + slug, p);
           count("jeu-participation-" + slug);
           montrerOk(p, false);
@@ -226,8 +226,8 @@
       } else {
         say(status2, "Tu es dans le tirage du " + jour(p.tirage_le) + ".", "ok");
       }
-      $("moi-sous").textContent = "Participation n° " + p.numero;
-      $("moi-tickets").textContent = tickets(p.tickets);
+      $("moi-sous").textContent = p.tickets > 1 ? "Tes tickets pour le tirage" : "Ton ticket pour le tirage";
+      $("moi-tickets").textContent = "🎟️ " + tickets(p.tickets);
       $("moi-amis").textContent = p.amis_confirmes + p.amis_en_attente === 0 ? "Aucun ami n'a encore participé avec ton lien."
         : p.amis_confirmes + " ami" + (p.amis_confirmes > 1 ? "s ont" : " a") + " participé avec ton lien"
           + (p.amis_en_attente ? " (et " + p.amis_en_attente + " en attente de confirmation)." : ".");
