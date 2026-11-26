@@ -2919,6 +2919,19 @@ def jeu_moi_page() -> str:
   <main class="section jeu-page" id="jeu-moi" data-supabase="{SUPABASE_URL}" data-key="{SUPABASE_ANON_KEY}" data-base="{BASE_URL}">
     <div class="panel jeu-ok">
       <p class="lettre-status busy" id="moi-status" aria-live="polite">Un instant…</p>
+      <div class="jeu-plus" id="lot" hidden>
+        <h3>🎁 Je récupère mon lot</h3>
+        <p id="lot-texte"></p>
+        <form id="lot-form" novalidate>
+          <div class="jeu-fields">
+            <label class="lettre-f"><span>Prénom et nom</span><input name="nom" required autocomplete="name" maxlength="80"></label>
+            <label class="lettre-f"><span>Téléphone</span><input type="tel" name="telephone" required autocomplete="tel" inputmode="tel" maxlength="20" placeholder="06 12 34 56 78"></label>
+          </div>
+          <button class="btn btn-sun lettre-go" type="submit">Je récupère mon lot</button>
+          <p class="lettre-status" id="lot-status" aria-live="polite"></p>
+          <p class="lettre-note">Ton nom et ton téléphone sont transmis seulement au partenaire qui offre le lot, pour fixer ta séance.</p>
+        </form>
+      </div>
       <div id="moi-contenu" hidden>
         <div class="jeu-ticket"><small id="moi-sous"></small><b id="moi-tickets"></b></div>
         <p id="moi-amis"></p>
@@ -2958,9 +2971,9 @@ def jeu_reglement_page(jeu: dict) -> str:
     <h2>5. Lots</h2>
     <p>{e(jeu["lot"])} Le lot ne peut être échangé contre sa valeur en argent.</p>
     <h2>6. Tirage et gagnants</h2>
-    <p>{jeu["nb_gagnants"]} gagnant{"s" if jeu["nb_gagnants"] > 1 else ""}, tiré{"s" if jeu["nb_gagnants"] > 1 else ""} au sort par ordinateur parmi les participations confirmées, en tenant compte des tickets. Les gagnants sont prévenus par mail et leur prénom est publié sur cette page, dans l'appli et sur les réseaux de Wavents. Ils répondent au mail pour organiser la remise du lot avec {e(jeu["partenaire"])}. Sans réponse dans les 30 jours, le lot est remis en jeu ou réattribué.</p>
+    <p>{jeu["nb_gagnants"]} gagnant{"s" if jeu["nb_gagnants"] > 1 else ""}, tiré{"s" if jeu["nb_gagnants"] > 1 else ""} au sort par ordinateur parmi les participations confirmées, en tenant compte des tickets. Les gagnants sont prévenus par mail et leur prénom est publié sur cette page, dans l'appli et sur les réseaux de Wavents. Pour recevoir son lot, le gagnant clique sur « Je récupère mon lot » dans les 15 jours qui suivent le tirage et indique son nom et son téléphone, transmis à {e(jeu["partenaire"])}, qui le contacte pour la remise. Sans réclamation dans ce délai, un nouveau tirage au sort est fait pour ce lot.</p>
     <h2>7. Données personnelles</h2>
-    <p>Le prénom et l'adresse mail servent uniquement au jeu (confirmation, résultat, remise du lot) et, si tu la demandes, à la lettre du jeudi. Ils ne sont ni vendus ni transmis, sauf le prénom et le choix de séance des gagnants à {e(jeu["partenaire"])} pour la remise du lot. Ils sont effacés 3 mois après le tirage (sans confirmation&nbsp;: sous 30 jours). Tu peux demander à tout moment l'accès, la rectification ou l'effacement de tes données à <a href="mailto:hello@wavents.fr">hello@wavents.fr</a>. Voir la <a href="{root}confidentialite.html#jeux">politique de confidentialité</a>.</p>
+    <p>Le prénom et l'adresse mail servent uniquement au jeu (confirmation, tickets gagnés, résultat, remise du lot) et, si tu la demandes, à la lettre du jeudi. Ils ne sont ni vendus ni transmis, sauf, pour les gagnants qui réclament leur lot, le nom, le téléphone et le choix de séance, transmis à {e(jeu["partenaire"])} pour la remise du lot. Ils sont effacés 3 mois après le tirage (sans confirmation&nbsp;: sous 30 jours). Tu peux demander à tout moment l'accès, la rectification ou l'effacement de tes données à <a href="mailto:hello@wavents.fr">hello@wavents.fr</a>. Voir la <a href="{root}confidentialite.html#jeux">politique de confidentialité</a>.</p>
     <h2>8. Divers</h2>
     <p>Le jeu n'est ni organisé ni parrainé par Facebook, Instagram, Google ou Apple. L'organisateur peut écourter, prolonger ou annuler le jeu en cas de problème, en le signalant sur cette page. Participer vaut acceptation de ce règlement.</p>
   </div></main>"""

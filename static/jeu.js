@@ -169,6 +169,37 @@
 
   // --- Ma participation ----------------------------------------------------------
   var moi = $("jeu-moi");
+  function montrerLot(p) {
+    var bloc = $("lot");
+    bloc.hidden = false;
+    if (p.reclame) {
+      $("lot-form").hidden = true;
+      $("lot-texte").textContent = "C'est transmis à " + p.partenaire + " : tu vas être appelé pour fixer ta séance. Bonne création !";
+      return;
+    }
+    $("lot-texte").textContent = "Tu as gagné " + p.lot + ". Indique ton nom et ton téléphone avant le "
+      + jour(p.limite) + " : " + p.partenaire + " t'appellera pour fixer ta séance.";
+    var f = $("lot-form"), st = $("lot-status"), b = f.querySelector(".lettre-go");
+    f.addEventListener("submit", function (ev) {
+      ev.preventDefault();
+      var nom = f.elements.nom.value.trim(), tel = f.elements.telephone.value.trim();
+      if (nom.length < 2) { say(st, "Indique ton prénom et ton nom.", "err"); return; }
+      if (tel.replace(/[^0-9]/g, "").length < 10) { say(st, "Ce numéro de téléphone ne semble pas complet.", "err"); return; }
+      b.disabled = true; say(st, "Un instant…", "busy");
+      rpc(moi, "jeu_reclamer", { p_jeton: param("j"), p_nom: nom, p_telephone: tel }).then(function (r) {
+        b.disabled = false;
+        if (r && r.ok) {
+          count("jeu-lot-reclame");
+          f.hidden = true;
+          $("lot-texte").textContent = "C'est transmis à " + p.partenaire + " : tu vas être appelé pour fixer ta séance. Bonne création !";
+        } else {
+          var E = { nom: "Indique ton prénom et ton nom.", telephone: "Ce numéro ne semble pas valide (10 chiffres, ex. 06 12 34 56 78).",
+                    trop_tard: "Le délai pour récupérer ce lot est passé.", pas_gagnant: "Ce lien ne correspond pas à un gagnant." };
+          say(st, E[r && r.erreur] || "Oups, ça n'est pas passé. Réessaie.", "err");
+        }
+      }).catch(function () { b.disabled = false; say(st, "Oups, ça n'est pas passé. Vérifie ta connexion et réessaie.", "err"); });
+    });
+  }
   if (moi) {
     var jeton = param("j");
     var status2 = $("moi-status");
@@ -182,8 +213,14 @@
       $("moi-voir").href = "../" + p.slug + "/";
       $("moi-max").textContent = p.max_bonus;
       if (p.statut === "tire") {
-        say(status2, p.gagnant ? "🎉 Bravo, tu fais partie des gagnants ! Regarde le mail reçu pour récupérer ton lot." : "Le tirage a eu lieu : pas cette fois… Merci d'avoir joué !", p.gagnant ? "ok" : "");
         $("moi-plus").hidden = true;
+        if (p.gagnant) {
+          say(status2, "🎉 Bravo " + p.prenom + ", tu fais partie des gagnants !", "ok");
+          $("moi-titre").textContent = "Tu as gagné, " + p.prenom + " ! 🎉";
+          montrerLot(p);
+        } else {
+          say(status2, p.expire ? "Le délai pour récupérer ton lot est passé : il a été remis en jeu." : "Le tirage a eu lieu : pas cette fois… Merci d'avoir joué !", "");
+        }
       } else if (!p.confirme) {
         say(status2, p.statut === "ouvert" ? "Pas encore confirmée : clique sur le lien du mail reçu pour être dans le tirage." : "Le jeu est terminé, et cette participation n'avait pas été confirmée.", "err");
       } else {
