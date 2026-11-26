@@ -2775,6 +2775,200 @@ def lettre_action_page(kind: str) -> str:
                   extra_head='<meta name="robots" content="noindex">')
 
 
+# --- Jeux concours (26/11/2026, script SQL 268 du dépôt Wavents) ------------
+# Une entrée par jeu : textes et photo de la page (le statut, le compte à
+# rebours et les gagnants viennent de la base, jeu_public). Pour lancer un
+# jeu : la ligne de la table `jeux` (debut, fin) décide ; rien à changer ici.
+JEUX = [
+    {
+        "slug": "envol-des-couleurs-noel",
+        "titre": "2 cartes cadeaux à gagner",
+        "accroche": "Un cours de poterie ou d'art créatif chez L'Envol des Couleurs, à Belleville.",
+        "partenaire": "L'Envol des Couleurs",
+        "partenaire_lieu": "Belleville-en-Beaujolais",
+        "lot": ("2 cartes cadeaux, une par gagnant. Chaque gagnant choisit sa séance chez L'Envol des Couleurs, "
+                "atelier de poterie et d'art créatif à Belleville-en-Beaujolais : poterie enfants, poterie adultes "
+                "ou art créatif enfants. Carte nominative, valable 1 an."),
+        "choix": ["Poterie adultes", "Poterie enfants", "Art créatif enfants"],
+        "image": "jeux/envol-des-couleurs.jpg",
+        "image_partage": "jeux/envol-des-couleurs-partage.jpg",
+        "kicker": "🎄 Jeu de Noël",
+        "fin_txt": "dimanche 13 décembre 2026 à 23 h 59",
+        "tirage_txt": "lundi 14 décembre 2026",
+        "nb_gagnants": 2,
+        "max_bonus": 5,
+    },
+]
+
+JEU_CSS = """<style>
+#jeu [hidden], #jeu-moi [hidden], .ev-hero [hidden] { display: none !important; }
+.add-fab { display: none !important; }
+.jeu-go { margin: 14px 0 0 10px; }
+.jeu-chip { display: inline-block; margin-top: 14px; padding: 8px 16px; border-radius: 999px; font-weight: 800;
+  background: rgba(255,255,255,.2); border: 1.5px solid rgba(255,255,255,.45); }
+.jeu-chip:empty { display: none; }
+.jeu-page { max-width: 760px; margin: 0 auto; }
+.jeu-photo { width: 100%; border-radius: 24px; display: block; margin: 0 0 20px; aspect-ratio: 16/9; object-fit: cover;
+  box-shadow: 0 14px 36px rgba(6,95,187,.16); }
+.jeu-choix { display: flex; flex-wrap: wrap; gap: 8px; margin: 4px 0 14px; border: 0; padding: 0; }
+.jeu-choix legend { font-weight: 700; font-size: .9rem; margin-bottom: 6px; padding: 0; }
+.jeu-choix label { cursor: pointer; }
+.jeu-choix input { position: absolute; opacity: 0; pointer-events: none; }
+.jeu-choix span { display: inline-block; padding: 9px 15px; border-radius: 999px; border: 1.5px solid var(--line);
+  font-weight: 800; font-size: .95rem; background: var(--card); }
+.jeu-choix input:checked + span { background: var(--blue); color: #fff; border-color: var(--blue); }
+.jeu-choix input:focus-visible + span { box-shadow: 0 0 0 4px rgba(1,186,239,.3); }
+.jeu-case { display: flex; gap: 10px; align-items: flex-start; font-weight: 700; font-size: .95rem; margin: 4px 0 12px; cursor: pointer; }
+.jeu-case input { width: 20px; height: 20px; margin-top: 2px; flex: none; accent-color: var(--blue); }
+.jeu-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 14px; }
+@media (max-width: 560px) { .jeu-fields { grid-template-columns: 1fr; } }
+.jeu-ok { text-align: center; }
+.jeu-ticket { display: inline-block; margin: 6px auto 16px; padding: 14px 26px; border-radius: 20px; background: var(--card);
+  border: 2px dashed var(--blue); }
+.jeu-ticket b { display: block; font-size: 2rem; color: var(--blue); line-height: 1.1; }
+.jeu-ticket small { color: var(--ink-soft); font-weight: 700; }
+.jeu-plus { text-align: left; border-radius: 20px; padding: 16px 18px; margin: 0 0 16px;
+  background: color-mix(in srgb, var(--sun) 22%, var(--card)); border: 1.5px solid var(--line); }
+.jeu-plus h3 { margin: 0 0 6px; font-size: 1.15rem; }
+.jeu-plus p { margin: 0 0 10px; line-height: 1.5; }
+.jeu-lien { display: flex; gap: 8px; }
+.jeu-lien input { flex: 1; min-width: 0; font: inherit; font-size: .9rem; border: 1.5px solid var(--line); border-radius: 12px; padding: 10px 12px; background: var(--card); color: var(--ink); }
+.jeu-suivre { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-top: 8px; }
+.jeu-gagnants { list-style: none; padding: 0; margin: 10px 0 0; display: grid; gap: 10px; }
+.jeu-gagnants li { padding: 14px 18px; border-radius: 18px; background: var(--card); border: 1.5px solid var(--line); font-weight: 800; font-size: 1.1rem; }
+.jeu-regle { line-height: 1.6; } .jeu-regle h2 { margin-top: 22px !important; }
+</style>"""
+
+
+def jeu_suivre(root: str) -> str:
+    return (f'<div class="jeu-suivre"><a class="btn btn-sun" href="{root}app/?ref=jeu" data-goatcounter-click="jeu-appli">📲 Télécharger l\'appli Wavents</a>'
+            '<a class="btn btn-ghost" href="https://www.facebook.com/wavents_app" rel="noopener" target="_blank" data-goatcounter-click="jeu-facebook">Facebook</a>'
+            '<a class="btn btn-ghost" href="https://www.instagram.com/wavents_app/" rel="noopener" target="_blank" data-goatcounter-click="jeu-instagram">Instagram</a></div>')
+
+
+def jeu_page(jeu: dict) -> str:
+    root = "../../"
+    choix = "".join(f'<label><input type="radio" name="choix" value="{e(c)}" required><span>{e(c)}</span></label>'
+                    for c in jeu["choix"])
+    body = f"""  <section class="ev-hero town-hero"><div class="ev-hero-inner">
+    <a class="back" href="{root}">← Wavents</a>
+    <p class="kicker">{e(jeu["kicker"])}</p>
+    <h1>{e(jeu["titre"])}&nbsp;!</h1>
+    <p class="lead">{e(jeu["accroche"])}</p>
+    <p><span class="jeu-chip" id="jeu-compte"></span><a class="btn btn-sun jeu-go" href="#participer" id="jeu-go" hidden>Je participe</a></p>
+  </div></section>
+  <main class="section jeu-page" id="jeu" data-slug="{e(jeu["slug"])}" data-supabase="{SUPABASE_URL}" data-key="{SUPABASE_ANON_KEY}"
+        data-communes="{root}data/communes.json" data-base="{BASE_URL}" data-max="{jeu["max_bonus"]}">
+    <img class="jeu-photo" src="{root}{e(jeu["image"])}" alt="{e(jeu["partenaire"])}">
+    <div class="panel">
+      <h2>Ce que tu peux gagner</h2>
+      <p>{e(jeu["lot"])}</p>
+      <p><b>Tirage au sort le {e(jeu["tirage_txt"])}.</b> Jeu gratuit, sans obligation d'achat. <a href="reglement/">Règlement du jeu</a></p>
+    </div>
+
+    <div class="panel" id="jeu-ferme" hidden><h2 id="jeu-ferme-titre">Le jeu ouvre bientôt</h2><p id="jeu-ferme-texte"></p>
+      <ul class="jeu-gagnants" id="jeu-gagnants"></ul>{jeu_suivre(root)}</div>
+
+    <div class="lettre-card" id="participer" hidden>
+      <div class="lettre-body">
+        <h2>Je participe 🎁</h2>
+        <form id="jeu-form" novalidate>
+          <div class="jeu-fields">
+            <label class="lettre-f"><span>Prénom</span><input name="prenom" required autocomplete="given-name" maxlength="40" placeholder="Camille"></label>
+            <label class="lettre-f"><span>Mail</span><input type="email" name="email" required autocomplete="email" inputmode="email" maxlength="254" placeholder="toi@exemple.fr"></label>
+          </div>
+          <fieldset class="jeu-choix"><legend>Si je gagne, je choisis…</legend>{choix}</fieldset>
+          <label class="jeu-case"><input type="checkbox" name="lettre"> Je veux aussi recevoir la lettre du jeudi (les sorties du week-end près de chez moi)</label>
+          <label class="lettre-f" id="jeu-commune" hidden><span>Ma commune (pour la lettre)</span>
+            <input name="commune" autocomplete="address-level2" maxlength="80" list="jeu-communes" placeholder="Belleville, Beaujeu…"><datalist id="jeu-communes"></datalist></label>
+          <input name="site_web" tabindex="-1" autocomplete="off" class="piege" aria-hidden="true">
+          <button class="btn btn-sun lettre-go" type="submit">Valider ma participation</button>
+          <p class="lettre-status" id="jeu-status" aria-live="polite"></p>
+          <p class="lettre-note">Une participation par adresse mail. Tu confirmes par mail pour être dans le tirage. Ton adresse ne sert qu'au jeu (et à la lettre si tu la demandes) ; elle est effacée 3 mois après le tirage. <a href="reglement/">Règlement</a> · <a href="{root}confidentialite.html#jeux">Confidentialité</a></p>
+        </form>
+      </div>
+    </div>
+
+    <div class="panel jeu-ok" id="jeu-ok" hidden>
+      <h2 id="jeu-ok-titre">C'est noté&nbsp;! 🎉</h2>
+      <div class="jeu-ticket"><small>Tu participes au tirage du {e(jeu["tirage_txt"].rsplit(" ", 1)[0])}</small><b id="jeu-ok-num"></b></div>
+      <div class="jeu-plus">
+        <h3>Plus de tickets = plus de chances</h3>
+        <p>Envoie ton lien à tes amis. Chaque ami qui participe avec ton lien te donne <b>1 ticket en plus</b> ({jeu["max_bonus"]} au plus).<br>Exemple&nbsp;: 3 amis participent → tu as 4 tickets.</p>
+        <div class="jeu-lien"><input id="jeu-lien" readonly aria-label="Ton lien à partager"><button class="btn btn-sun" type="button" id="jeu-partager">Envoyer mon lien</button></div>
+      </div>
+      <p><b>📩 Un mail vient de partir&nbsp;: clique dedans pour valider ta participation.</b> Il contient aussi le lien pour revoir tes tickets.</p>
+      <p>Pour ne rien rater des sorties du coin&nbsp;:</p>{jeu_suivre(root)}
+    </div>
+  </main>
+  <script src="{root}jeu.js" defer></script>"""
+    return layout(f"{jeu['titre']} : {jeu['partenaire']} – Wavents", body,
+                  description=f"{jeu['titre']} : {jeu['accroche']} Jeu gratuit, tirage le {jeu['tirage_txt']}.",
+                  url=f"{BASE_URL}/gagner/{jeu['slug']}/", image=f"{BASE_URL}/{jeu['image_partage']}",
+                  depth=2, page_class="town-page", extra_head=JEU_CSS)
+
+
+def jeu_moi_page() -> str:
+    """/gagner/moi/?j=<jeton>(&c=1) : confirmation et « ma participation »."""
+    root = "../../"
+    body = f"""  <section class="ev-hero town-hero"><div class="ev-hero-inner">
+    <p class="kicker">Jeu Wavents</p>
+    <h1 id="moi-titre">Ma participation</h1>
+    <p class="lead" id="moi-jeu"></p>
+  </div></section>
+  <main class="section jeu-page" id="jeu-moi" data-supabase="{SUPABASE_URL}" data-key="{SUPABASE_ANON_KEY}" data-base="{BASE_URL}">
+    <div class="panel jeu-ok">
+      <p class="lettre-status busy" id="moi-status" aria-live="polite">Un instant…</p>
+      <div id="moi-contenu" hidden>
+        <div class="jeu-ticket"><small id="moi-sous"></small><b id="moi-tickets"></b></div>
+        <p id="moi-amis"></p>
+        <div class="jeu-plus" id="moi-plus">
+          <h3>Plus de tickets = plus de chances</h3>
+          <p>Envoie ton lien à tes amis. Chaque ami qui participe avec ton lien (et confirme par mail) te donne <b>1 ticket en plus</b> (<span id="moi-max"></span> au plus).</p>
+          <div class="jeu-lien"><input id="jeu-lien" readonly aria-label="Ton lien à partager"><button class="btn btn-sun" type="button" id="jeu-partager">Envoyer mon lien</button></div>
+        </div>
+        <p><a class="btn btn-ghost" id="moi-voir" href="{root}">Voir la page du jeu</a></p>
+        {jeu_suivre(root)}
+      </div>
+    </div>
+  </main>
+  <script src="{root}jeu.js" defer></script>"""
+    return layout("Ma participation – Wavents", body, description="Ta participation à un jeu Wavents.",
+                  url=f"{BASE_URL}/gagner/moi/", depth=2, page_class="town-page",
+                  extra_head='<meta name="robots" content="noindex">' + JEU_CSS)
+
+
+def jeu_reglement_page(jeu: dict) -> str:
+    root = "../../../"
+    body = f"""  <section class="ev-hero town-hero"><div class="ev-hero-inner">
+    <a class="back" href="../">← Le jeu</a>
+    <p class="kicker">Jeu Wavents</p>
+    <h1>Règlement du jeu</h1>
+    <p class="lead">{e(jeu["titre"])} : {e(jeu["partenaire"])}</p>
+  </div></section>
+  <main class="section jeu-page"><div class="panel jeu-regle">
+    <h2>1. Organisateur</h2>
+    <p>Le jeu est organisé par Wavents, projet personnel et non commercial édité par Paul, particulier, à Belleville-en-Beaujolais (voir les <a href="{root}mentions-legales.html">mentions légales</a>). Contact&nbsp;: <a href="mailto:hello@wavents.fr">hello@wavents.fr</a>. Les lots sont offerts par {e(jeu["partenaire"])} ({e(jeu["partenaire_lieu"])}).</p>
+    <h2>2. Dates</h2>
+    <p>Le jeu est ouvert jusqu'au {e(jeu["fin_txt"])} (heure de Paris). Le tirage au sort a lieu le {e(jeu["tirage_txt"])}.</p>
+    <h2>3. Participation</h2>
+    <p>Le jeu est gratuit et sans obligation d'achat, ouvert à toute personne physique. Un mineur participe avec l'accord de ses parents. On participe sur cette page en donnant son prénom et son adresse mail, puis en confirmant sa participation par le lien reçu par mail&nbsp;: seules les participations confirmées sont tirées au sort. Une seule participation par personne et par adresse mail. Toute participation incomplète, faite avec une fausse adresse ou de façon automatisée est annulée.</p>
+    <h2>4. Tickets</h2>
+    <p>Chaque participation confirmée donne 1 ticket. Chaque personne qui participe en passant par le lien personnel d'un participant, et confirme sa participation, donne à ce participant 1 ticket en plus, dans la limite de {jeu["max_bonus"]} tickets en plus. Chaque ticket donne une chance de gagner&nbsp;; une même personne ne peut gagner qu'un lot.</p>
+    <h2>5. Lots</h2>
+    <p>{e(jeu["lot"])} Le lot ne peut être échangé contre sa valeur en argent.</p>
+    <h2>6. Tirage et gagnants</h2>
+    <p>{jeu["nb_gagnants"]} gagnant{"s" if jeu["nb_gagnants"] > 1 else ""}, tiré{"s" if jeu["nb_gagnants"] > 1 else ""} au sort par ordinateur parmi les participations confirmées, en tenant compte des tickets. Les gagnants sont prévenus par mail et leur prénom est publié sur cette page, dans l'appli et sur les réseaux de Wavents. Ils répondent au mail pour organiser la remise du lot avec {e(jeu["partenaire"])}. Sans réponse dans les 30 jours, le lot est remis en jeu ou réattribué.</p>
+    <h2>7. Données personnelles</h2>
+    <p>Le prénom et l'adresse mail servent uniquement au jeu (confirmation, résultat, remise du lot) et, si tu la demandes, à la lettre du jeudi. Ils ne sont ni vendus ni transmis, sauf le prénom et le choix de séance des gagnants à {e(jeu["partenaire"])} pour la remise du lot. Ils sont effacés 3 mois après le tirage (sans confirmation&nbsp;: sous 30 jours). Tu peux demander à tout moment l'accès, la rectification ou l'effacement de tes données à <a href="mailto:hello@wavents.fr">hello@wavents.fr</a>. Voir la <a href="{root}confidentialite.html#jeux">politique de confidentialité</a>.</p>
+    <h2>8. Divers</h2>
+    <p>Le jeu n'est ni organisé ni parrainé par Facebook, Instagram, Google ou Apple. L'organisateur peut écourter, prolonger ou annuler le jeu en cas de problème, en le signalant sur cette page. Participer vaut acceptation de ce règlement.</p>
+  </div></main>"""
+    return layout(f"Règlement : {jeu['titre']} – Wavents", body, description="Règlement du jeu Wavents.",
+                  url=f"{BASE_URL}/gagner/{jeu['slug']}/reglement/", depth=3, page_class="town-page",
+                  extra_head='<meta name="robots" content="noindex">' + JEU_CSS)
+
+
 def orga_section() -> str:
     return """  <section class="section">
     <div class="orga reveal"><span class="orga-ico" aria-hidden="true">📣</span>
@@ -3791,6 +3985,21 @@ def main() -> int:
           "teaser": f["teaser"], "n": FEST_COUNTS.get(f["slug"], 0)} for f in FESTIVALS],
         ensure_ascii=False), encoding="utf-8")
     (out / "data" / "communes.json").write_text(json.dumps(fetch_lettre_communes(), ensure_ascii=False), encoding="utf-8")
+    # Jeux concours (26/11/2026) : page de chaque jeu, son règlement, « ma
+    # participation » (/gagner/moi/), et /gagner/ qui renvoie au dernier jeu.
+    (out / "gagner" / "moi").mkdir(parents=True, exist_ok=True)
+    (out / "gagner" / "moi" / "index.html").write_text(jeu_moi_page(), encoding="utf-8")
+    for jeu in JEUX:
+        (out / "gagner" / jeu["slug"] / "reglement").mkdir(parents=True, exist_ok=True)
+        (out / "gagner" / jeu["slug"] / "index.html").write_text(jeu_page(jeu), encoding="utf-8")
+        (out / "gagner" / jeu["slug"] / "reglement" / "index.html").write_text(jeu_reglement_page(jeu), encoding="utf-8")
+    if JEUX:
+        dernier = JEUX[-1]["slug"]
+        (out / "gagner" / "index.html").write_text(
+            f'<!doctype html><meta charset="utf-8"><meta name="robots" content="noindex">'
+            f'<meta http-equiv="refresh" content="0; url={dernier}/">'
+            f'<script>location.replace("{dernier}/" + location.search)</script>'
+            f'<a href="{dernier}/">Le jeu en cours</a>', encoding="utf-8")
     (out / "a-propos").mkdir(exist_ok=True)
     (out / "a-propos" / "index.html").write_text(about_page(upcoming, communes), encoding="utf-8")
     (out / "faq").mkdir(exist_ok=True)
