@@ -1100,7 +1100,7 @@ def home_page(events: list[dict], all_upcoming: list[dict], now: datetime) -> st
         body,
         description=f"Que faire ce week-end ou ce soir près de chez toi ? {len(all_upcoming)} sorties à venir dans le Beaujolais, le Val de Saône et le nord de Lyon : concerts, marchés, brocantes, fêtes de village, spectacles. Mis à jour chaque jour, gratuit.",
         url=f"{BASE_URL}/",
-        image=f"{BASE_URL}/img/og.png?v=3",
+        image=f"{BASE_URL}/img/og.png?v=4",
         extra_head=(f'<script type="application/ld+json">{json.dumps(ORGANIZATION, ensure_ascii=False)}</script>'
                     f'<script type="application/ld+json">{json.dumps(WEBSITE, ensure_ascii=False)}</script>'
                     + app_ld()),
@@ -2400,7 +2400,7 @@ def festival_page(fest: dict, upcoming: list[dict], series: dict[str, list[dict]
     # donnait n'importe quoi (une vente d'huîtres en aperçu des marchés de
     # Noël). Image propre à la page si `og_image` (1200 × 630, dans static/),
     # sinon l'image Wavents de l'accueil.
-    image = f"{BASE_URL}/{fest['og_image']}" if fest.get("og_image") else f"{BASE_URL}/img/og.png?v=3"
+    image = f"{BASE_URL}/{fest['og_image']}" if fest.get("og_image") else f"{BASE_URL}/img/og.png?v=4"
     intro = (f"{fest['name']} {year}, {fest.get('when', span).lower() if fest.get('when') else span} : "
              "c'est quoi, où, et tout le programme jour par jour, mis à jour chaque jour.")
     lead = fest["lead"]

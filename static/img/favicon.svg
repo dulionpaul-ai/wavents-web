@@ -4,15 +4,26 @@
   <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#1874C9"/><stop offset=".5" stop-color="#1A92DE"/><stop offset="1" stop-color="#FFD93D"/></linearGradient>
   <linearGradient id="bgpad" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="100" y2="100"><stop offset="0" stop-color="#1874C9"/><stop offset=".5" stop-color="#1A92DE"/><stop offset="1" stop-color="#FFD93D"/></linearGradient>
   <radialGradient id="sunglow" cx=".85" cy=".95" r=".6"><stop offset="0" stop-color="#FFE08A"/><stop offset=".35" stop-color="#FFD66B" stop-opacity=".75"/><stop offset="1" stop-color="#FFD66B" stop-opacity="0"/></radialGradient>
-  <linearGradient id="sun" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFE9A0"/><stop offset="1" stop-color="#FFB84D"/></linearGradient>
+  <!-- Rafraîchissement du 27/11/2026 (choix de Paul) : soleil plus vif avec
+       halo, ciel doré, trois vagues épaissies, liseré intérieur doré (ciel)
+       puis bleu (mer), ombre fine sous l'épingle. -->
+  <linearGradient id="sun" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFE58A"/><stop offset=".55" stop-color="#FFC24A"/><stop offset="1" stop-color="#FF9A2E"/></linearGradient>
+  <radialGradient id="ciel" cx=".5" cy=".6" r=".7"><stop offset="0" stop-color="#FFE3A0"/><stop offset=".55" stop-color="#FDEBC2"/><stop offset="1" stop-color="#FBE6B8"/></radialGradient>
+  <radialGradient id="halo" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="#FFD66B" stop-opacity=".55"/><stop offset="1" stop-color="#FFD66B" stop-opacity="0"/></radialGradient>
+  <linearGradient id="v1" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#22C7F5"/><stop offset="1" stop-color="#0FA6E8"/></linearGradient>
+  <linearGradient id="v3" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#1A7FDB"/><stop offset="1" stop-color="#0B58AE"/></linearGradient>
+  <linearGradient id="lis" gradientUnits="userSpaceOnUse" x1="0" y1="19" x2="0" y2="79"><stop offset="0" stop-color="#FFB84D"/><stop offset=".55" stop-color="#FFD66B"/><stop offset=".62" stop-color="#13BDF0"/><stop offset="1" stop-color="#1D8CE5"/></linearGradient>
+  <filter id="ombre" x="-20%" y="-20%" width="140%" height="140%"><feDropShadow dx="0" dy="1.6" stdDeviation="1.6" flood-color="#06325F" flood-opacity=".35"/></filter>
   <clipPath id="pinclip"><path d="M50,19.5 C35.9,19.5 24.5,30.9 24.5,45 C24.5,63 50,78.5 50,78.5 C50,78.5 75.5,63 75.5,45 C75.5,30.9 64.1,19.5 50,19.5 Z"/></clipPath>
 </defs><rect width="100" height="100" rx="22" fill="url(#bgpad)"/><g transform="translate(50 50) scale(.86) translate(-50 -50)">
-  <path d="M50,11.5 C31.5,11.5 16.5,26.5 16.5,45 C16.5,68.5 50,89 50,89 C50,89 83.5,68.5 83.5,45 C83.5,26.5 68.5,11.5 50,11.5 Z" fill="#fff" stroke="#fff" stroke-width="1.2" stroke-linejoin="round"/>
+  <path d="M50,11.5 C31.5,11.5 16.5,26.5 16.5,45 C16.5,68.5 50,89 50,89 C50,89 83.5,68.5 83.5,45 C83.5,26.5 68.5,11.5 50,11.5 Z" fill="#fff" stroke="#fff" stroke-width="1.2" stroke-linejoin="round" filter="url(#ombre)"/>
   <g clip-path="url(#pinclip)">
-    <rect x="0" y="0" width="100" height="100" fill="#FEF1CF"/>
-    <circle cx="50" cy="46" r="11.8" fill="url(#sun)"/>
-    <path d="M20,56 C28,50.5 37,59 46,54.5 C55,50 64,59 73,54.5 C77,52.5 80,53 82,54 V100 H20 Z" fill="#13BDF0"/>
-    <path d="M20,64 C29,58.5 38,67 47,62.5 C56,58 65,67 74,62.5 C77,61 80,61.5 82,62 V100 H20 Z" fill="#1D8CE5"/>
-    <path d="M20,72 C29,66.5 39,75 48,70.5 C57,66 66,75 75,70.5 C78,69 80,69.5 82,70 V100 H20 Z" fill="#166CC3"/>
+    <rect x="0" y="0" width="100" height="100" fill="url(#ciel)"/>
+    <circle cx="50" cy="47" r="20" fill="url(#halo)"/>
+    <circle cx="50" cy="47.5" r="13" fill="url(#sun)"/>
+    <path d="M20,55 C29,49 38,58.5 47,54 C56,49.5 65,58.5 74,54 C77,52.5 80,52.5 82,53 V100 H20 Z" fill="url(#v1)"/>
+    <path d="M20,63.5 C29,57.5 38,67 47,62.5 C56,58 65,67 74,62.5 C77,61 80,61 82,61.5 V100 H20 Z" fill="#1D8CE5"/>
+    <path d="M20,72 C29,66 38,75.5 47,71 C56,66.5 65,75.5 74,71 C77,69.5 80,69.5 82,70 V100 H20 Z" fill="url(#v3)"/>
   </g>
+  <path d="M50,19.5 C35.9,19.5 24.5,30.9 24.5,45 C24.5,63 50,78.5 50,78.5 C50,78.5 75.5,63 75.5,45 C75.5,30.9 64.1,19.5 50,19.5 Z" fill="none" stroke="url(#lis)" stroke-width="1.3"/>
 </g></svg>
