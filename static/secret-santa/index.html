@@ -211,7 +211,7 @@ function render(links) {
     const box = document.createElement("div"); box.className = "link";
     box.innerHTML = `<b>${esc(name)}</b><div class="btns"><button type="button" class="copy">Copier le lien</button><a class="share" href="https://wa.me/?text=${encodeURIComponent(msg)}" target="_blank" rel="noopener">Envoyer</a></div>`;
     box.querySelector(".share").addEventListener("click", () => stat("santa-envoi"));
-    box.querySelector(".copy").onclick = async () => { stat("santa-copie"); try { await navigator.clipboard.writeText(msg); toast("Lien de " + name + " copié"); } catch (e) { prompt("Copie ce message :", msg); } };
+    box.querySelector(".copy").onclick = async () => { stat("santa-copie"); try { await navigator.clipboard.writeText(url); toast("Lien de " + name + " copié"); } catch (e) { prompt("Copie ce lien :", url); } };
     if (navigator.share) box.querySelector(".share").onclick = (e) => { e.preventDefault(); navigator.share({ text: msg }).catch(() => {}); };
     $("links").appendChild(box);
   }
