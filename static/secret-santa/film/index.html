@@ -33,6 +33,11 @@
     animation: pulse 1.8s infinite; cursor: pointer; }
   @media (max-width: 360px) { .btn { font-size: 16px; padding: 16px 22px; } }
   .btn { white-space: nowrap; }
+  [hidden] { display: none !important; }
+  #skip { position: fixed; top: max(14px, env(safe-area-inset-top)); left: 14px; z-index: 50; display: none;
+    font: 800 15px Nunito, sans-serif; color: #fff; background: rgba(255,255,255,.14); border: 1.5px solid rgba(255,255,255,.4);
+    border-radius: 999px; padding: 9px 16px; backdrop-filter: blur(6px); }
+  body.running #skip { display: block; }
   .btn.ghost { background: transparent; color: var(--gold); border: 2px solid rgba(247,211,106,.6); animation: none; font-size: 16px; padding: 13px 24px; }
   @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(247,211,106,.6); } 70% { box-shadow: 0 0 0 26px rgba(247,211,106,0); } 100% { box-shadow: 0 0 0 0 rgba(247,211,106,0); } }
   .santa { position: relative; height: 110px; }
@@ -122,6 +127,7 @@
   <h1 class="cinzel gold" id="hello">Secret Santa</h1>
   <p id="hello2">Une production Jubert's Family</p>
   <button class="btn" id="go">🎬 Lancer la projection</button>
+  <button class="btn ghost" id="direct" hidden style="margin-top:14px">👀 Revoir directement qui j'ai tiré</button>
 </section>
 
 <section class="scene" id="studio">
@@ -190,6 +196,8 @@
   <a class="btn ghost" id="own" href="/secret-santa/?ref=film" style="margin-top:14px;text-decoration:none">🎅 Organiser mon propre Secret Santa</a>
 </section>
 
+<button type="button" id="skip">Passer ⏭</button>
+
 <section class="scene" id="credits"><div class="roll" id="roll"></div></section>
 
 <section class="scene" id="locked">
@@ -204,7 +212,13 @@ const PAYLOAD = "";
 const $ = (id) => document.getElementById(id);
 // Intitulé du groupe (les pages /noel/ de la famille Jubert n'en ont pas).
 const group = () => (data && data.group) || "La famille Jubert";
-const wait = (ms) => new Promise((r) => setTimeout(r, ms));
+// « Passer » (27/11, retour d'un joueur) : toutes les attentes du film sont
+// annulables ; un clic saute directement à la révélation.
+const SKIP = new Error("passer"); let skipping = false; const pending = new Set();
+const wait = (ms) => skipping ? Promise.reject(SKIP) : new Promise((r, j) => {
+  const t = setTimeout(() => { pending.delete(j); r(); }, ms); pending.add(j); });
+function skipFilm() { if (skipping || !running) return; skipping = true; stat("santa-passer");
+  pending.forEach((j) => j(SKIP)); pending.clear(); }
 const scenes = ["start", "studio", "trailer", "launch", "reel", "gift", "reveal", "credits", "locked"];
 function show(id) { scenes.forEach((s) => $(s).classList.toggle("on", s === id)); }
 // Statistiques (GoatCounter, sans cookie ni donnée personnelle ; la partie
@@ -300,9 +314,22 @@ requestAnimationFrame(frame);
 function ring(x = "50%", y = "50%") { const r = document.createElement("div"); r.className = "ring"; r.style.left = x; r.style.top = y; document.body.appendChild(r); setTimeout(() => r.remove(), 2000); }
 
 // ---- Le film -----------------------------------------------------------------
-let data = null, running = false;
+let data = null, running = false, seenKey = "santa-vu";
 async function film() {
-  if (running) return; running = true; stat(data.group ? "santa-film-lance" : "santa-jubert-lance");
+  if (running) return; running = true; skipping = false; document.body.classList.add("running");
+  try { await filmScenes(); } catch (e) { if (e !== SKIP) throw e; finalReveal(); }
+  running = false; skipping = false; document.body.classList.remove("running");
+}
+function finalReveal() {
+  document.body.classList.add("open"); fireworksOn = true;
+  show("reveal"); document.querySelectorAll(".spot").forEach((s) => s.classList.add("on"));
+  $("who").innerHTML = [...data.target].map((c) => `<span class="in">${c === " " ? "&nbsp;" : c}</span>`).join("");
+  $("info").textContent = data.info || "";
+  try { localStorage.setItem(seenKey, "1"); } catch (e) {}
+  confetti(120);
+}
+async function filmScenes() {
+  stat(data.group ? "santa-film-lance" : "santa-jubert-lance");
   audio(); if (ac.state === "suspended") await ac.resume();
   document.body.classList.add("open");
   // 1. Le studio : l'épingle se pose, l'onde part de sa pointe.
@@ -392,7 +419,8 @@ async function film() {
   }
   l.classList.remove("show"); await wait(700);
   show("launch"); tone(220, 2.5, "sine", .08);
-  await new Promise((res) => { $("draw").onclick = () => { $("draw").onclick = null; res(); }; });
+  await new Promise((res, j) => { pending.add(j); $("draw").onclick = () => { $("draw").onclick = null; pending.delete(j); res(); }; });
+  if (skipping) throw SKIP;
   boom(); vibrate(100); stat("santa-tirage");
   show("reel"); const strip = $("strip"); const others = data.names.filter((n) => n !== data.giver);
   const seq = []; for (let i = 0; i < 44; i++) seq.push(others[(i * 7 + 3) % others.length]);
@@ -431,8 +459,9 @@ async function film() {
   $("info").textContent = data.info || "";
   await wait(500);
   for (const s of $("who").children) { s.classList.add("in"); tone(880 + Math.random() * 400, .25, "triangle", .12); await wait(170); }
-  fanfare(); confetti(160); stat("santa-revele"); await wait(5500);
-  running = false;
+  fanfare(); confetti(160); stat("santa-revele");
+  try { localStorage.setItem(seenKey, "1"); } catch (e) {}
+  await wait(5500);
 }
 async function credits() {
   fireworksOn = false; show("credits"); const r = $("roll");
@@ -441,12 +470,16 @@ async function credits() {
   await wait(16500); show("reveal"); fireworksOn = true;
 }
 $("go").onclick = film;
+$("skip").onclick = skipFilm;
+$("direct").onclick = () => { stat("santa-direct"); finalReveal(); };
 $("again").onclick = () => { fireworksOn = false; document.querySelectorAll(".spot").forEach((s) => s.classList.remove("on")); film(); };
 // Pas de générique de fin (Paul, 04/11).
 
 (async () => {
   try { data = await decrypt(); }
   catch (e) { document.querySelectorAll("#start button").forEach((b) => b.remove()); show("locked"); return; }
+  seenKey = "santa-vu-" + location.hash.slice(1, 25);
+  try { if (localStorage.getItem(seenKey)) $("direct").hidden = false; } catch (e) {}
   $("hello").textContent = data.giver;
   $("studioName").textContent = data.group ? group().toUpperCase() : "JUBERT'S FAMILY";
   $("pre2").textContent = /^(les|nous)\b/i.test(group()) ? "PRÉSENTENT" : "PRÉSENTE";
