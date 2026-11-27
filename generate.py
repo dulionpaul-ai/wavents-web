@@ -2844,7 +2844,10 @@ JEU_CSS = """<style>
 .jeu-ticket small { color: var(--ink-soft); font-weight: 700; }
 .jeu-plus { text-align: left; border-radius: 20px; padding: 16px 18px; margin: 0 0 16px;
   background: color-mix(in srgb, var(--sun) 22%, var(--card)); border: 1.5px solid var(--line); }
-.jeu-plus h3 { margin: 0 0 6px; font-size: 1.15rem; }
+.jeu-plus h3 { margin: 0 0 6px; font-size: 1.15rem; text-wrap: balance; }
+.jeu-mail { margin: 4px 0 18px; padding: 14px 16px; border-radius: 18px; line-height: 1.5; text-align: left;
+  background: color-mix(in srgb, var(--sun) 30%, var(--card)); border: 2px solid var(--sun); }
+.jeu-petit { font-size: .92rem; color: var(--ink-soft); margin: 0; }
 .jeu-plus p { margin: 0 0 10px; line-height: 1.5; }
 .jeu-lien { display: flex; gap: 8px; }
 .jeu-lien input { flex: 1; min-width: 0; font: inherit; font-size: .9rem; border: 1.5px solid var(--line); border-radius: 12px; padding: 10px 12px; background: var(--card); color: var(--ink); }
@@ -2913,13 +2916,14 @@ def jeu_page(jeu: dict) -> str:
 
     <div class="panel jeu-ok" id="jeu-ok" hidden>
       <h2 id="jeu-ok-titre">C'est noté&nbsp;! 🎉</h2>
-      <div class="jeu-ticket"><small>Tu participes au tirage du {e(jeu["tirage_txt"].rsplit(" ", 1)[0])}</small><b id="jeu-ok-num"></b></div>
+      <p class="jeu-mail">📩 <b>Dernière étape&nbsp;: ouvre le mail qu'on vient de t'envoyer et clique dedans pour valider ta participation.</b> Sans ce clic, tu n'es pas dans le tirage. Pense à regarder les indésirables.</p>
+      <div class="jeu-ticket"><small>Tirage du {e(jeu["tirage_txt"].rsplit(" ", 1)[0]).replace(" ", "&nbsp;")}</small><b id="jeu-ok-num"></b></div>
       <div class="jeu-plus">
         <h3>Plus de tickets = plus de chances</h3>
         <p>Envoie ton lien à tes amis. Chaque ami qui participe avec ton lien te donne <b>1 ticket en plus</b> ({jeu["max_bonus"]} au plus).<br>Exemple&nbsp;: 3 amis participent → tu as 4 tickets.</p>
         <div class="jeu-lien"><input id="jeu-lien" readonly aria-label="Ton lien à partager"><button class="btn btn-sun" type="button" id="jeu-partager">Envoyer mon lien</button></div>
       </div>
-      <p><b>📩 Un mail vient de partir&nbsp;: clique dedans pour valider ta participation.</b> Il contient aussi le lien pour revoir tes tickets.</p>
+      <p class="jeu-petit">Le mail contient aussi le lien pour revoir tes tickets.</p>
     </div>
     {jeu_suivre(root)}
   </main>
